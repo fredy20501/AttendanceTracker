@@ -16,7 +16,7 @@ Aims:
 ```
 git fetch
 git checkout -b <feature> origin/main
-git push -u
+git push -u origin HEAD
 ```
 - Replace <feature> with the name of your branch. Your branch name should be descriptive (e.g., `refactor-authentication`, `user-content-cache-key`, `make-retina-avatars`), so that others can see what is being worked on.
 - `push -u` is an easy way to get the "upstream tracking" set up correctly.

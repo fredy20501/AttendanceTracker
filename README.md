@@ -1,6 +1,8 @@
 # AttendanceTracker
 A web application for teachers used to track student attendance in classrooms.
 
+---
+
 # Proposed Workflow
 Inspired by [mvitocruz/git-workflow.txt](https://gist.github.com/mvitocruz/946941/6055ae1be8d63c35d828c338ca9aef517c4784f1) and [
 datagrok/git-workflow.md](https://gist.github.com/datagrok/d1650d85496cd509d42b8656d30410cf).

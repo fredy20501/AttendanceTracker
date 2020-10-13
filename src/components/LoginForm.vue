@@ -2,7 +2,7 @@
   <div>
     <h2>Login</h2>
     <br>
-    <div class="column">
+    <form @submit.prevent class="column">
       <!-- The `for` attribute specifies the id for the input it is labeling. It is for accessibility reasons -->
       <label for="Email">Email Address</label><br>
       <input id="Email" type="text" placeholder="Email Address" v-model="email">
@@ -17,7 +17,7 @@
       <br><br>
       <button @click="forgotPassword">Forgot Password</button>
       <br><br>
-    </div>
+    </form>
   </div>
 </template>
 

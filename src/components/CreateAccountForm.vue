@@ -2,7 +2,7 @@
   <div>
     <h2>Create Account</h2>
     <br>
-    <form class="column">
+    <form @submit.prevent class="column">
       <label>Account Type</label><br>
       <input id="StudentAccount" type="radio" name="account" value="student"
         v-model="accountType">
@@ -35,6 +35,12 @@
   </div>
 </template>
 
+<!--
+IDEA: 
+Maybe use VeeValidate to make error/invalid popup show up if values are wrong/missing
+Resource: https://logaretm.github.io/vee-validate/
+ -->
+
 <script>
 export default {
   name: 'CreateAccount',
@@ -56,6 +62,11 @@ export default {
   },
   methods: {
     createAccount() {
+      console.log("Account Type: ", this.accountType);
+      console.log("Student Number: ", this.studentID);
+      console.log("Password: ", this.password);
+      console.log("Confirmed Password: ", this.passwordCheck);
+
       // TOOD: Make API call
     }
   }

@@ -41,6 +41,12 @@ The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/docu
   text-align: left;
 }
 
+.error {
+  background-color: #ffaaaa;
+  font-size: 13.3px;
+  padding: 2px;
+}
+
 input:not([type=radio]), button {
   width: 100%;
   height: 30px;
@@ -53,4 +59,5 @@ label, button {
 button {
   font-size: 16px;
 }
+
 </style>

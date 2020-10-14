@@ -2,29 +2,33 @@
   <div>
     <h2>Login</h2>
     <br>
-    <form @submit.prevent class="column">
-      <!-- The `for` attribute specifies the id for the input it is labeling. It is for accessibility reasons -->
-      <label for="Email">Email Address</label><br>
-      <input id="Email" type="text" placeholder="Email Address" v-model="email">
-    
-      <br><br>
-      <label for="Password">Password</label><br>
-      <input id="Password" type="text" placeholder="Password" v-model="password">
-      <br><br>
-      <button @click="login">Login</button>
-      <br><br>
-      <button @click="$router.push('create-account')">Create Account</button>
-      <br><br>
-      <button @click="forgotPassword">Forgot Password</button>
-      <br><br>
-    </form>
+    <ValidationObserver v-slot="{ handleSubmit, invalid }">
+      <form @submit.prevent="handleSubmit(login)" class="column">
+        <ValidationProvider name="Email Address" rules="required|email" v-slot="{ errors }">
+          <label for="Email">Email Address</label><br>
+          <input id="Email" type="email" placeholder="Email Address" v-model="email">
+          <span v-if="errors.length" class="error">{{ errors[0] }}</span>
+        </ValidationProvider>
+        <br><br>
+        <ValidationProvider name="Password" rules="required|min:6" v-slot="{ errors }">
+          <label for="Password">Password</label><br>
+          <input id="Password" type="password" placeholder="Password" v-model="password">
+          <span v-if="errors.length" class="error">{{ errors[0] }}</span>
+        </ValidationProvider>
+        <br><br>
+        <button type="submit" :disabled="invalid">Login</button>
+        <br><br>
+        <button @click="$router.push('create-account')">Create Account</button>
+        <br><br>
+        <button @click="forgotPassword">Forgot Password</button>
+        <br><br>
+      </form>
+    </ValidationObserver>
   </div>
 </template>
 
 <!--
-IDEA: 
-Maybe use VeeValidate to make error/invalid popup show up if values are wrong/missing
-Resource: https://logaretm.github.io/vee-validate/
+VeeValidate Tutorial: https://www.youtube.com/watch?v=XwND-DLWCF0
  -->
 
 <script>

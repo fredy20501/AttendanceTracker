@@ -2,7 +2,11 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const session = require('express-session');
-const config = require('./config/config.js')
+
+var config;
+if (!process.env.TRAVIS) {
+  config = require('./config/config.js');
+}
 
 const username = process.env.DB_USERNAME || config.db.username;
 const password = process.env.DB_PASSWORD || config.db.password;

@@ -76,3 +76,39 @@ Go to our repository page, select your branch, then select "Pull Request".
 Once the pull request has been reviewed, someone (the reviewer or yourself) can click the accept pull request button to merge it.
 
 After all of this, it should be safe to delete the branch <feature>.
+
+## Final Notes:
+When setting up your environment for the first time I recommend installing `npm-merge-driver`. This will auto-resolve any conflicts that happen in the package-lock.json file when merging with someone else's changes (those conflicts are a pain to do manually). Just run this command once you have installed `node.js` on your computer:
+```
+npx npm-merge-driver install --global
+```
+- The `--global` will install it globally for your computer so you will have it for all projects.
+- Note: If there are also conflicts in `package.json`, you will have to solve those manually. Once you have fixed it, run `npm install --package-lock-only` to fix the `package-lock.json` accordingly.
+- Source: https://npm.community/t/dealing-with-package-lock-json-conflicts/902/2
+
+----
+
+# NPM Commands
+
+### Project setup
+```
+npm install
+```
+
+### Compiles and hot-reloads for development
+```
+npm run serve
+```
+
+### Compiles and minifies for production
+```
+npm run build
+```
+
+### Lints and fixes files
+```
+npm run lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).

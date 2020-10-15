@@ -1,4 +1,4 @@
-const app = require('..');
+const app = require('../../server/index.js');
 const supertest = require("supertest");
 const request = supertest(app);
 
@@ -16,10 +16,11 @@ describe('Backend server fuctionality', () => {
         //expect(response.body.message).toBe("Hellow, World!");
         done();
     })
-    it('gets login endpoint', async done =>{
-        //sends GET request to /login endpoint
-        const response = await request.get("/login");
-        expect(response.status).toBe(200);
+    it('try to access data without being logged in', async done =>{
+        //sends GET request to /dashboard endpoint
+        const response = await request.get("/api/dashboard");
+        // expect 401 unauthorized since we are not logged in
+        expect(response.status).toBe(401);
         done();
     })
 })

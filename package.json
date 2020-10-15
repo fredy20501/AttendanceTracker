@@ -4,7 +4,7 @@
   "description": "A web application for teachers used to track student attendance in classrooms.",
   "private": true,
   "scripts": {
-    "serve": "concurrently \"vue-cli-service serve\" \"node server/index.js\"",
+    "serve": "concurrently \"vue-cli-service serve\" \"nodemon server/index.js\"",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "test": "jest"
@@ -32,11 +32,13 @@
     "@vue/cli-service": "~4.5.0",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
-    "eslint-plugin-vue": "^6.2.2",
     "eslint-plugin-jest": "^24.1.0",
+    "eslint-plugin-vue": "^6.2.2",
+    "jest": "^26.5.2",
+    "nodemon": "^2.0.5",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
-    "vue-template-compiler": "^2.6.11",
-    "jest": "^26.5.2"
+    "supertest": "^5.0.0",
+    "vue-template-compiler": "^2.6.11"
   }
 }

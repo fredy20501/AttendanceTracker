@@ -42,3 +42,5 @@ app.use('/api/', require('./routes/api/login'));
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Sernodver started on port ${PORT}`));
+
+module.exports = app;

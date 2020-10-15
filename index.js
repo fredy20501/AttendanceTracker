@@ -7,6 +7,10 @@ app.get('/', (req, res) => {
     res.send('Hellow, World!');
 });
 
+app.get('/login', (req, res) => {
+    res.send('Login successful');
+});
+
 const server = app.listen(port, () => {
     console.log('App running on port '+port);
 });

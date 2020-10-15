@@ -3,11 +3,10 @@ const path = require('path');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const config = require('./config/config.js')
-// use the local one for local testing
 
-const connectionString = `mongodb+srv://${config.db.username}:${config.db.password}@athena.8ymku.gcp.mongodb.net/Athena?retryWrites=true&w=majority`;
-
-// mongoose.connect('mongodb://localhost/test1', {useNewUrlParser: true});
+const username = process.env.DB_USERNAME || config.db.username;
+const password = process.env.DB_PASSWORD || config.db.password;
+const connectionString = `mongodb+srv://${username}:${password}@athena.8ymku.gcp.mongodb.net/Athena?retryWrites=true&w=majority`;
 mongoose.connect(connectionString, {useNewUrlParser: true, useUnifiedTopology : true});
 
 const app = express();
@@ -16,10 +15,10 @@ const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
   // we're connected!
-  console.log("mongodb connection successful")
+  console.log("Mongodb connection successful")
 });
 
-// // Body Parser Middleware
+// Body Parser Middleware
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 // TODO: change the secret key
@@ -28,14 +27,12 @@ app.use(session({secret:"34h3k24h32k4jh23k4jh23", resave: false, saveUninitializ
 
 app.get('/', (req,res) => {
     res.send('<h1>Hello World!!!</h1>');
-    // res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Set static folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Members API Routes
-// app.use('/api/members', require('./routes/api/members'));
+// API Routes
 app.use('/api/', require('./routes/api/login'));
 
 

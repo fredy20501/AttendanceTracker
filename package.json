@@ -4,7 +4,7 @@
   "description": "A web application for teachers used to track student attendance in classrooms.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "nodemon server/index.js",
     "test": "jest"
   },
   "repository": {
@@ -18,7 +18,8 @@
   },
   "homepage": "https://github.com/fredy20501/AttendanceTracker#readme",
   "devDependencies": {
-    "jest": "^26.5.2"
+    "jest": "^26.5.2",
+    "nodemon": "^2.0.5"
   },
   "dependencies": {
     "express": "^4.17.1",

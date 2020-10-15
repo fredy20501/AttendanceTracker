@@ -1,30 +1,32 @@
 var express = require('express');
 var router = express.Router();
-var User = require('../../dbSchemas/User');
+var { Course, User } = require('../../dbSchemas/attendanceSchema');
 
-router.get('/', function(req, res, next){
-    res.render('index', {title : 'Express'});
+router.get('/', function(req, res){
+    // res.render('index', {title : 'Express'});
+    res.status(200).send();
 });
 
 router.post('/login', function (req, res){
-    var name = req.body.name;
+    var email = req.body.email;
     var password = req.body.password;
 
     console.log("login request received");
+    console.log(email, password);
 
-    User.findOne({name: name, password: password}, function (err, user){
+    User.findOne({email: email, password: password}, function (err, user){
         if(err){
             console.log(err);
             return res.status(500).send();
         }
 
         if(!user){
-            return res.status(404).send();
+            return res.status(401).send();
         }
 
         // this logs in user
         req.session.user = user;
-        return res.status(200).send();
+        return res.status(200).json({ is_professor: user.is_professor }).send();
     })
 });
 
@@ -51,14 +53,12 @@ router.post('/register', function(req, res){
     var email = req.body.email;
     var password = req.body.password;
     var is_professor = req.body.is_professor;
-    var student_number = req.body.student_number;
 
     var newUser = new User();
     newUser.name = name;
     newUser.password = password;
     newUser.email = email;
     newUser.is_professor = is_professor;
-    newUser.student_number = student_number;
 
     newUser.save(function(err, savedUser) {
         if(err){

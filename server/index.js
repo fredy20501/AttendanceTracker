@@ -3,6 +3,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const config = require('./config/config.js')
+const cors = require('cors')
 // use the local one for local testing
 
 const connectionString = `mongodb+srv://${config.db.username}:${config.db.password}@athena.8ymku.gcp.mongodb.net/Athena?retryWrites=true&w=majority`;
@@ -22,6 +23,7 @@ db.once('open', function() {
 // // Body Parser Middleware
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
+app.use(cors());
 // TODO: change the secret key
 app.use(session({secret:"34h3k24h32k4jh23k4jh23", resave: false, saveUninitialized: true}));
 
@@ -41,4 +43,4 @@ app.use('/api/', require('./routes/api/login'));
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => console.log(`Sernodver started on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

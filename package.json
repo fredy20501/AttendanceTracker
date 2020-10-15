@@ -4,7 +4,7 @@
   "description": "A web application for teachers used to track student attendance in classrooms.",
   "private": true,
   "scripts": {
-    "serve": "concurrently \"vue-cli-service serve\" \"node server/index.js\"",
+    "serve": "concurrently \"vue-cli-service serve\" \"nodemon server/index.js\"",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "test": "jest"
@@ -14,14 +14,18 @@
     "url": "git+https://github.com/fredy20501/AttendanceTracker.git"
   },
   "dependencies": {
+    "axios": "^0.20.0",
     "concurrently": "^5.3.0",
     "core-js": "^3.6.5",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "moment": "^2.29.0",
     "mongoose": "^5.10.8",
+    "nodemon": "^2.0.5",
     "vee-validate": "^3.4.1",
     "vue": "^2.6.11",
+    "vue-notification": "^1.3.20",
     "vue-router": "^3.2.0"
   },
   "devDependencies": {
@@ -31,11 +35,11 @@
     "@vue/cli-service": "~4.5.0",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
-    "eslint-plugin-vue": "^6.2.2",
     "eslint-plugin-jest": "^24.1.0",
+    "eslint-plugin-vue": "^6.2.2",
+    "jest": "^26.5.2",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
-    "vue-template-compiler": "^2.6.11",
-    "jest": "^26.5.2"
+    "vue-template-compiler": "^2.6.11"
   }
 }

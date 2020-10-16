@@ -34,8 +34,8 @@ describe('Backend server fuctionality', () => {
             email:'blah', 
             password:'bbbbbb'
         });
-        // expect 404 since user should not exist
-        expect(response.status).toBe(404);
+        // expect 401 since user should not exist
+        expect(response.status).toBe(401);
         done();
     });
 

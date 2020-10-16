@@ -13,11 +13,13 @@ describe('Backend server fuctionality', () => {
     let server;
     let request;
 
-    // Open server before running tests
-    beforeAll((done) => {
+    // Open server & database before running tests
+    beforeAll(async (done) => {
         server = http.createServer(app);
-        server.listen(done);
+        server.listen();
         request = supertest(server);
+        const db = mongoose.connection;
+        db.once('open', done);
     });
 
     // Close database & server when done

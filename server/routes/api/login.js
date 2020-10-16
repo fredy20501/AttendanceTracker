@@ -7,12 +7,13 @@ router.get('/', function(req, res, next){
 });
 
 router.post('/login', function (req, res){
-    var name = req.body.name;
+    var email = req.body.email;
     var password = req.body.password;
 
     console.log("login request received");
+    console.log(req.body);
 
-    User.findOne({name: name, password: password}, function (err, user){
+    User.findOne({email: email, password: password}, function (err, user){
         if(err){
             console.log(err);
             return res.status(500).send();
@@ -51,25 +52,44 @@ router.post('/register', function(req, res){
     var email = req.body.email;
     var password = req.body.password;
     var is_professor = req.body.is_professor;
-    var student_number = req.body.student_number;
+    
+    console.log('register request received');
+    console.log(req.body);
 
     var newUser = new User();
     newUser.name = name;
     newUser.password = password;
     newUser.email = email;
     newUser.is_professor = is_professor;
-    newUser.student_number = student_number;
 
     newUser.save(function(err, savedUser) {
         if(err){
             console.log(err);
-            console.log("My err");
             return res.status(500).send();
         }
 
         return res.status(200).send(); 
 
     })
+});
+
+
+router.delete('/delete-user', function(req, res){
+    // Delete all users with the given email 
+    // (should only delete one since emails are unique)
+    var email = req.body.email;
+
+    console.log('delete request received');
+    console.log(req.body);
+
+    User.deleteMany({ email: email }, function(err) {
+        if(err){
+            console.log(err);
+            return res.status(500).send();
+        }
+
+        return res.status(200).send(); 
+    });
 });
 
 

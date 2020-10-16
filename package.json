@@ -7,7 +7,7 @@
     "serve": "concurrently \"vue-cli-service serve\" \"nodemon server/index.js\"",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "test": "jest"
+    "test": "jest --detectOpenHandles"
   },
   "repository": {
     "type": "git",
@@ -20,6 +20,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
+    "lynx": "^0.2.0",
     "moment": "^2.29.0",
     "mongoose": "^5.10.8",
     "nodemon": "^2.0.5",
@@ -38,8 +39,10 @@
     "eslint-plugin-jest": "^24.1.0",
     "eslint-plugin-vue": "^6.2.2",
     "jest": "^26.5.2",
+    "nodemon": "^2.0.5",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
+    "supertest": "^5.0.0",
     "vue-template-compiler": "^2.6.11"
   }
 }

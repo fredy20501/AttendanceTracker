@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const session = require('express-session');
+const cors = require('cors')
 
 var config;
 if (!process.env.TRAVIS) {
@@ -21,6 +22,8 @@ db.once('open', function() {
   // we're connected!
   console.log("Mongodb connection successful")
 });
+
+app.use(cors())
 
 // Body Parser Middleware
 app.use(express.json());

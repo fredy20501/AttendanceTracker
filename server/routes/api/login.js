@@ -66,10 +66,14 @@ router.post('/register', function(req, res){
     newUser.save(function(err, savedUser) {
         if(err){
             console.log(err);
-            return res.status(500).send();
+            return res.status(500).send({
+                error: err
+            });
         }
 
-        return res.status(200).send(); 
+        return res.status(200).send({
+            userId: savedUser._id
+        }); 
 
     })
 });

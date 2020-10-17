@@ -5,17 +5,17 @@
     <ValidationObserver v-slot="{ handleSubmit, invalid }">
       <form @submit.prevent="handleSubmit(login)" class="column">
         <div>
-          <ValidationProvider name="Email Address" rules="required|email" v-slot="{ errors }">
-            <label for="Email">Email Address</label><br>
-            <input id="Email" type="email" placeholder="Email Address" v-model="email">
+          <ValidationProvider name="Email" rules="required|email" v-slot="{ errors }">
+            <label for="email">Email Address</label><br>
+            <input name="email" type="email" autocomplete="username" placeholder="Email Address" v-model="email">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>
         <br>
         <div>
           <ValidationProvider name="Password" rules="required|min:6" v-slot="{ errors }">
-            <label for="Password">Password</label><br>
-            <input id="Password" type="password" placeholder="Password" v-model="password">
+            <label for="password">Password</label><br>
+            <input name="password" type="password" autocomplete="current-password" placeholder="Password" v-model="password">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>
@@ -25,7 +25,9 @@
           <br><br>
           <button @click="$router.push('create-account')">Create Account</button>
           <br><br>
-          <button @click="forgotPassword">Forgot Password</button>
+          
+          <!-- Don't show Forgot Password button until it is functional -->
+          <button style="display:none" @click="forgotPassword">Forgot Password</button>
         </div>
       </form>
     </ValidationObserver>

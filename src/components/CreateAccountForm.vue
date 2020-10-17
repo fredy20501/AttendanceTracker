@@ -3,7 +3,7 @@
     <h2>Create Account</h2>
     <br>
     
-    <ValidationObserver v-slot="{ handleSubmit, invalid }">
+    <ValidationObserver v-slot="{ handleSubmit }">
       <form @submit.prevent="handleSubmit(createAccount)" class="column">
         <div>
           <label>Account Type</label><br>
@@ -18,33 +18,32 @@
         <br>
         <div>
           <ValidationProvider name="Name" rules="required" v-slot="{ errors }">
-            <label for="Name">Name</label><br>
-            <input id="Name" type="text" placeholder="Name" v-model="name">
+            <label for="name">Name</label><br>
+            <input name="name" type="text" placeholder="Name" v-model="name">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>
         <br>
         <div>
-          <ValidationProvider name="Email Address" rules="required|email" v-slot="{ errors }">
-            <label for="Email">Email Address</label><br>
-            <input id="Email" type="text" placeholder="Email Address" v-model="email">
+          <ValidationProvider name="Email Address" rules="required|email|unbEmail" v-slot="{ errors }">
+            <label for="email">Email Address</label><br>
+            <input name="email" type="email" autocomplete="username" placeholder="Email Address" v-model="email">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>
         <br>
         <div>
           <ValidationProvider name="Password" rules="required|min:6|confirmed:confirmation" v-slot="{ errors }">
-            <label for="Password">Password</label><br>
-            <input id="Password" type="text" placeholder="Password" v-model="password">
+            <label for="password">Password</label><br>
+            <input name="password" type="text"  placeholder="Password" v-model="password">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>
         <br>
         <div>
-          <ValidationProvider name="Confirmation" vid="confirmation" v-slot="{ errors }">
-            <label for="Password">Confirm Password</label><br>
-            <input id="Password" type="text" placeholder="Password" v-model="passwordCheck">
-            <span v-if="errors.length" class="error">{{ errors[0] }}</span>
+          <ValidationProvider name="Confirmation" vid="confirmation">
+            <label for="password-conf">Password Confirmation</label><br>
+            <input name="password-conf" type="text" placeholder="Password" v-model="passwordConfirmation">
           </ValidationProvider>
         </div>
         <br>
@@ -76,7 +75,7 @@ export default {
       name: '',
       email: '',
       password: '',
-      passwordCheck: ''
+      passwordConfirmation: ''
     }
   },
   methods: {
@@ -85,11 +84,17 @@ export default {
       axios.get('http://localhost:5000/api/')
       .then(function (resp) {
         console.log(resp);
-        vue.$notify({ title: "API reached! ("+resp.status+")", type: 'success' });
+        vue.$notify({ 
+          title: "API reached! ("+resp.status+")", 
+          type: 'success' 
+        });
       })
       .catch(function (err) {
         console.log(err);
-        vue.$notify({ title: "API could not be reached ("+err.status+")", type: 'error' });
+        vue.$notify({ 
+          title: "API could not be reached ("+err.status+")", 
+          type: 'error' 
+        });
       });
     },
     createAccount() {
@@ -106,7 +111,10 @@ export default {
       })
       .then(function (resp) {
         console.log(resp);
-        vue.$notify({ title: "Account created successfully!", type: "success" });
+        vue.$notify({ 
+          title: "Account created successfully!", 
+          type: "success" 
+        });
         
         // Automatically log the user in
         axios.post('http://localhost:5000/api/login', {
@@ -117,17 +125,31 @@ export default {
           console.log(resp);
           // Redirect to their home page
           if (resp.data.is_professor) vue.$router.push('/professor');
-          else vue.$router.push('/student');
+          else vue.$router.push('/student')
         })
         .catch(function (err) {
-          vue.$notify({ title: "Could not login automatically. Please try logging in manually.", type: "warn" });
-          console.log(err);
+          vue.$notify({
+            title: "Could not login automatically. Please try logging in manually", 
+            type: "warn" 
+          });
+          console.log(err)
         });
 
       })
       .catch(function (err) {
-        console.log(err);
-        vue.$notify({ title: "Could not create account. Please try again later.", type: "error" });
+        console.log(err.response)
+        if (err.response.data.error.code == 11000) {
+          vue.$notify({ 
+            title: "An account with this email already exists", 
+            type: "error" 
+          });
+        }
+        else {
+          vue.$notify({ 
+            title: "Could not create account. Please try again later", 
+            type: "error" 
+          });
+        }
       });
     }
   }

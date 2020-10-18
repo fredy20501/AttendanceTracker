@@ -1,9 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Login from '../views/Login.vue'
-import CreateAccount from '../views/CreateAccount.vue'
-import StudentHome from '../views/StudentHome.vue'
-import ProfessorHome from '../views/ProfessorHome.vue'
 
 Vue.use(VueRouter)
 
@@ -14,15 +11,15 @@ const routes = [
   },
   {
     path: '/create-account',
-    component: CreateAccount
+    component: () => import('../views/CreateAccount.vue')
   },
   {
     path: '/student',
-    component: StudentHome
+    component: () => import('../views/StudentHome.vue')
   },
   {
     path: '/professor',
-    component: ProfessorHome
+    component: () => import('../views/ProfessorHome.vue')
   }
 ]
 

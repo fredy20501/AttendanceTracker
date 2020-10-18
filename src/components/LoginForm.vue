@@ -21,7 +21,14 @@
         </div>
         <br>
         <div>
-          <button type="submit" :disabled="invalid">Login</button>
+          <SpinnerButton 
+            label="Login"
+            width="100%"
+            height="30px"
+            type="submit"
+            :disabled="$wait.waiting('login') || invalid"
+            :loading="$wait.waiting('login')"
+          />
           <br><br>
           <button @click="$router.push('create-account')">Create Account</button>
           <br><br>
@@ -31,57 +38,77 @@
         </div>
       </form>
     </ValidationObserver>
-    <notifications style="margin-top:5px" position="top center"/>
   </div>
 </template>
 
-<!--
-VeeValidate Tutorial: https://www.youtube.com/watch?v=XwND-DLWCF0
- -->
-
 <script>
-const axios = require('axios').default;
+import { mapGetters } from 'vuex'
+import SpinnerButton from './SpinnerButton'
 
 export default {
   name: 'LoginForm',
-
-  // These are the variables we are using on this page 
-  // (see `v-model` in the html above)
+  components: {
+    SpinnerButton
+  },
   data() {
-      return {
-          email: '',
-          password: ''
-      }
+    return {
+      email: '',
+      password: ''
+    }
   },
 
-  // Here we define functions we can call when a certain event happens 
-  // (see `@click` in the html above)
+  computed: {
+    // Import the getters from the global store
+    ...mapGetters([
+      'getUser'
+    ])
+  },
+
   methods: {
     login() {
+
       // Need to store 'this' since it won't work inside the .then() and .catch() blocks
       // More details: https://riptutorial.com/vue-js/example/28955/right--use-a-closure-to-capture--this-
       var vue = this;
 
+      // Start the loading spinner
+      this.$wait.start('login')
+
       // Make call to login API
-      axios.post('http://localhost:5000/api/login', {
+      this.$store.dispatch('login', {
         email: this.email,
         password: this.password
       })
-      .then(function (resp) {
-        console.log(resp);
-
+      .then(() => {
         // Redirect to their home page
-        if (resp.data.is_professor) vue.$router.push('/professor');
+        if (vue.getUser.is_professor) vue.$router.push('/professor');
         else vue.$router.push('/student');
       })
-      .catch(function (err) {
-        vue.$notify({ title: "Invalid email or password", type: "error" });
+      .catch(err => {
         console.log(err);
+        // Show a notification with the error message
+        if (err.message) {
+          vue.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          });
+        }
+        // Stop the loading spinner
+        vue.$wait.end('login')
       });
     },
+
     forgotPassword() {
       // TODO: Send email with a link to reset password
     }
   }
 }
 </script>
+
+<style lang="scss" scoped >
+div.half-circle-spinner {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+}
+</style>

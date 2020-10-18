@@ -3,7 +3,7 @@
     <h2>Create Account</h2>
     <br>
     
-    <ValidationObserver v-slot="{ handleSubmit }">
+    <ValidationObserver v-slot="{ handleSubmit, invalid }">
       <form @submit.prevent="handleSubmit(createAccount)" class="column">
         <div>
           <label>Account Type</label><br>
@@ -35,7 +35,7 @@
         <div>
           <ValidationProvider name="Password" rules="required|min:6|confirmed:confirmation" v-slot="{ errors }">
             <label for="password">Password</label><br>
-            <input name="password" type="text"  placeholder="Password" v-model="password">
+            <input name="password" type="password"  placeholder="Password" v-model="password">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>
@@ -43,32 +43,37 @@
         <div>
           <ValidationProvider name="Confirmation" vid="confirmation">
             <label for="password-conf">Password Confirmation</label><br>
-            <input name="password-conf" type="text" placeholder="Password" v-model="passwordConfirmation">
+            <input name="password-conf" type="password" placeholder="Password" v-model="passwordConfirmation">
           </ValidationProvider>
         </div>
         <br>
         <div>
-          <button type="submit" :disabled="invalid">Create Account</button>
+          <SpinnerButton 
+            label="Create Account"
+            width="100%"
+            height="30px"
+            type="submit"
+            :disabled="$wait.waiting('register') || invalid"
+            :loading="$wait.waiting('register')"
+          />
           <br><br>
           <button @click="$router.push('/')">Back</button>
-          <br><br>
-          <button @click="testAPI">Test API</button>
         </div>
       </form>
     </ValidationObserver>
-    <notifications style="margin-top:5px" position="top center"/>
   </div>
 </template>
 
-<!--
-VeeValidate Tutorial: https://www.youtube.com/watch?v=XwND-DLWCF0
- -->
 
 <script>
-const axios = require('axios').default;
+import { mapGetters } from 'vuex'
+import SpinnerButton from './SpinnerButton'
 
 export default {
   name: 'CreateAccount',
+  components: {
+    SpinnerButton
+  },
   data() {
     return {
       accountType: 'student',
@@ -78,78 +83,46 @@ export default {
       passwordConfirmation: ''
     }
   },
+
+  computed: {
+    // Import the getters from the global store
+    ...mapGetters([
+      'getUser'
+    ])
+  },
+
   methods: {
-    testAPI() {
-      var vue = this;
-      axios.get('http://localhost:5000/api/')
-      .then(function (resp) {
-        console.log(resp);
-        vue.$notify({ 
-          title: "API reached! ("+resp.status+")", 
-          type: 'success' 
-        });
-      })
-      .catch(function (err) {
-        console.log(err);
-        vue.$notify({ 
-          title: "API could not be reached ("+err.status+")", 
-          type: 'error' 
-        });
-      });
-    },
     createAccount() {
       // Need to store 'this' since it won't work inside the .then() and .catch() blocks
       // More details: https://riptutorial.com/vue-js/example/28955/right--use-a-closure-to-capture--this-
       var vue = this;
 
-      // Make call to register api
-      axios.post('http://localhost:5000/api/register', {
+      // Start the loading spinner
+      this.$wait.start('register')
+
+      // Register & Login
+      this.$store.dispatch('registerAndLogin', {
         name: this.name,
         email: this.email,
         is_professor: this.accountType == 'professor',
         password: this.password
       })
-      .then(function (resp) {
-        console.log(resp);
-        vue.$notify({ 
-          title: "Account created successfully!", 
-          type: "success" 
-        });
-        
-        // Automatically log the user in
-        axios.post('http://localhost:5000/api/login', {
-          email: vue.email,
-          password: vue.password
-        })
-        .then(function (resp) {
-          console.log(resp);
-          // Redirect to their home page
-          if (resp.data.is_professor) vue.$router.push('/professor');
-          else vue.$router.push('/student')
-        })
-        .catch(function (err) {
-          vue.$notify({
-            title: "Could not login automatically. Please try logging in manually", 
-            type: "warn" 
-          });
-          console.log(err)
-        });
-
+      .then(() => {
+        // Redirect to their home page
+        if (vue.getUser.is_professor) vue.$router.push('/professor');
+        else vue.$router.push('/student')
       })
-      .catch(function (err) {
-        console.log(err.response)
-        if (err.response.data.error.code == 11000) {
+      .catch(err => {
+        console.log(err)
+        // Show a notification with the error message
+        if (err.message) {
           vue.$notify({ 
-            title: "An account with this email already exists", 
-            type: "error" 
+            title: err.message, 
+            type: err.type ?? 'error'
           });
         }
-        else {
-          vue.$notify({ 
-            title: "Could not create account. Please try again later", 
-            type: "error" 
-          });
-        }
+        // Stop loading spinner
+        vue.$wait.end('register')
       });
     }
   }
@@ -159,5 +132,11 @@ export default {
 <style scoped lang="scss">
 label.radio {
   font-weight: normal;
+}
+
+div.half-circle-spinner {
+  position: absolute;
+  right: 4px;
+  top: 4px;
 }
 </style>

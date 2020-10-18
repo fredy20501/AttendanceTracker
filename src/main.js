@@ -3,7 +3,8 @@ import App from './App.vue'
 import router from './router'
 
 
-// Import VeeValidate globally so we can use it in all components
+// Import vee-validate globally
+// Tutorial: https://www.youtube.com/watch?v=XwND-DLWCF0
 import { ValidationProvider, extend } from 'vee-validate/dist/vee-validate.full.esm';
 import { ValidationObserver } from 'vee-validate';
 Vue.component('ValidationProvider', ValidationProvider)
@@ -21,15 +22,34 @@ extend('unbEmail', {
 
 
 // Import vue-notifications globally
+// Docs: https://www.npmjs.com/package/vue-notification
 import Notifications from 'vue-notification'
 Vue.use(Notifications)
 
-import Vuex from 'vuex'
-Vue.use(Vuex)
+
+// Import vue-wait globally
+// More info: https://github.com/f/vue-wait
+import VueWait from 'vue-wait'
+Vue.use(VueWait)
+
+
+// Import epic-spinners globally
+// More info: https://github.com/epicmaxco/epic-spinners
+import {HalfCircleSpinner} from 'epic-spinners'
+Vue.component('HalfCircleSpinner', HalfCircleSpinner)
+
+
+// Global store is defined in store.js
+import store from './store'
+
 
 Vue.config.productionTip = false
 
 new Vue({
   router,
+  store,
+  wait: new VueWait({
+    useVuex: true
+  }),
   render: h => h(App)
 }).$mount('#app')

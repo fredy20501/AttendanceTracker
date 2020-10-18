@@ -3,6 +3,7 @@
     <Header />
     <router-view />
     <Footer />
+    <notifications style="margin-top:5px" position="top center"/>
   </div>
 </template>
 
@@ -24,6 +25,13 @@ export default {
 The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/documentation/syntax) 
 (it is a css pre-processor which allows fancy syntax - don't worry about it, you can just stick to plain css) -->
 <style lang="scss">
+
+* {
+  box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   font-size: 1.1em;
@@ -50,6 +58,7 @@ The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/docu
 input:not([type=radio]), button {
   width: 100%;
   height: 30px;
+  padding: 1px 2px;
 }
 
 label, button {

@@ -12,7 +12,7 @@ if (!process.env.TRAVIS) {
 const username = process.env.DB_USERNAME || config.db.username;
 const password = process.env.DB_PASSWORD || config.db.password;
 const connectionString = `mongodb+srv://${username}:${password}@athena.8ymku.gcp.mongodb.net/Athena?retryWrites=true&w=majority`;
-mongoose.connect(connectionString, {useNewUrlParser: true, useUnifiedTopology : true});
+mongoose.connect(connectionString, {useNewUrlParser: true, useUnifiedTopology : true, useCreateIndex:true});
 
 const app = express();
 

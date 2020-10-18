@@ -7,8 +7,9 @@ cache:
 
 jobs:
   allow_failure:
-    - stage: "Code Lint Checker"
-      script: npm run lint
+    - name: "Code Lint Checker"
   include:
-    - stage: "Automated Tests"
+    - name: "Code Lint Checker"
+      script: npm run lint
+    - name: "Automated Tests"
       script: npm run test

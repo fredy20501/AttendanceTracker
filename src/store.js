@@ -20,6 +20,13 @@ const useStrict = process.env.NODE_ENV !== 'production'
 import createPersistedState from "vuex-persistedstate"
 import createMutationsSharer from "vuex-shared-mutations"
 
+const emptyUser = {
+  id: '',
+  name: '',
+  email: '',
+  is_professor: false
+}
+
 const store = new Vuex.Store({
   strict: useStrict,
 
@@ -31,21 +38,23 @@ const store = new Vuex.Store({
   ],
 
   state: {
-    user: {
-      id: '',
-      name: '',
-      email: '',
-      is_professor: false
-    }
+    authenticated: false,
+    user: { ...emptyUser }
   },
 
   getters: {
-    getUser: state => state.user
+    getUser: state => state.user,
+    isAuthenticated: state => state.authenticated
   },
 
   mutations: {
     setUser(state, user) {
       state.user = user
+      state.authenticated = true
+    },
+    logout(state) {
+      state.user = { ...emptyUser }
+      state.authenticated = false
     }
   },
 
@@ -66,7 +75,6 @@ const store = new Vuex.Store({
           throw err
         })
     },
-    
 
     registerAndLogin(context, payload) {
       return $http.post('register', payload)

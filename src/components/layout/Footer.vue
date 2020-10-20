@@ -30,13 +30,14 @@ export default {
 
       this.$store.dispatch('logout')
       .then(() => {
-        vue.$router.push('/')
+        // Go to login page
+        vue.$router.push({ name:'login' })
       })
       .catch(() => {
         vue.$notify({ 
-            title: "Could not logout. Please try again later", 
-            type: 'error'
-          });
+          title: "Could not logout. Please try again later", 
+          type: 'error'
+        });
       })
     }
   }

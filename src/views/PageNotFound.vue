@@ -8,7 +8,7 @@
 
 <script>
 export default {
-  name: 'ProfessorHome'
+  name: 'PageNotFound'
 }
 </script>
 

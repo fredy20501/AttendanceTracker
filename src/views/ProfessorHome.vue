@@ -3,7 +3,6 @@
     <h1>Professor Home</h1>
     <div>Welcome {{ getUser.name }}!</div>
     <br>
-    <!-- TODO: make this button go to create section page -->
     <button v-on:click="$router.push({ name:'createSection' })">Create Section</button>
   </div>
 </template>

@@ -18,6 +18,8 @@ const routes = [
     component: () => import(/* webpackChunkName: "[request]" */ '../views/CreateAccount.vue')
   },
   {
+    // Genral "home" page which redirects to the proper student or 
+    // professor home page depending on the user
     path: '/home',
     name: 'home',
     redirect: () => {
@@ -32,6 +34,8 @@ const routes = [
   {
     path: '/student',
     name: 'studentHome',
+    // We use the meta tag to know whether you need to be logged in to access it (requiresAuth) 
+    // and what account it is associated with (accountType)
     meta: { requiresAuth: true, accountType: 'student' },
     component: () => import(/* webpackChunkName: "[request]" */ '../views/StudentHome.vue')
   },
@@ -62,8 +66,9 @@ const router = new VueRouter({
   routes
 })
 
+// This beforeEach method is called whenever the router is being switched to a different page
 router.beforeEach((to, from, next) => {
-  console.log("Authenticated:",store.getters.isAuthenticated);
+  console.log("Authenticated:", store.getters.isAuthenticated); // for debugging
 
   // Prevent users from accessing pages if they are not logged in
   if (to.matched.some(record => record.meta.requiresAuth) && !store.getters.isAuthenticated) {
@@ -71,9 +76,8 @@ router.beforeEach((to, from, next) => {
     next({ name: 'login' })
   }
 
-  // If the user is already logged in and going to login or create-account pages, redirect to home page
+  // If the user is already logged in and going to the login or create-account page, redirect to home page
   else if (to.matched.some(record => !record.meta.requiresAuth) && store.getters.isAuthenticated) {
-    // User is not authenticated, go to login page
     next({ name: 'home' })
   }
 

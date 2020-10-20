@@ -1,13 +1,7 @@
-const app = require('../../server/app.js');
+const app = require('../server/app.js');
 const mongoose = require('mongoose');
 const supertest = require("supertest");
 const http = require('http');
-
-describe('Sample Test', () => {
-    it('Should test that true === true', () => {
-        expect(true).toBe(true);
-    })
-})
 
 describe('Backend server fuctionality', () => {
     let server;
@@ -40,8 +34,8 @@ describe('Backend server fuctionality', () => {
             email:'blah', 
             password:'bbbbbb'
         });
-        // expect 404 since user should not exist
-        expect(response.status).toBe(404);
+        // expect 401 since user should not exist
+        expect(response.status).toBe(401);
         done();
     });
 

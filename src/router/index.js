@@ -1,22 +1,32 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Login from '../views/Login.vue'
+import store from '../store'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    name: 'Login',
+    name: 'login',
     component: Login
   },
   {
     path: '/create-account',
-    name: 'Create Account',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/CreateAccount.vue')
+    name: 'createAccount',
+    component: () => import(/* webpackChunkName: "[request]" */ '../views/CreateAccount.vue')
+  },
+  {
+    path: '/student',
+    name: 'studentHome',
+    meta: { requiresAuth: true, accountType: 'student' },
+    component: () => import(/* webpackChunkName: "[request]" */ '../views/StudentHome.vue')
+  },
+  {
+    path: '/professor',
+    name: 'professorHome',
+    meta: { requiresAuth: true, accountType: 'professor' },
+    component: () => import(/* webpackChunkName: "[request]" */ '../views/ProfessorHome.vue')
   }
 ]
 
@@ -25,5 +35,17 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes
 })
+
+router.beforeEach((to, from, next) => {
+  // Prevent users from accessing pages if they are not logged in
+  if (to.matched.some(record => record.meta.requiresAuth) && !store.getters.isAuthenticated) {
+    // User is not authenticated, go to login page
+    next({ name: 'login' })
+  }
+  else {
+    // Continue as normal
+    next()
+  }
+}) 
 
 export default router

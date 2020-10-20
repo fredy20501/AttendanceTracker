@@ -4,3 +4,12 @@ node_js:
 cache:
   directories
     - "node_modules"
+
+jobs:
+  allow_failure:
+    - name: "Code Lint Checker"
+  include:
+    - name: "Code Lint Checker"
+      script: npm run lint
+    - name: "Automated Tests"
+      script: npm run test

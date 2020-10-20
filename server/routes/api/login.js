@@ -1,12 +1,13 @@
 var express = require('express');
 var router = express.Router();
-var User = require('../../dbSchemas/User');
+var { User } = require('../../dbSchemas/attendanceSchema');
 
-router.get('/', function(req, res, next){
-    res.render('index', {title : 'Express'});
+router.get('/', (req, res) => {
+    // res.render('index', {title : 'Express'});
+    res.status(200).send();
 });
 
-router.post('/login', function (req, res){
+router.post('/login', (req, res) => {
     var email = req.body.email;
     var password = req.body.password;
 
@@ -20,18 +21,26 @@ router.post('/login', function (req, res){
         }
 
         if(!user){
-            return res.status(404).send();
+            return res.status(401).send();
         }
 
         // this logs in user
         req.session.user = user;
-        return res.status(200).send();
+        
+        return res.status(200).json({
+            user: {
+                id: user._id, 
+                name: user.name,
+                email: user.email,
+                is_professor: user.is_professor 
+            }
+        }).send();
     })
 });
 
 // the following is a test to test to see if you are logged in correctly
 // may be copied and changed as needed
-router.get('/dashboard', function(req, res){
+router.get('/dashboard', (req, res) => {
     if(!req.session.user){
         console.log("Unuathorized request. Please login.");
         return res.status(401).send();
@@ -41,13 +50,13 @@ router.get('/dashboard', function(req, res){
 
 });
 
-router.get('/logout', function(req, res){
+router.get('/logout', (req, res) => {
     req.session.destroy();
     return res.status(200).send();
 });
 
 
-router.post('/register', function(req, res){
+router.post('/register', (req, res) => {
     var name = req.body.name;
     var email = req.body.email;
     var password = req.body.password;
@@ -62,19 +71,18 @@ router.post('/register', function(req, res){
     newUser.email = email;
     newUser.is_professor = is_professor;
 
-    newUser.save(function(err, savedUser) {
+    newUser.save(err => {
         if(err){
             console.log(err);
-            return res.status(500).send();
+            return res.status(500).send(err);
         }
 
         return res.status(200).send(); 
-
     })
 });
 
 
-router.delete('/delete-user', function(req, res){
+router.delete('/delete-user', (req, res) => {
     // Delete all users with the given email 
     // (should only delete one since emails are unique)
     var email = req.body.email;
@@ -82,7 +90,7 @@ router.delete('/delete-user', function(req, res){
     console.log('delete request received');
     console.log(req.body);
 
-    User.deleteMany({ email: email }, function(err) {
+    User.deleteMany({ email: email }, (err) => {
         if(err){
             console.log(err);
             return res.status(500).send();
@@ -91,29 +99,5 @@ router.delete('/delete-user', function(req, res){
         return res.status(200).send(); 
     });
 });
-
-
-// router.post('/register', function(req, res){
-//     var username = req.body.username;
-//     var password = req.body.password;
-//     var firstname = req.body.firstname;
-//     var lastname = req.body.lastname;
-
-//     var newUser = new User();
-//     newUser.username = username;
-//     newUser.password = password;
-//     newUser.firstname = firstname;
-//     newUser.lastname = lastname;
-//     newUser.save(function(err, savedUser) {
-//         if(err){
-//             console.log(err);
-//             console.log("My err");
-//             return res.status(500).send();
-//         }
-
-//         return res.status(200).send(); 
-
-//     })
-// });
 
 module.exports = router;

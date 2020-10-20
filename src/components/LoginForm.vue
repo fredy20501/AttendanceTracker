@@ -4,60 +4,111 @@
     <br>
     <ValidationObserver v-slot="{ handleSubmit, invalid }">
       <form @submit.prevent="handleSubmit(login)" class="column">
-        <ValidationProvider name="Email Address" rules="required|email" v-slot="{ errors }">
-          <label for="Email">Email Address</label><br>
-          <input id="Email" type="email" placeholder="Email Address" v-model="email">
-          <span v-if="errors.length" class="error">{{ errors[0] }}</span>
-        </ValidationProvider>
-        <br><br>
-        <ValidationProvider name="Password" rules="required|min:6" v-slot="{ errors }">
-          <label for="Password">Password</label><br>
-          <input id="Password" type="password" placeholder="Password" v-model="password">
-          <span v-if="errors.length" class="error">{{ errors[0] }}</span>
-        </ValidationProvider>
-        <br><br>
-        <button type="submit" :disabled="invalid">Login</button>
-        <br><br>
-        <button @click="$router.push('create-account')">Create Account</button>
-        <br><br>
-        <button @click="forgotPassword">Forgot Password</button>
-        <br><br>
+        <div>
+          <ValidationProvider name="Email" rules="required|email" v-slot="{ errors }">
+            <label for="email">Email Address</label><br>
+            <input name="email" type="email" autocomplete="username" placeholder="Email Address" v-model="email">
+            <span v-if="errors.length" class="error">{{ errors[0] }}</span>
+          </ValidationProvider>
+        </div>
+        <br>
+        <div>
+          <ValidationProvider name="Password" rules="required|min:6" v-slot="{ errors }">
+            <label for="password">Password</label><br>
+            <input name="password" type="password" autocomplete="current-password" placeholder="Password" v-model="password">
+            <span v-if="errors.length" class="error">{{ errors[0] }}</span>
+          </ValidationProvider>
+        </div>
+        <br>
+        <div>
+          <SpinnerButton 
+            label="Login"
+            width="100%"
+            height="30px"
+            type="submit"
+            :disabled="$wait.waiting('login') || invalid"
+            :loading="$wait.waiting('login')"
+          />
+          <br><br>
+          <button @click="$router.push('create-account')">Create Account</button>
+          <br><br>
+          
+          <!-- Don't show Forgot Password button until it is functional -->
+          <button style="display:none" @click="forgotPassword">Forgot Password</button>
+        </div>
       </form>
     </ValidationObserver>
   </div>
 </template>
 
-<!--
-VeeValidate Tutorial: https://www.youtube.com/watch?v=XwND-DLWCF0
- -->
-
 <script>
+import { mapGetters } from 'vuex'
+import SpinnerButton from './SpinnerButton'
+
 export default {
   name: 'LoginForm',
-
-  // These are the variables we are using on this page 
-  // (see `v-model` in the html above)
+  components: {
+    SpinnerButton
+  },
   data() {
-      return {
-          email: '',
-          password: ''
-      }
+    return {
+      email: '',
+      password: ''
+    }
   },
 
-  // Here we define functions we can call when a certain event happens 
-  // (see `@click` in the html above)
+  computed: {
+    // Import the getters from the global store
+    ...mapGetters([
+      'getUser'
+    ])
+  },
+
   methods: {
     login() {
-      // Log the values to the console 
-      // (you can open the console by pressing F12 in your browser)
-      console.log("Email: ", this.email);
-      console.log("Password: ", this.password);
 
-      // TODO: make call to login API
+      // Need to store 'this' since it won't work inside the .then() and .catch() blocks
+      // More details: https://riptutorial.com/vue-js/example/28955/right--use-a-closure-to-capture--this-
+      var vue = this;
+
+      // Start the loading spinner
+      this.$wait.start('login')
+
+      // Make call to login API
+      this.$store.dispatch('login', {
+        email: this.email,
+        password: this.password
+      })
+      .then(() => {
+        // Redirect to their home page
+        if (vue.getUser.is_professor) vue.$router.push('/professor');
+        else vue.$router.push('/student');
+      })
+      .catch(err => {
+        console.log(err);
+        // Show a notification with the error message
+        if (err.message) {
+          vue.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          });
+        }
+        // Stop the loading spinner
+        vue.$wait.end('login')
+      });
     },
+
     forgotPassword() {
       // TODO: Send email with a link to reset password
     }
   }
 }
 </script>
+
+<style lang="scss" scoped >
+div.half-circle-spinner {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+}
+</style>

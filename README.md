@@ -112,3 +112,16 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+
+# Notes on modifications made to allow deployment
+
+- in .eslintrc.js, I removed the following:
+```
+    "jest/globals": true
+```
+from just after ```env{ root:true```
+
+- Added vue.config.js
+
+- modified default port on index.js (though this is an env variable anyways, so it shouldnt matter too much.

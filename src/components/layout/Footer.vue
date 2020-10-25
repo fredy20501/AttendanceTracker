@@ -3,7 +3,8 @@
   <div>
     <br>
     <br>
-    <button v-if="isAuthenticated" v-on:click="logout">Logout</button>
+    <button v-on:click="$router.go(-1)" v-if="this.$route.name !== 'login'">Back</button>
+    <button class="red" id="logout" v-if="isAuthenticated" v-on:click="logout">Logout</button>
     <br>
     <!-- Here I'm defining two source for the image. The first with media="(min-width...)"" will show 
     only if the screen reaches the minimum width. Otherwise it will show the other -->
@@ -53,5 +54,6 @@ img {
 button {
   width: auto;
   padding: 0 10px;
+  margin-left: 10px;
 }
 </style>

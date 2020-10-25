@@ -22,6 +22,7 @@
         <br>
         <div>
           <SpinnerButton 
+            class="green"
             label="Login"
             width="100%"
             height="30px"
@@ -92,10 +93,10 @@ export default {
         password: this.password
       })
       .then(() => {
-        // Stop the loading spinner
-        vue.$wait.end('login')
         // Redirect to their home page
         vue.$router.push('/home');
+        // Stop the loading spinner
+        vue.$wait.end('login')
       })
       .catch(err => {
         console.log(err);

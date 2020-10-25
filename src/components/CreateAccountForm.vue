@@ -49,6 +49,7 @@
         <br>
         <div>
           <SpinnerButton 
+            class="green"
             label="Create Account"
             width="100%"
             height="30px"
@@ -56,8 +57,6 @@
             :disabled="$wait.waiting('register') || invalid"
             :loading="$wait.waiting('register')"
           />
-          <br><br>
-          <button @click="$router.push('/')">Back</button>
         </div>
       </form>
     </ValidationObserver>
@@ -108,10 +107,10 @@ export default {
         password: this.password
       })
       .then(() => {
-        // Stop loading spinner
-        vue.$wait.end('register')
         // Redirect to their home page
         vue.$router.push('/home');
+        // Stop loading spinner
+        vue.$wait.end('register')
       })
       .catch(err => {
         console.log(err)

@@ -11,7 +11,5 @@ jobs:
     - name: "Code Lint Checker"
       script: npm run lint
   include:
-    - name: "Code Lint Checker"
-      script: npm run lint
     - name: "Automated Tests"
       script: npm run test

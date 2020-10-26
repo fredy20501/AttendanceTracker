@@ -6,8 +6,10 @@ cache:
     - "node_modules"
 
 jobs:
+  fast_finish: true
   allow_failure:
     - name: "Code Lint Checker"
+      script: npm run lint
   include:
     - name: "Code Lint Checker"
       script: npm run lint

@@ -83,5 +83,4 @@ module.exports = {User, Course, SeatingLayout};
  *          -   mandatory: A boolean value which indicates if a specifc class had mandatory attendence.
  *          
  *      always_mandatory: a boolean value which indicates whether all classes should be mandatory.
- * 
  **********************************************/

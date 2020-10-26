@@ -7,8 +7,8 @@ const userSchema = new Schema({
     name: { type: String, required: true, trim: true },
     password: { type: String, required: true },
     is_professor: { type: Boolean, required: true },
-    timestamps: { required: true }
-});
+},
+    timestamps: { required: true });
 const User = mongoose.model('User', userSchema, 'user');
 
 const seatingLayoutSchema = new Schema({
@@ -17,9 +17,9 @@ const seatingLayoutSchema = new Schema({
     dimensions: [{ type: Number, required: true }, { type: Number, required: true }],
     layout: [[{ type: Number, required: true }]], 
     default: { type: Boolean, required: true },
-    description: { type: String },
-    timestamps: { required: true }
-})
+    description: { type: String }
+},
+    timestamps: { required: true });
 const SeatingLayout = mongoose.model('SeatingLayout', seatingLayoutSchema, 'seatingLayout');
 
 const courseSchema = new Schema({
@@ -40,8 +40,8 @@ const courseSchema = new Schema({
     ],
     seating_layout: { type: ObjectId, ref: 'seatingLayout', requried: true },
     always_mandatory: { type: Boolean, requried: true },
-    timestamps: { required: true }
-});
+},
+    timestamps: { required: true });
 const Course = mongoose.model('course', courseSchema, 'course');
 
 module.exports = {User, Course, SeatingLayout};

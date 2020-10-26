@@ -89,24 +89,24 @@ npx npm-merge-driver install --global
 ----
 
 # To start the server:
--ssh onto google cloud 
--go to the folder containing the repository
--run
+- ssh onto google cloud 
+- go to the folder containing the repository
+- run
 export PORT=3000
 ```
 In your linux terminal, this sets up the port for the project to use.
--for a temporary hosting use 
+- for a temporary hosting use 
 npm run serve
 ```
--for a persistent hosting use
+- for a persistent hosting use
 nohup npm run serve
 ```
 This tells ubuntu not to kill the process when we log out.
--Then to kill the process: run 
+- Then to kill the process: run 
 ps ux
 ```
 Look for the 2 processes labelled 'node home/.../vue-cli-...' and 'node home/.../nodemon server/index.js', get their IDs.
--Run '$Kill -9 ID' for both of them
+- Run '$Kill -9 ID' for both of them
 
 # NPM Commands
 

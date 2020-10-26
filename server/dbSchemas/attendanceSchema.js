@@ -7,7 +7,7 @@ const userSchema = new Schema({
     name: { type: String, required: true, trim: true },
     password: { type: String, required: true },
     is_professor: { type: Boolean, required: true },
-    date_created: { type: Date, required: true }
+    timestamps: { required: true }
 });
 const User = mongoose.model('User', userSchema, 'user');
 
@@ -18,32 +18,33 @@ const seatingLayoutSchema = new Schema({
     layout: [[{ type: Number, required: true }]], 
     default: { type: Boolean, required: true },
     description: { type: String },
-    date_created: { type: Date, required: true }
+    timestamps: { required: true }
 })
-const User = mongoose.model('SeatingLayout', seatingLayoutSchema, 'seatingLayout');
+const SeatingLayout = mongoose.model('SeatingLayout', seatingLayoutSchema, 'seatingLayout');
 
 const courseSchema = new Schema({
-    name: { type: String, required: true, trim: true },
+    name: { type: String, required: true, unique: true, trim: true },
     admin: { type: ObjectId, ref: 'user' },
     professor: { type: ObjectId, ref: 'user' },
     students: [ { type: ObjectId, ref: 'user' } ],
     max_capacity: { type: Number, required: true },
+    attendence_threshold: { type: Number, required: true},
     attendence: [
         {
             date: Date,
             absent_students: [ { type: ObjectId, ref: 'user' } ],
-            seating_layout: { type: ObjectId, ref: 'seatingLayout', requried: true },
             seating_arrangement: [[ { type: ObjectId, ref: 'user' } ]],
             course_type: { type: String, required: true },
             mandatory: { type: Boolean, requried: true }
         }
     ],
+    seating_layout: { type: ObjectId, ref: 'seatingLayout', requried: true },
     always_mandatory: { type: Boolean, requried: true },
-    date_created: { type: Date, required: true }
+    timestamps: { required: true }
 });
 const Course = mongoose.model('course', courseSchema, 'course');
 
-module.exports = {User, Course, seatingLayoutSchema};
+module.exports = {User, Course, SeatingLayout};
 
 /********************************
  * Schema Property Explainations*
@@ -75,6 +76,6 @@ module.exports = {User, Course, seatingLayoutSchema};
  *          -   course_type: a string which indicates whether the course is a Lecture, Lab or Tutorial.
  *          -   mandatory: A boolean value which indicates if a specifc class had mandatory attendence.
  *          
- *      akways_mandatory: a boolean value which indicates whether all classes should be mandatory.
+ *      always_mandatory: a boolean value which indicates whether all classes should be mandatory.
  * 
  **********************************************/

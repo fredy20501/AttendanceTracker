@@ -3,6 +3,8 @@
   <div>
     <br>
     <br>
+    <button v-if="isAuthenticated" v-on:click="logout">Logout</button>
+    <br>
     <!-- Here I'm defining two source for the image. The first with media="(min-width...)"" will show 
     only if the screen reaches the minimum width. Otherwise it will show the other -->
     <picture>
@@ -13,8 +15,32 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
-  name: "Footer"
+  name: "Footer",
+  computed: {
+    ...mapGetters([
+      'isAuthenticated'
+    ])
+  },
+  methods: {
+    logout() {
+      const vue = this;
+
+      this.$store.dispatch('logout')
+      .then(() => {
+        // Go to login page
+        vue.$router.push({ name:'login' })
+      })
+      .catch(() => {
+        vue.$notify({ 
+          title: "Could not logout. Please try again later", 
+          type: 'error'
+        });
+      })
+    }
+  }
 }
 </script>
 
@@ -23,5 +49,9 @@ img {
   max-width: 445px;
   width: 100%;
   height: auto;
+}
+button {
+  width: auto;
+  padding: 0 10px;
 }
 </style>

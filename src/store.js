@@ -31,7 +31,9 @@ const store = new Vuex.Store({
   strict: useStrict,
 
   plugins: [
+    // Make the state persist between browser sessions
     createPersistedState(),
+    // Make the state shared accross tabs
     createMutationsSharer({
       predicate: ["setUser"]
     })
@@ -44,7 +46,8 @@ const store = new Vuex.Store({
 
   getters: {
     getUser: state => state.user,
-    isAuthenticated: state => state.authenticated
+    isAuthenticated: state => state.authenticated,
+    isProfessor: state => state.user.is_professor
   },
 
   mutations: {
@@ -102,6 +105,13 @@ const store = new Vuex.Store({
           err.message = "Could not create account. Please try again later"
         }
         throw err
+      })
+    },
+
+    logout(context) {
+      return $http.get('logout')
+      .then(() => {
+        context.commit('logout')
       })
     },
 

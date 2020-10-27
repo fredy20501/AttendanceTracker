@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Header />
-    <router-view />
+    <router-view style="position:relative;"/>
     <Footer />
     <notifications style="margin-top:5px" position="top center"/>
   </div>

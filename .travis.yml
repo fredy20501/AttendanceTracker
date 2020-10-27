@@ -6,7 +6,8 @@ cache:
     - "node_modules"
 
 jobs:
-  allow_failure:
+  fast_finish: true
+  allow_failures:
     - name: "Code Lint Checker"
   include:
     - name: "Code Lint Checker"

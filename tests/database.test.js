@@ -2,9 +2,7 @@ const app = require('../server/app.js');
 const supertest = require("supertest");
 const http = require('http');
 const mongoose = require('mongoose');
-const User = require('../server/dbSchemas/attendanceSchema.js').User;
-const Course = require('../server/dbSchemas/attendanceSchema.js').Course;
-const SeatingLayout = require('../server/dbSchemas/attendanceSchema.js').SeatingLayout;
+const { User, Course, SeatingLayout } = require('../server/dbSchemas/attendanceSchema.js');
 
 describe('Database Functionality', () => {
 

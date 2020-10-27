@@ -56,14 +56,26 @@ describe('Database Functionality', () => {
 
     xit('Should store course to database', async done => {
 
+        // Create a sample seating layout for this test
+        const seatingLayout = await request.post('/api/createSeatingLayout').send({
+            name: 'Sample layout',
+            capacity: 25,
+            dimensions: [ 5 , 5],
+            layout: [[5]], 
+            default: true,
+            description: 'This is a sample'
+        });
+
         //Create test course
         const res = await request.post('/api/createSection').send({
             name: 'SWE4103',
             admin: 'Dr. MacIsaac',
             professor: 'Dawn MacIsaac',
             maxCapacity: 30,
-            attendance: [Date, [], []],
-            date_created: Date
+            attendance: [Date, [], true],
+            seating_layout: seatingLayout,
+            seating_arrangement: [[]],
+            always_mandatory: true,
         });
         
         //Search course in database by name
@@ -79,6 +91,11 @@ describe('Database Functionality', () => {
         expect(course.maxCapacity).toBeTruthy();
         expect(course.attendance).toBeTruthy();
         expect(course.date_created).toBeTruthy();
+
+        //Delete sample seating layout after testing
+        response = await request.delete("/api/deleteSeatingLayout").send({
+            name: 'Sample layout'
+        });
 
         //Delete test course after testing
         response = await request.delete("/api/deleteSection").send({

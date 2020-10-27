@@ -37,12 +37,11 @@ const courseSchema = new Schema({
         {
             date: Date,
             absent_students: [ { type: ObjectId, ref: 'user' } ],
-            seating_arrangement: [[ { type: ObjectId, ref: 'user' } ]],
-            course_type: { type: String, required: true },
             mandatory: { type: Boolean, requried: true }
         }
     ],
     seating_layout: { type: ObjectId, ref: 'seatingLayout', requried: true },
+    seating_arrangement: [[ { type: ObjectId, ref: 'user' } ]],
     always_mandatory: { type: Boolean, requried: true },
 },
 { 

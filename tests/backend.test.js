@@ -4,10 +4,11 @@ const supertest = require("supertest");
 const http = require('http');
 
 describe('Backend server fuctionality', () => {
+
     let server;
     let request;
 
-    // Open server & database before running tests
+    //Open server before running tests
     beforeAll(async (done) => {
         server = http.createServer(app);
         server.listen();
@@ -16,20 +17,19 @@ describe('Backend server fuctionality', () => {
         db.once('open', done);
     });
 
-    // Close database & server when done
+    //Close server when done
     afterAll(async (done) => {
         await mongoose.connection.close();
-        server.close(done);
+        await server.close(done);
     });
 
-    it('reaches server api', async done =>{
-        // tests to see if api is reachable
+    it('Should reach server api', async done => {
         const response = await request.get("/");
         expect(response.status).toBe(200);
         done();
     });
 
-    it('send invalid login', async done =>{
+    it('Should send invalid login', async done => {
         const response = await request.post("/api/login").send({
             email:'blah', 
             password:'bbbbbb'
@@ -39,14 +39,13 @@ describe('Backend server fuctionality', () => {
         done();
     });
 
-    it('try to access data without being logged in', async done =>{
+    it('Should not allow access to data without being logged in', async done => {
         const response = await request.get("/api/dashboard");
-        // expect 401 unauthorized since we are not logged in
         expect(response.status).toBe(401);
         done();
     });
 
-    it('create, login, logout, then delete test account', async done =>{
+    xit('Should successfully create, login, logout, and delete test account', async done =>{
         // Create test account
         var response = await request.post("/api/register").send({
             name:'test_user', 
@@ -73,6 +72,42 @@ describe('Backend server fuctionality', () => {
         });
         expect(response.status).toBe(200);
 
+        done();
+    });
+
+    xit("Should reach create-section endpoint", async done => {
+        response = await request.get("/api/createSection");
+        expect(response.status).toBe(200);
+        done()
+    });
+
+    xit("Should reach update-section endpoint", async done => {
+        response = await request.get("/api/updateSection");
+        expect(response.status).toBe(200);
+        done();
+    });
+
+    xit("Should reach delete-section endpoint", async done => {
+        response = await request.get("/api/deleteSection");
+        expect(response.status).toBe(200);
+        done();
+    });
+
+    xit("Should reach create-seating-plan endpoint", async done => {
+        response = await request.get("/api/createSeatingLayout");
+        expect(response.status).toBe(200);
+        done()
+    });
+
+    xit("Should reach update-seating-plan endpoint", async done => {
+        response = await request.get("/api/updateSeatingLayout");
+        expect(response.status).toBe(200);
+        done();
+    });
+
+    xit("Should reach delete-seating-plan endpoint", async done => {
+        response = await request.get("/api/deleteSeatingLayout");
+        expect(response.status).toBe(200);
         done();
     });
 })

@@ -8,7 +8,7 @@ describe('Backend server fuctionality', () => {
     let server;
     let request;
 
-    //Open server before running tests
+    //Open server & database before running tests
     beforeAll(async (done) => {
         server = http.createServer(app);
         server.listen();
@@ -17,7 +17,7 @@ describe('Backend server fuctionality', () => {
         db.once('open', done);
     });
 
-    //Close server when done
+    //Close server & database when done
     afterAll(async (done) => {
         await mongoose.connection.close();
         await server.close(done);

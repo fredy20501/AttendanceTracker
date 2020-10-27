@@ -5,10 +5,20 @@ Vue.use(Vuex)
 // Vuex tutorial: https://scrimba.com/scrim/cMPa2Uk?pl=pnyzgAP
 
 
+// Get port from server config
+var config;
+if (!process.env.TRAVIS) {
+  config = require('@/../server/config/config.js')
+}
+// Don't change the default port (5000) since both frontend 
+// and backend assume 5000 if config is missing.
+// Change the value in the config file to specify the port you want.
+const PORT = config?.app.port || 5000;
+
 // Set API url for all requests
 import Axios from 'axios'
 const $http = Axios.create({
-  baseURL: "http://localhost:5000/api/"
+  baseURL: "http://localhost:"+PORT+"/api/"
 })
 
 // Only use strict mode during development

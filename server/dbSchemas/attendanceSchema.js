@@ -14,7 +14,8 @@ const userSchema = new Schema({
 const User = mongoose.model('User', userSchema, 'user');
 
 const seatingLayoutSchema = new Schema({
-    name: { type: String, required: true },
+    name: { type: String, unique: true, required: true },
+    created_by: { type: ObjectId, ref: 'user', required: true},
     capacity: { type: Number, required: true },
     dimensions: [{ type: Number, required: true }, { type: Number, required: true }],
     layout: [[{ type: Number, required: true }]], 
@@ -37,12 +38,12 @@ const courseSchema = new Schema({
         {
             date: Date,
             absent_students: [ { type: ObjectId, ref: 'user' } ],
-            mandatory: { type: Boolean, requried: true }
+            mandatory: { type: Boolean, required: true }
         }
     ],
-    seating_layout: { type: ObjectId, ref: 'seatingLayout', requried: true },
+    seating_layout: { type: ObjectId, ref: 'seatingLayout', required: true },
     seating_arrangement: [[ { type: ObjectId, ref: 'user' } ]],
-    always_mandatory: { type: Boolean, requried: true },
+    always_mandatory: { type: Boolean, required: true },
 },
 { 
     timestamps: true 

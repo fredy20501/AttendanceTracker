@@ -41,5 +41,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // API Routes
 app.use('/api/', require('./routes/api/login'));
+app.use('/api/section', require('./routes/api/section'));
 
 module.exports = app;

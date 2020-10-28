@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h2>Create Section</h2>
-    <br />
+    <h2>Create Section (UI)</h2>
+    <br>
 
     <form @submit.prevent>
       <!-- Put fields & buttons with their labels here -->

@@ -1,14 +1,61 @@
 <template>
   <div>
-    <h2>Create Section (UI)</h2>
+    <h2>Create/Edit Section</h2>
     <br>
 
     <form @submit.prevent>
       <!-- Put fields & buttons with their labels here -->
-      
+        <div >
+          <ValidationProvider name="Section Tag" rules="required" v-slot="{ errors }">
+            <label for="sectionTags">Section Tag</label><br>
+            <input list= "sectionTags" name="sectionTag" type="text" style="width:300px;" v-model="sectionTag">
+            <datalist id=sectionTags>
+              <!--Example, should import user's sections from db-->
+              <option value=ADAM-ECE3221-FRO1B-LEC></option>
+            </datalist>
+            <span v-if="errors.length" class="error">{{ errors[0] }}</span>
+          </ValidationProvider>
+          <br><br>
+          <button 
+            style="width:300px;"
+            v-on:click="$.createSection()"
+          >
+            Add Section
+          </button> 
+          <br><br>
+          <button 
+            style="width:300px;"
+            v-on:click="$.saveSection()"
+          >
+            Save Section
+          </button>
+        </div>
+        <br>
+        <div >
+          <ValidationProvider name="Attenence Type" rules="required" v-slot="{ errors }">
+            <label>Attendence Type</label><br>
+            <input id="MandatoryAttendence" type="radio" name="attendence" value="mandatory"
+              v-model="attendenceType">
+            <label for="MandatoryAttendence" class="radio">Mandatory Attendence</label>
+            <br>
+            <input id="OptInAttendence" type="radio" name="attendence" value="optIn"
+              v-model="attendenceType">
+            <label for="OptInAttendence" class="radio">Opt In/Opt Out</label>
+            <span v-if="errors.length" class="error">{{ errors[0] }}</span>
+          </ValidationProvider>
+        </div>
+        <br>
+        <div >
+          <ValidationProvider name="Absent Threshold" v-slot="{ errors }">
+            <label for="absentThreshold">Absent Threshold</label><br>
+            <input name="absentThreshold" style="width:300px;" type="number" placeholder="Absent Threshold" v-model="absentThreshold">
+            <span v-if="errors.length" class="error">{{ errors[0] }}</span>
+          </ValidationProvider>
+        </div>
+        <br>
 
       <!-- This is the basics for the excel file upload -->
-      <div style="text-align:left">
+      <div >
         <button 
           style="width:300px;"
           v-on:click="$refs.excelInputField.click()"
@@ -40,7 +87,6 @@
       *careful: that specific example is for vue 2 and we are using vue 3 
       -->
     </div>
-
 
     <!-- Hidden file input (only allows .xlsx files) -->
     <input

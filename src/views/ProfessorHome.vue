@@ -3,7 +3,7 @@
     <h1>Professor Home</h1>
     <div>Welcome {{ getUser.name }}!</div>
     <br>
-    <button v-on:click="$router.push({ name:'createSection' })">Create Section</button>
+    <button v-on:click="$router.push({ name:'createSection' })">Create/Edit Section</button>
   </div>
 </template>
 

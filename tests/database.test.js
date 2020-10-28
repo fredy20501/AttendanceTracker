@@ -134,7 +134,7 @@ describe('Database Functionality', () => {
             name: 'Sample layout'
         });
         expect(response.status).toBe(200);
-        
+
         //Delete test course after testing
         response = await request.delete("/api/deleteSection").send({
             name: 'SWE4103'
@@ -162,7 +162,7 @@ describe('Database Functionality', () => {
         });
         expect(response.status).toBe(200);
 
-        done();
+        done()
     });
 
     xit('Should store seating layout to database', async done => {

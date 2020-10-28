@@ -49,6 +49,7 @@
         <br>
         <div>
           <SpinnerButton 
+            class="green"
             label="Create Account"
             width="100%"
             height="30px"
@@ -56,8 +57,6 @@
             :disabled="$wait.waiting('register') || invalid"
             :loading="$wait.waiting('register')"
           />
-          <br><br>
-          <button @click="$router.push('/')">Back</button>
         </div>
       </form>
     </ValidationObserver>
@@ -87,7 +86,7 @@ export default {
   computed: {
     // Import the getters from the global store
     ...mapGetters([
-      'getUser'
+      'isProfessor'
     ])
   },
 
@@ -109,8 +108,9 @@ export default {
       })
       .then(() => {
         // Redirect to their home page
-        if (vue.getUser.is_professor) vue.$router.push('/professor');
-        else vue.$router.push('/student')
+        vue.$router.push('/home');
+        // Stop loading spinner
+        vue.$wait.end('register')
       })
       .catch(err => {
         console.log(err)
@@ -132,11 +132,5 @@ export default {
 <style scoped lang="scss">
 label.radio {
   font-weight: normal;
-}
-
-div.half-circle-spinner {
-  position: absolute;
-  right: 4px;
-  top: 4px;
 }
 </style>

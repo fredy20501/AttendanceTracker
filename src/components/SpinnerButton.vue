@@ -1,5 +1,6 @@
 <template>
   <button 
+    :class="css_class"
     :type="type"
     :style="buttonStyle"
     :disabled="disabled"
@@ -19,6 +20,7 @@
 export default {
   name: 'SpinnerButton',
   props: {
+    css_class: String,
     label: String,
     width: String,
     height: String,

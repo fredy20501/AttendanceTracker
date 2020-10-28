@@ -22,6 +22,7 @@
         <br>
         <div>
           <SpinnerButton 
+            class="green"
             label="Login"
             width="100%"
             height="30px"
@@ -31,13 +32,25 @@
           />
           <br><br>
           <button @click="$router.push('create-account')">Create Account</button>
-          <br><br>
-          
+
           <!-- Don't show Forgot Password button until it is functional -->
-          <button style="display:none" @click="forgotPassword">Forgot Password</button>
+          <div style="display:none">
+            <br><br>
+            <button @click="forgotPassword">Forgot Password</button>
+          </div>
         </div>
       </form>
     </ValidationObserver>
+
+    <div class="demo-accounts">
+      <b>Test Student</b><br>
+      email: test.student@unb.ca<br>
+      password: testing123<br>
+      <br>
+      <b>Test Professor</b><br>
+      email: test.professor@unb.ca<br>
+      password: testing123<br>
+    </div>
   </div>
 </template>
 
@@ -60,7 +73,7 @@ export default {
   computed: {
     // Import the getters from the global store
     ...mapGetters([
-      'getUser'
+      'isProfessor'
     ])
   },
 
@@ -81,8 +94,9 @@ export default {
       })
       .then(() => {
         // Redirect to their home page
-        if (vue.getUser.is_professor) vue.$router.push('/professor');
-        else vue.$router.push('/student');
+        vue.$router.push('/home');
+        // Stop the loading spinner
+        vue.$wait.end('login')
       })
       .catch(err => {
         console.log(err);
@@ -106,9 +120,20 @@ export default {
 </script>
 
 <style lang="scss" scoped >
-div.half-circle-spinner {
+.demo-accounts {
   position: absolute;
-  right: 4px;
-  top: 4px;
+  right: 10px;
+  top: 10px;
+  border: 1px dashed black;
+  padding: 10px;
+  text-align: left;
+  opacity: 0.25;
+}
+
+// Hide the demo account block on small screen sizes
+@media only screen and (max-width: 880px) {
+  .demo-accounts {
+    display: none;
+  }
 }
 </style>

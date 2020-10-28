@@ -5,10 +5,20 @@ Vue.use(Vuex)
 // Vuex tutorial: https://scrimba.com/scrim/cMPa2Uk?pl=pnyzgAP
 
 
+// Get port from server config
+var config;
+if (!process.env.TRAVIS) {
+  config = require('@/../server/config/config.js')
+}
+// Don't change the default port (5000) since both frontend 
+// and backend assume 5000 if config is missing.
+// Change the value in the config file to specify the port you want.
+const PORT = config?.app.port || 5000;
+
 // Set API url for all requests
 import Axios from 'axios'
 const $http = Axios.create({
-  baseURL: "http://localhost:5000/api/"
+  baseURL: "http://localhost:"+PORT+"/api/"
 })
 
 // Only use strict mode during development
@@ -31,7 +41,9 @@ const store = new Vuex.Store({
   strict: useStrict,
 
   plugins: [
+    // Make the state persist between browser sessions
     createPersistedState(),
+    // Make the state shared accross tabs
     createMutationsSharer({
       predicate: ["setUser"]
     })
@@ -44,7 +56,8 @@ const store = new Vuex.Store({
 
   getters: {
     getUser: state => state.user,
-    isAuthenticated: state => state.authenticated
+    isAuthenticated: state => state.authenticated,
+    isProfessor: state => state.user.is_professor
   },
 
   mutations: {
@@ -105,8 +118,75 @@ const store = new Vuex.Store({
       })
     },
 
+    logout(context) {
+      return $http.get('logout')
+      .then(() => {
+        context.commit('logout')
+      })
+    },
+
     testAPI() {
       return $http.get()
+    },
+
+    getSeatingLayouts() {
+      // return $http.get('seatingPlan')
+      // .catch(err => {
+      //   err.message = "Could not get seating layouts. Please try again later"
+      //   throw err
+      // })
+
+      // Return mock data since api is not here yet
+      return new Promise((resolve) => {
+        resolve({
+          seatingLayouts: [
+            {
+              name: 'Test Layout',
+              layout: [
+                [0, 0, 1, 1, 2, 0],
+                [0, 4, 4, 3, 3, 1]
+              ]
+            },
+            {
+              name: 'Long Class',
+              layout: [
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 0, 1, 1, 2, 0],
+                [0, 4, 4, 3, 3, 1]
+              ]
+            },
+            {
+              name: 'Large Class',
+              layout: [
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0]
+              ]
+            }
+          ]
+        })
+      })
     }
   }
 })

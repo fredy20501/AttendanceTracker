@@ -44,7 +44,7 @@ The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/docu
 }
 
 .column {
-  max-width: 300px;
+  width: 300px;
   margin: auto;
   text-align: left;
 }
@@ -55,7 +55,7 @@ The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/docu
   padding: 2px;
 }
 
-input:not([type=radio]), button {
+input:not([type=radio]), button, select {
   width: 100%;
   height: 30px;
   padding: 1px 2px;

@@ -92,8 +92,8 @@ router.post('/createSection', (req, res) => {
 
 //currently unfinished
 router.get('/updateSection', (req, res) => {
-    let sectionName = req.body.sectionName;
 
+    let courseId = req.body.courseId;
     let courseName = req.body.courseName;
     let attendanceThreshold = req.body.attendanceThreshold;
     let seatingLayout = req.body.seatingLayout;
@@ -105,39 +105,55 @@ router.get('/updateSection', (req, res) => {
     let seatingArrangement = req.body.seatingArrangement;
     let attendance = [];
 
+    Course.findOne({_id: courseId}, function (err, course) {
+        console.log(courseName);
+        console.log(course)
 
-    const updateSection =  Course.findOne({name:sectionName});
+        if(err || course == null){
+            console.log(err);
+            return res.status(500).send(err);
+        }
 
-    console.log(updateSection)
-
-
-    // return res.status(200).json({
-    //     updateSection
-    // }).send();
-    // return res.status(200).send(updateSection); 
-
-
-    // Course.findOne({name : sectionName}, function(err, course){
-
-    //     if(err){
-    //         console.log(err);
-    //         return res.status(500).send();
-    //     }
-
-    //     if !courseName :
-    //        courseName = course.courseName  
-
-
-    //     course.save()
-
-    // })
-    // let section = await Course.findOne({name : sectionName}).exec();
-
-    // console.log(section)
-
-    // return res.status(200).send(section)
-
-
+        if(courseName != null && courseName !== ""){
+            course.name = courseName;
+        }
+        if(attendanceThreshold != null && attendanceThreshold !== ""){
+            course.attendance_threshold = attendanceThreshold;
+        }
+        if(seatingLayout != null && seatingLayout !== ""){
+            course.seating_layout = seatingLayout;
+        }
+        if(attMandatory != null && attMandatory !== ""){
+            course.always_mandatory = attMandatory;
+        } 
+        if(professor != null && professor !== ""){
+            course.professor = professor;
+        }
+        if(admin != null && admin !== ""){
+            course.admin = admin;
+        }
+        if(students != null && students !== ""){
+            course.students = students
+        }
+        if(maxCapacity != null && maxCapacity !== ""){
+            course.max_capacity = maxCapacity;
+        }
+        if(seatingArrangement != null && seatingArrangement !== ""){
+            course.seating_arrangement = seatingArrangement;
+        }
+        if(Array.isArray(attendance) && attendance.length){
+            course.attendance = attendance;
+        }
+    
+        course.save(err => {
+            if(err){
+                console.log(err);
+                return res.status(500).send(err);
+            }
+        
+            return res.status(200).send(); 
+        })
+    });
 });
 
 module.exports = router;

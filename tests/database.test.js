@@ -134,9 +134,31 @@ describe('Database Functionality', () => {
             name: 'Sample layout'
         });
         expect(response.status).toBe(200);
+        
         //Delete test course after testing
         response = await request.delete("/api/deleteSection").send({
             name: 'SWE4103'
+        });
+        expect(response.status).toBe(200);
+
+        //Delete test users after testing
+        response = await request.delete("/api/delete-user").send({
+            email: 'st1@test.com'
+        });
+        expect(response.status).toBe(200);
+
+        response = await request.delete("/api/delete-user").send({
+            email: 'st2@test.com'
+        });
+        expect(response.status).toBe(200);
+
+        response = await request.delete("/api/delete-user").send({
+            email: 'admin@test.com'
+        });
+        expect(response.status).toBe(200);
+
+        response = await request.delete("/api/delete-user").send({
+            email: 'prof1@test.com'
         });
         expect(response.status).toBe(200);
 

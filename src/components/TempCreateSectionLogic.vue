@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>Create Section (LOGIC)</h2>
+    <h2>Manage Layout</h2>
     <br>
 
     <!-- Basic dropdown for selecting layout -->

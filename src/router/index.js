@@ -25,8 +25,14 @@ const routes = [
   {
     path: '/professor',
     name: 'professorHome',
-    meta: { requiresAuth: true, accountType: 'professor' },
+    //meta: { requiresAuth: true, accountType: 'professor' },
     component: () => import(/* webpackChunkName: "[request]" */ '../views/ProfessorHome.vue')
+  },
+  {
+    path: '/create-edit-section',
+    name: 'createEditSection',
+    //meta: { requiresAuth: true, accountType: 'professor' },
+    component: () => import(/* webpackChunkName: "[request]" */ '../views/CreateEditSection.vue')
   }
 ]
 

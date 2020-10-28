@@ -17,10 +17,6 @@ router.get('/previousSeatingPlans', (req, res) => {
             return res.status(500).send();
         }
 
-        // if(!user){
-        //     return res.status(401).send();
-        // }
-
         return res.status(200).json({
             seatingLayout
         }).send();
@@ -94,6 +90,7 @@ router.post('/createSection', (req, res) => {
 });
 
 
+//currently unfinished
 router.get('/updateSection', (req, res) => {
     let sectionName = req.body.sectionName;
 

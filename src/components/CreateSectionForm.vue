@@ -77,18 +77,16 @@
         </div>
       </div>
     </form>
-    <!--
+
     <br>
-    
+
     <div id="Grid" class="border">
       The grid goes here!
-      
-      Tip: use vue's v-for attribute to loop through the number of rows and columns and add a box element each
+      <!-- Tip: use vue's v-for attribute to loop through the number of rows and columns and add a box element each
       Here's an example of a vue grid: https://vuejs.org/v2/examples/grid-component.html
       *careful: that specific example is for vue 2 and we are using vue 3 
-      
+      -->
     </div>
-    -->
 
     <!-- Hidden file input (only allows .xlsx files) -->
     <input

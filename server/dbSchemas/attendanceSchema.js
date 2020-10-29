@@ -14,9 +14,9 @@ const userSchema = new Schema({
 const User = mongoose.model('User', userSchema, 'user');
 
 const seatingLayoutSchema = new Schema({
-    name: { type: String, unique: true, required: true },
-    created_by: { type: ObjectId, ref: 'user', required: true},
+    name: { type: String, required: true, unique : true },
     capacity: { type: Number, required: true },
+    created_by: { type: ObjectId, ref: 'user'},
     dimensions: [{ type: Number, required: true }, { type: Number, required: true }],
     layout: [[{ type: Number, required: true }]], 
     default: { type: Boolean, required: true },

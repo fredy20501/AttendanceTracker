@@ -34,7 +34,7 @@ router.post('/login', (req, res) => {
                 email: user.email,
                 is_professor: user.is_professor 
             }
-        }).send();
+        });
     })
 });
 

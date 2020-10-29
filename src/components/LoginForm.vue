@@ -31,12 +31,12 @@
             :loading="$wait.waiting('login')"
           />
           <br><br>
-          <button @click="$router.push('create-account')">Create Account</button>
+          <button type="button" @click="$router.push('create-account')">Create Account</button>
 
           <!-- Don't show Forgot Password button until it is functional -->
           <div style="display:none">
             <br><br>
-            <button @click="forgotPassword">Forgot Password</button>
+            <button type="button" @click="forgotPassword">Forgot Password</button>
           </div>
         </div>
       </form>

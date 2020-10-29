@@ -130,64 +130,45 @@ const store = new Vuex.Store({
     },
 
     getSeatingLayouts() {
-      // return $http.get('seatingPlan')
-      // .catch(err => {
-      //   err.message = "Could not get seating layouts. Please try again later"
-      //   throw err
-      // })
-
-      // Return mock data since api is not here yet
-      return new Promise((resolve) => {
-        resolve({
-          seatingLayouts: [
-            {
-              name: 'Test Layout',
-              layout: [
-                [0, 0, 1, 1, 2, 0],
-                [0, 4, 4, 3, 3, 1]
-              ]
-            },
-            {
-              name: 'Long Class',
-              layout: [
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 0, 1, 1, 2, 0],
-                [0, 4, 4, 3, 3, 1]
-              ]
-            },
-            {
-              name: 'Large Class',
-              layout: [
-                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
-                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
-                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
-                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
-                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
-                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
-                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
-                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
-                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
-                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0]
-              ]
-            }
-          ]
-        })
+      return $http.get('section/previousSeatingPlans')
+      .then(res => {
+        // Format the response to match what frontend is expecting
+        return { layouts: res.data.seatingLayout }
       })
-    }
+      .catch(err => {
+        err.message = "Could not get seating layouts. Please try again later"
+        throw err
+      })
+    },
+
+    createSeatingLayout(context, payload) {
+      return $http.post('section/createSeatingLayout', payload)
+      .then(res => {
+        // Format the response to match what frontend is expecting
+        res.data.seatingLayout.type = "saved"
+        return { layout: res.data.seatingLayout }
+      })
+      .catch(err => {
+        err.message = "Could not save seating layout. Please try again later"
+        throw err
+      })
+    },
+
+    createSection(context, payload) {
+      return $http.post('section/createSection', payload)
+      .catch(err => {
+        err.message = "Could not create section. Please try again later"
+        throw err
+      })
+    },
+
+    updateSection(context, payload) {
+      return $http.post('section/updateSection', payload)
+      .catch(err => {
+        err.message = "Could not save section. Please try again later"
+        throw err
+      })
+    },
   }
 })
 

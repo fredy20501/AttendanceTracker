@@ -69,6 +69,10 @@ button {
   font-size: 16px;
 }
 
+div.vue-notification {
+  font-size: 16px
+}
+
 /* Custom red/green buttons */
 button.red {
   background-color: #cc0000;

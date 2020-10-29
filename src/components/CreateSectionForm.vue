@@ -8,8 +8,8 @@
     <h2 v-if="mode=='edit'">Edit Section</h2>
     <br>
 
-    <ValidationObserver v-slot="{ handleSubmit }">
-    <form @submit.prevent="handleSubmit(createSection)">
+    <ValidationObserver v-slot="{ handleSubmit, invalid}">
+    <form @submit.prevent="handleSubmit(submit)">
       <div class="column">
         <div>
           <ValidationProvider name="Section Name" rules="required|alpha_dash" v-slot="{ errors }">
@@ -41,31 +41,49 @@
       <div class="column">
         <br>
         <!-- Add/Save button: Only one is shown depending if the mode is "add" or "update" -->
-        <button v-if="mode=='add'" type="submit" class="green" v-on:click="createSection">Create Section</button>
-        <button v-if="mode=='edit'" type="submit" class="green" v-on:click="saveSection">Save Section</button>
+        <SpinnerButton 
+          v-if="mode=='add'"
+          class="green"
+          label="Create Section"
+          width="100%"
+          height="30px"
+          type="submit"
+          :disabled="$wait.waiting('createSection') || invalid"
+          :loading="$wait.waiting('createSection')"
+        />
+        <SpinnerButton 
+          v-if="mode=='edit'"
+          class="green"
+          label="Save Section"
+          width="100%"
+          height="30px"
+          type="submit"
+          :disabled="$wait.waiting('saveSection') || invalid"
+          :loading="$wait.waiting('saveSection')"
+        />
         
         <br>
         <br>
 
         <!-- This is the basics for the excel file upload -->
-        <button style="width:300px;" v-on:click="$refs.excelInputField.click()">
+        <button type="button" style="width:300px;" v-on:click="$refs.excelInputField.click()">
           Upload Class List
         </button>
         <br>
         <br>
-        <div v-if="class_list.length>0">
+        <div v-if="classList.length>0">
           Class List:
           <br>
           <table class="students">
             <tbody>
-              <tr v-for="(student, index) in class_list" :key="index" >
+              <tr v-for="(student, index) in classList" :key="index" >
                 <td>{{student.name}}</td>
                 <td>{{student.email}}</td>
               </tr>
             </tbody>
           </table>
-          <button v-on:click="clearClassList">
-            Clear Class List
+          <button type="button" v-on:click="clearClassList">
+            Remove Class List
           </button>
         </div>
       </div>
@@ -88,7 +106,7 @@
     <div class="column">
       <!-- Basic dropdown for selecting layout -->
       <label>Select Layout</label><br>
-      <select @change="stopSelect" style="height: 30px; width:300px;" v-model="layoutSelected">
+      <select @change="layoutSelectedEvent" style="height: 30px; width:300px;" v-model="layoutSelected">
         <option v-for="(layout, i) in layouts" v-bind:key="i" :value="i"
           v-bind:class="{bold: layout.type=='new'}"
         >
@@ -97,6 +115,12 @@
           <span v-if="layout.type=='new'">*(not saved)</span>
         </option>
       </select><br>
+      <br>
+      <div v-if="isCurrentLayoutNew">
+        <label>Layout Name</label>
+        <input @change="updateLayoutName($event)" 
+          type="text" placeholder="Layout Name" v-model="newLayoutName">
+      </div>
       <br>
       <div v-if="isCurrentLayoutNew">
         <label>How to modify seats</label>
@@ -111,7 +135,16 @@
       <!-- Basic button for adding new layout -->
       <button v-on:click="createLayout">New layout</button><br>
       <br>
-      <button :disabled="!isCurrentLayoutNew" v-on:click="saveLayout" class="green">Save layout</button>
+      <SpinnerButton 
+        class="green"
+        label="Save Layout"
+        width="100%"
+        height="30px"
+        type="button"
+        :disabled="$wait.waiting('saveLayout') || !isCurrentLayoutNew"
+        :loading="$wait.waiting('saveLayout')"
+        :onClick="saveLayout" 
+      />
 
       <br>
       <br>
@@ -138,11 +171,11 @@
     <div id="Grid" class="border">
       <table v-if="layouts.length>0">
         <tbody v-bind:class="{isNew: isCurrentLayoutNew}">
-          <tr v-for="(row, i) in currentLayout" v-bind:key="i">
+          <tr v-for="(row, i) in currentLayout.layout" v-bind:key="i">
             <td v-for="(seat, j) in row" v-bind:key="j">
               <div
-                @click="fromSelect(i,j)" 
-                @mouseover="toSelect(i,j)"
+                @click="fromPaintSelect(i,j)" 
+                @mouseover="toPaintSelect(i,j)"
                 v-bind:class="{
                   'seat': true,
                   'type-0': seat==0,
@@ -155,7 +188,7 @@
             </td>
           </tr>
           <tr>
-            <td :colspan="currentLayout[0].length">
+            <td :colspan="currentLayout.layout[0].length">
               <div style="margin: 10px auto 0 auto; padding: 0 10px; max-width: 200px" class="border">
                 Whiteboard
               </div>
@@ -216,9 +249,13 @@
 <script>
 import { mapGetters } from "vuex";
 import readXlsxFile from 'read-excel-file'
+import SpinnerButton from './SpinnerButton'
 
 export default {
   name: "CreateSectionForm",
+  components: {
+    SpinnerButton
+  },
 
   data() {
     return {
@@ -230,11 +267,12 @@ export default {
       sectionName: "",
       attendanceType: 'optIn',
       attendanceThreshold: 0,
-      class_list: [],
+      classList: [],
 
       // Layout stuff
       layouts: [],
       layout_id: "",
+      newLayoutName: "",
       layoutSelected: 0,
 
       // Select grid data
@@ -251,19 +289,9 @@ export default {
         }
       },
 
-      defaultLayout: {
-        name: "default",
-        // This type: "new" allows us to keep track 
-        // of which layout is new in the dropdown
-        type: "new",
-        layout: [
-          [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-          [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-          [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-          [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-          [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
-        ]
-      }
+      // This value is referenced in computed values so we can force update them
+      // by updating this "updated" value
+      updated: 0
     }
   },
 
@@ -271,18 +299,21 @@ export default {
     // Import the getters from the global store
     ...mapGetters(["getUser"]),
     
-    is_mandatory: () => { this.attendanceType == 'mandatory' },
-    currentLayout: function() {
-      return this.layouts.length>0 ? this.layouts[this.layoutSelected].layout : {}
+    isMandatory: function() { 
+      return this.attendanceType == 'mandatory'
     },
-    isCurrentLayoutNew: function() { 
-      return this.layouts.length>0 && this.layouts[this.layoutSelected].type == "new"
+    currentLayout: function() {
+      this.updated // Reference this value to allow forcing an update
+      return this.layouts.length>0 ? this.layouts[this.layoutSelected] : {}
+    },
+    isCurrentLayoutNew: function() {
+      return this.layouts.length>0 && this.currentLayout.type == "new"
     },
     rows: function() {
-      return this.currentLayout?.length
+      return this.currentLayout.layout?.length
     },
     columns: function() {
-      return this.currentLayout?.[0].length
+      return this.currentLayout.layout?.[0].length
     },
     currentPaintSelected: function() {
       return this.isCurrentLayoutNew ? this.paintSelectIndex : -1
@@ -328,7 +359,7 @@ export default {
 
         // Condense the 2d array into an array of 
         // objects with full name and email
-        this.class_list = rows.map(row => {
+        this.classList = rows.map(row => {
           return {
             'name': row[firstNameColumn]+' '+row[lastNameColumn],
             'email': row[emailColumn]
@@ -338,7 +369,7 @@ export default {
     },
 
     clearClassList() {
-      this.class_list = []
+      this.classList = []
       this.$refs.excelInputField.value = ""
     },
 
@@ -358,7 +389,7 @@ export default {
 
       this.$store.dispatch('getSeatingLayouts')
       .then(res => {
-        vue.layouts = res.seatingLayouts
+        vue.layouts = res.layouts
       })
       .catch(err => {
         console.log(err)
@@ -373,67 +404,248 @@ export default {
     },
 
     createLayout() {
-      this.stopSelect()
+      this.stopPaintSelect()
 
-      // Make a copy of the default layout as the new layout
-      const newLayout = JSON.parse(JSON.stringify(this.defaultLayout))
+      // Make a copy of the current layout as the new layout
+      const newLayout = JSON.parse(JSON.stringify(this.currentLayout))
+      newLayout.type = "new"
+      // Remove the id since it isn't correct anymore
+      delete newLayout._id
+
       // Add the new layout to the dropdown and select it
       this.layouts.push(newLayout)
       this.layoutSelected = this.layouts.length-1
+
+      // Set the layout name field
+      this.newLayoutName = newLayout.name
     },
 
-    saveLayout() {
-      // Call api to save the new layout
-      /* Send data:
-      - 2d array with numbers representing the type of seat (open-access, ...)
-      */
+    layoutSelectedEvent() {
+      this.stopPaintSelect()
+      if (this.isCurrentLayoutNew) {
+        this.newLayoutName = this.currentLayout.name
+      }
     },
+
+    updateLayoutName(event) {
+      this.currentLayout.name = event.srcElement.value
+    },
+
+    // Call api to save the currently selected new layout
+    saveLayout() {
+      var vue = this
+
+      // Start the loading spinner
+      this.$wait.start('saveLayout')
+
+      // Calculate fields
+      const dimensions = [this.rows, this.columns]
+      const capacity = this.rows * this.columns
+      const userId = this.getUser.id
+      const layoutName = this.currentLayout.name
+      const layout = this.currentLayout.layout
+
+      this.$store.dispatch('createSeatingLayout', {
+        name: layoutName,
+        capacity: capacity,
+        createdBy: userId,
+        dimensions: dimensions,
+        layout: layout,
+        default: false
+      })
+      .then(res => {
+        // Overwrite the current layout with what we just saved
+        vue.layouts[vue.layoutSelected] = res.layout
+        // Force some computed value(s) to update
+        this.updated++
+
+        // show success message
+        vue.$notify({ 
+          title: "Seating layout saved successfully", 
+          type: "success"
+        })
+
+        // Stop the loading spinner
+        this.$wait.end('saveLayout')
+      })
+      .catch(err => {
+        console.log(err)
+        // Show a notification with the error message
+        if (err.message) {
+          vue.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          })
+        }
+        // Stop the loading spinner
+        this.$wait.end('saveLayout')
+      })
+    },
+
+    // General submit function which redirects
+    // to the proper function depending on the mode
+    submit() {
+      if (this.mode=="add") this.createSection()
+      else if (this.mode=="edit") this.saveSection()
+      else {
+        this.$notify({ 
+          title: "Invalid mode. Please try again", 
+          type: "error"
+        })
+      }
+    },
+
+    isSeatingLayoutSaved() {
+      if (this.isCurrentLayoutNew) {
+        this.$notify({ 
+          title: "Current seating layout is not saved", 
+          type: "error"
+        })
+        return false
+      }
+      return true
+    },
+
+    // Call api to create a new section
+    createSection() {
+      // Stop if selected layout is not saved
+      if (!this.isSeatingLayoutSaved()) return
+
+      var vue = this
+
+      // Start the loading spinner
+      this.$wait.start('createSection')
+
+      // Calculate fields
+      const capacity = this.rows * this.columns
+      const userId = this.getUser.id
+      const layoutId = this.currentLayout._id
+
+      this.$store.dispatch('createSection', {
+        courseName: this.sectionName,
+        professor: userId,
+        maxCapacity: capacity,
+        attendanceThreshold: this.attendanceThreshold,
+        seatingLayout: layoutId,
+        attMandatory: this.isMandatory,
+        // TODO: Currently we don't save the classlist 
+        // since the db requires actual user Ids reather than name+email
+        // students: this.classList
+      })
+      .then(() => {
+        // show success message
+        vue.$notify({ 
+          title: "Section saved successfully", 
+          type: "success"
+        })
+        // Redirect to their home page
+        vue.$router.push('/home');
+
+        // Stop the loading spinner
+        this.$wait.end('createSection')
+      })
+      .catch(err => {
+        console.log(err)
+        // Show a notification with the error message
+        if (err.message) {
+          vue.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          })
+        }
+        // Stop the loading spinner
+        this.$wait.end('createSection')
+      })
+    },
+
+    // [WIP] Call api to save the section
+    // TODO: this is missing the courseId of the section we want to update
+    saveSection() {
+      // Return immediately and do nothing since this function is not complete
+      var myTruth = true
+      if (myTruth) return
+
+      // Stop if selected layout is not saved
+      if (!this.isSeatingLayoutSaved()) return
+
+      var vue = this
+
+      // Start the loading spinner
+      this.$wait.start('saveSection')
+
+      // Calculate fields
+      const capacity = this.rows * this.columns
+      const userId = this.getUser.id
+      const layoutId = this.currentLayout._id
+
+      this.$store.dispatch('updateSection', {
+        // TODO: Need the courseId
+        // courseId: 
+        courseName: this.sectionName,
+        professor: userId,
+        maxCapacity: capacity,
+        attendanceThreshold: this.attendanceThreshold,
+        seatingLayout: layoutId,
+        attMandatory: this.isMandatory,
+        // TODO: Currently we don't save the classlist 
+        // since the db requires actual user Ids reather than name+email
+        // students: this.classList
+      })
+      .then(() => {
+        // show success message
+        vue.$notify({ 
+          title: "Section saved successfully", 
+          type: "success"
+        })
+
+        // Stop the loading spinner
+        this.$wait.end('saveSection')
+      })
+      .catch(err => {
+        console.log(err)
+        // Show a notification with the error message
+        if (err.message) {
+          vue.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          })
+        }
+        // Stop the loading spinner
+        this.$wait.end('saveSection')
+      })
+    },
+
+
 
     addRow() {
-      this.stopSelect()
-
-      // Get current layout
-      var currentLayout = this.layouts[this.layoutSelected].layout
-      // Get number of columns
-      const numColumns = currentLayout[0].length
+      this.stopPaintSelect()
       // Add a new row with the correct number of columns
       // (Use the paintSelectIndex as the default type)
-      const newRow = Array(numColumns).fill(this.paintSelectIndex)
-      currentLayout.push(newRow)
+      const newRow = Array(this.columns).fill(this.paintSelectIndex)
+      this.currentLayout.layout.push(newRow)
     },
     addColumn() {
-      this.stopSelect()
-
-      // Get current layout
-      var currentLayout = this.layouts[this.layoutSelected].layout
-      // Add a new column to ever row
+      this.stopPaintSelect()
+      // Add a new column to every row
       // (Use the paintSelectIndex as the default type)
-      currentLayout.forEach(row => {
+      this.currentLayout.layout.forEach(row => {
         row.push(this.paintSelectIndex)
       })
     },
     removeRow() {
-      this.stopSelect()
-
-      // Get current layout
-      var currentLayout = this.layouts[this.layoutSelected].layout
+      this.stopPaintSelect()
       // Remove last row
-      currentLayout.pop()
+      this.currentLayout.layout.pop()
     },
     removeColumn() {
-      this.stopSelect()
-
-      // Get current layout
-      var currentLayout = this.layouts[this.layoutSelected].layout
+      this.stopPaintSelect()
       // Remove last column of every row
-      currentLayout.forEach(row => {
+      this.currentLayout.layout.forEach(row => {
         row.pop()
       })
     },
 
-    
-
-    fromSelect(row, column) {
+    fromPaintSelect(row, column) {
       // Only allow modifying new layouts
       if (!this.isCurrentLayoutNew) return
 
@@ -447,11 +659,11 @@ export default {
       }
       // End the selection if already active
       else {
-        this.paintSelectIndexed()
-        this.stopSelect()
+        this.paintSelectedSeats()
+        this.stopPaintSelect()
       }
     },
-    toSelect(row, column) {
+    toPaintSelect(row, column) {
       // Update the second position as you hover over seats,
       // but only if select is active
       if (!this.seatSelect.active) return
@@ -459,46 +671,24 @@ export default {
       this.seatSelect.second.column = column
       this.$forceUpdate();
     },
-    stopSelect() {
+    stopPaintSelect() {
       this.seatSelect.active = false
       this.seatSelect.first.row = -1
       this.seatSelect.first.column = -1
       this.seatSelect.second.row = -1
       this.seatSelect.second.column = -1
     },
-    paintSelectIndexed() {
+    paintSelectedSeats() {
       // Update all seats inside the selection
       // with the selected color
       for (var i=0; i<this.rows; i++) {
         for (var j=0; j<this.columns; j++) {
           if (this.isSeatSelected(i,j)) {
-            this.currentLayout[i][j] = this.paintSelectIndex
+            this.currentLayout.layout[i][j] = this.paintSelectIndex
           }
         }
       }
       this.$forceUpdate();
-    },
-
-    createSection() {
-      // Call api to create a new section
-      /* Send data:
-      - name
-      - is_mandatory
-      - attendanceThreshold
-      - layout_id
-      - class_list
-      */
-    },
-
-    saveSection() {
-      // Call api to save the section
-      /* Send data:
-      - name
-      - is_mandatory
-      - attendanceThreshold
-      - layout_id
-      - class_list (?)
-      */
     },
   },
 };

@@ -4,6 +4,7 @@
     :type="type"
     :style="buttonStyle"
     :disabled="disabled"
+    v-on:click="onClick"
   >
     {{ label }}
     <HalfCircleSpinner 
@@ -26,7 +27,11 @@ export default {
     height: String,
     type: String,
     disabled: Boolean,
-    loading: Boolean
+    loading: Boolean,
+    onClick: {
+      type: Function,
+      default: () => {}
+    }
   },
   computed: {
     heightNum() {
@@ -36,10 +41,10 @@ export default {
       return 'width:'+this.width+'; height:'+this.height
     },
     spinnerSize() {
-      return Math.min(this.heightNum-(0.15)*this.heightNum, 30)
+      return Math.min(this.heightNum-12, 30)
     },
     spinnerMargin() {
-      return ((this.heightNum- this.spinnerSize)/2) + 'px'
+      return ((this.heightNum- this.spinnerSize)/4) + 'px'
     },
     spinnerStyle() {
       return 'right:'+this.spinnerMargin+'; top:'+this.spinnerMargin

@@ -22,6 +22,7 @@
         <br>
         <div>
           <SpinnerButton 
+            class="green"
             label="Login"
             width="100%"
             height="30px"
@@ -30,12 +31,12 @@
             :loading="$wait.waiting('login')"
           />
           <br><br>
-          <button @click="$router.push('create-account')">Create Account</button>
+          <button type="button" @click="$router.push('create-account')">Create Account</button>
 
           <!-- Don't show Forgot Password button until it is functional -->
           <div style="display:none">
             <br><br>
-            <button @click="forgotPassword">Forgot Password</button>
+            <button type="button" @click="forgotPassword">Forgot Password</button>
           </div>
         </div>
       </form>
@@ -92,10 +93,10 @@ export default {
         password: this.password
       })
       .then(() => {
-        // Stop the loading spinner
-        vue.$wait.end('login')
         // Redirect to their home page
         vue.$router.push('/home');
+        // Stop the loading spinner
+        vue.$wait.end('login')
       })
       .catch(err => {
         console.log(err);

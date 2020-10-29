@@ -1,12 +1,16 @@
 <template>
   <div>
-    <!-- Once the component(s) for this page are created we can use them here -->
-    <h1>Create Section</h1>
+    <CreateSectionForm />
   </div>
 </template>
 
 <script>
+import CreateSectionForm from '@/components/CreateSectionForm.vue'
+
 export default {
-  name: 'CreateSection'
+  name: 'CreateSection',
+  components: {
+    CreateSectionForm
+  },
 }
 </script>

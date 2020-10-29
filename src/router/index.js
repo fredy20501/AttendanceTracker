@@ -68,7 +68,6 @@ const router = new VueRouter({
 
 // This beforeEach method is called whenever the router is being switched to a different page
 router.beforeEach((to, from, next) => {
-  console.log("Authenticated:", store.getters.isAuthenticated); // for debugging
 
   // Prevent users from accessing pages if they are not logged in
   if (to.matched.some(record => record.meta.requiresAuth) && !store.getters.isAuthenticated) {

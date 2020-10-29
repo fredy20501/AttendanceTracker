@@ -53,7 +53,7 @@ describe('Database Functionality', () => {
         done ()
     });
 
-    xit('Should store course to database', async done => {
+    it('Should store course to database', async done => {
 
         //Create 2 students, an admin, and a professor
         const student1 = await request.post('/api/register').send({
@@ -84,7 +84,7 @@ describe('Database Functionality', () => {
         // Create a sample seating layout for this test
         const seatingLayout = await request.post('/api/createSeatingLayout').send({
             name: 'Sample layout',
-            created_by: prof1,
+            createdBy: prof1,
             capacity: 25,
             dimensions: [ 5 , 5],
             layout: [
@@ -100,16 +100,17 @@ describe('Database Functionality', () => {
 
         //Create test course
         var course = await request.post('/api/createSection').send({
-            name: 'SWE4103',
+            courseName: 'SWE4103',
             admin: admin1,
             professor: prof1,
             maxCapacity: 30,
             attendance: [Date, [student2], true],
-            seating_layout: seatingLayout,
-            seating_arrangement: [
+            seatingLayout: seatingLayout,
+            attendanceThreshold: 0,
+            seatingArrangement: [
                 [2, student1, 1, 1, 0],
             ],
-            always_mandatory: true,
+            attMandatory: true,
         });
         
         //Search course in database by name
@@ -165,7 +166,7 @@ describe('Database Functionality', () => {
         done()
     });
 
-    xit('Should store seating layout to database', async done => {
+    it('Should store seating layout to database', async done => {
 
         // Create a test seating layout
         var seatingLayout = await request.post('/api/createSeatingLayout').send({

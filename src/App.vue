@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Header />
-    <router-view />
+    <router-view style="position:relative;"/>
     <Footer />
     <notifications style="margin-top:5px" position="top center"/>
   </div>
@@ -27,9 +27,9 @@ The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/docu
 <style lang="scss">
 
 * {
-  box-sizing: content-box;
-  -moz-box-sizing: content-box;
-  -webkit-box-sizing: content-box;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
 }
 
 #app {
@@ -44,7 +44,7 @@ The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/docu
 }
 
 .column {
-  max-width: 300px;
+  width: 300px;
   margin: auto;
   text-align: left;
 }
@@ -55,7 +55,7 @@ The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/docu
   padding: 2px;
 }
 
-input:not([type=radio]), button {
+input:not([type=radio]), button, select {
   width: 100%;
   height: 30px;
   padding: 1px 2px;
@@ -67,6 +67,26 @@ label, button {
 
 button {
   font-size: 16px;
+}
+
+div.vue-notification {
+  font-size: 16px
+}
+
+/* Custom red/green buttons */
+button.red {
+  background-color: #cc0000;
+  color: white;
+}
+button.green {
+  background-color: #22a222;
+  color: white;
+}
+
+/* Make buttons transparent rather 
+than greyed-out when disabled */
+button:disabled {
+  opacity: 0.4
 }
 
 </style>

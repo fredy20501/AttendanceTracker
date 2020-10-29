@@ -41,7 +41,9 @@ const store = new Vuex.Store({
   strict: useStrict,
 
   plugins: [
+    // Make the state persist between browser sessions
     createPersistedState(),
+    // Make the state shared accross tabs
     createMutationsSharer({
       predicate: ["setUser"]
     })
@@ -54,7 +56,8 @@ const store = new Vuex.Store({
 
   getters: {
     getUser: state => state.user,
-    isAuthenticated: state => state.authenticated
+    isAuthenticated: state => state.authenticated,
+    isProfessor: state => state.user.is_professor
   },
 
   mutations: {
@@ -115,9 +118,57 @@ const store = new Vuex.Store({
       })
     },
 
+    logout(context) {
+      return $http.get('logout')
+      .then(() => {
+        context.commit('logout')
+      })
+    },
+
     testAPI() {
       return $http.get()
-    }
+    },
+
+    getSeatingLayouts() {
+      return $http.get('section/previousSeatingPlans')
+      .then(res => {
+        // Format the response to match what frontend is expecting
+        return { layouts: res.data.seatingLayout }
+      })
+      .catch(err => {
+        err.message = "Could not get seating layouts. Please try again later"
+        throw err
+      })
+    },
+
+    createSeatingLayout(context, payload) {
+      return $http.post('section/createSeatingLayout', payload)
+      .then(res => {
+        // Format the response to match what frontend is expecting
+        res.data.seatingLayout.type = "saved"
+        return { layout: res.data.seatingLayout }
+      })
+      .catch(err => {
+        err.message = "Could not save seating layout. Please try again later"
+        throw err
+      })
+    },
+
+    createSection(context, payload) {
+      return $http.post('section/createSection', payload)
+      .catch(err => {
+        err.message = "Could not create section. Please try again later"
+        throw err
+      })
+    },
+
+    updateSection(context, payload) {
+      return $http.post('section/updateSection', payload)
+      .catch(err => {
+        err.message = "Could not save section. Please try again later"
+        throw err
+      })
+    },
   }
 })
 

@@ -76,37 +76,37 @@ describe('Backend server fuctionality', () => {
     });
 
     xit("Should reach create-section endpoint", async done => {
-        response = await request.get("/api/createSection");
+        const response = await request.get("/api/createSection");
         expect(response.status).toBe(200);
         done()
     });
 
     xit("Should reach update-section endpoint", async done => {
-        response = await request.get("/api/updateSection");
+        const response = await request.get("/api/updateSection");
         expect(response.status).toBe(200);
         done();
     });
 
     xit("Should reach delete-section endpoint", async done => {
-        response = await request.get("/api/deleteSection");
+        const response = await request.get("/api/deleteSection");
         expect(response.status).toBe(200);
         done();
     });
 
     xit("Should reach create-seating-plan endpoint", async done => {
-        response = await request.get("/api/createSeatingLayout");
+        const response = await request.get("/api/createSeatingLayout");
         expect(response.status).toBe(200);
         done()
     });
 
     xit("Should reach update-seating-plan endpoint", async done => {
-        response = await request.get("/api/updateSeatingLayout");
+        const response = await request.get("/api/updateSeatingLayout");
         expect(response.status).toBe(200);
         done();
     });
 
     xit("Should reach delete-seating-plan endpoint", async done => {
-        response = await request.get("/api/deleteSeatingLayout");
+        const response = await request.get("/api/deleteSeatingLayout");
         expect(response.status).toBe(200);
         done();
     });

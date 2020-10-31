@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <Header />
-    <router-view style="position:relative;"/>
+    <router-view style="position:relative; margin:10px;"/>
+    <br>
+    <br>
     <Footer />
     <notifications style="margin-top:5px" position="top center"/>
   </div>
@@ -43,6 +45,19 @@ The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/docu
   margin: auto;
 }
 
+.banner {
+  background: #333;
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  border-left: solid 20px #cc0000;
+}
+
+// Make banners flush with the screen on small screens
+@media only screen and (max-width: 900px) {
+  body { margin: 0; }
+}
+
 .column {
   width: 300px;
   margin: auto;
@@ -80,6 +95,10 @@ button.red {
 }
 button.green {
   background-color: #22a222;
+  color: white;
+}
+button.blue {
+  background-color: #24a0ee;
   color: white;
 }
 

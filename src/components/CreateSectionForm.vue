@@ -40,36 +40,14 @@
       </div>
       <div class="column">
         <br>
-        <!-- Add/Save button: Only one is shown depending if the mode is "add" or "update" -->
-        <SpinnerButton 
-          v-if="mode=='add'"
-          class="green"
-          label="Create Section"
-          width="100%"
-          height="30px"
-          type="submit"
-          :disabled="$wait.waiting('createSection') || invalid"
-          :loading="$wait.waiting('createSection')"
-        />
-        <SpinnerButton 
-          v-if="mode=='edit'"
-          class="green"
-          label="Save Section"
-          width="100%"
-          height="30px"
-          type="submit"
-          :disabled="$wait.waiting('saveSection') || invalid"
-          :loading="$wait.waiting('saveSection')"
-        />
-        
-        <br>
-        <br>
 
         <!-- This is the basics for the excel file upload -->
         <button type="button" style="width:300px;" v-on:click="$refs.excelInputField.click()">
           Upload Class List
         </button>
         <br>
+        <label>Column Format</label>
+        <div>First Name, Last Name, Email</div>
         <br>
         <div v-if="classList.length>0">
           Class List:
@@ -87,162 +65,189 @@
           </button>
         </div>
       </div>
-    </form>
-    </ValidationObserver>
 
-    <!-- Hidden file upload field (only allows .xlsx files) -->
-    <input
-      style="display:none"
-      type="file"
-      ref="excelInputField"
-      @change="loadClassList"
-      accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    />
-
-    <br>
-    <hr>
-    <br>
-
-    <div class="column">
-      <!-- Basic dropdown for selecting layout -->
-      <label>Select Layout</label><br>
-      <select @change="layoutSelectedEvent" style="height: 30px; width:300px;" v-model="layoutSelected">
-        <option v-for="(layout, i) in layouts" v-bind:key="i" :value="i"
-          v-bind:class="{bold: layout.type=='new'}"
-        >
-          {{ layout.name }}
-          <!-- Add small tooltip to specify unsaved layouts -->
-          <span v-if="layout.type=='new'">*(not saved)</span>
-        </option>
-      </select><br>
-      <br>
-      <div v-if="isCurrentLayoutNew">
-        <label>Layout Name</label>
-        <input @change="updateLayoutName($event)" 
-          type="text" placeholder="Layout Name" v-model="newLayoutName">
-      </div>
-      <br>
-      <div v-if="isCurrentLayoutNew">
-        <label>How to modify seats</label>
-        <div>
-          Select desired seat type from the legend, then click two seats to "paint" between them.
-        </div>
-      </div>
-      
-    </div>
-    <div class="column">
-      <br>
-      <!-- Basic button for adding new layout -->
-      <button v-on:click="createLayout">New layout</button><br>
-      <br>
-      <SpinnerButton 
-        class="green"
-        label="Save Layout"
-        width="100%"
-        height="30px"
-        type="button"
-        :disabled="$wait.waiting('saveLayout') || !isCurrentLayoutNew"
-        :loading="$wait.waiting('saveLayout')"
-        :onClick="saveLayout" 
+      <!-- Hidden file upload field (only allows .xlsx files) -->
+      <input
+        style="display:none"
+        type="file"
+        ref="excelInputField"
+        @change="loadClassList"
+        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       />
 
       <br>
       <br>
+      <hr style="margin: 20px 0; border-top: 10px solid #333;">
+      <br>
 
-      <!-- Basic column/rows buttons -->
-      <div>
-        <div style="float:left;">
-          <button class="small-button" :disabled="!isCurrentLayoutNew || columns>=50" v-on:click="addColumn">+</button>
-          Columns: <span v-if="layouts.length>0">{{columns}} </span>
-          <button class="small-button" :disabled="!isCurrentLayoutNew || columns<=1" v-on:click="removeColumn">-</button>
+      <div class="column">
+        <!-- Basic dropdown for selecting layout -->
+        <label>Select Layout</label><br>
+        <select @change="layoutSelectedEvent" style="height: 30px; width:300px;" v-model="layoutSelected">
+          <option v-for="(layout, i) in layouts" v-bind:key="i" :value="i"
+            v-bind:class="{bold: layout.type=='new'}"
+          >
+            {{ layout.name }}
+            <!-- Add small tooltip to specify unsaved layouts -->
+            <span v-if="layout.type=='new'">*(not saved)</span>
+          </option>
+        </select><br>
+        <br>
+        <div v-if="isCurrentLayoutNew">
+          <label>Layout Name</label>
+          <input @change="updateLayoutName($event)" 
+            type="text" placeholder="Layout Name" v-model="newLayoutName">
+        </div>
+        <br>
+        <div v-if="isCurrentLayoutNew">
+          <label>How to modify seats</label>
+          <div>Select desired seat type from the legend, then click two seats to "paint" between them.</div>
         </div>
         
-        <div style="float:right;">
-          <button class="small-button" :disabled="!isCurrentLayoutNew || rows>=99" v-on:click="addRow">+</button>
-          Rows: <span v-if="layouts.length>0">{{rows}} </span>
-          <button class="small-button" :disabled="!isCurrentLayoutNew || rows<=1" v-on:click="removeRow">-</button>
+      </div>
+      <div class="column">
+        <br>
+        <!-- Basic button for adding new layout -->
+        <button v-on:click="createLayout">New layout</button><br>
+        <br>
+        <SpinnerButton 
+          class="blue"
+          label="Save Layout"
+          width="100%"
+          height="30px"
+          type="button"
+          :disabled="$wait.waiting('saveLayout') || !isCurrentLayoutNew"
+          :loading="$wait.waiting('saveLayout')"
+          :onClick="saveLayout" 
+        />
+
+        <br>
+        <br>
+
+        <!-- Basic column/rows buttons -->
+        <div>
+          <div style="float:left;">
+            <button class="small-button" :disabled="!isCurrentLayoutNew || columns>=50" v-on:click="addColumn">+</button>
+            Columns: <span v-if="layouts.length>0">{{columns}} </span>
+            <button class="small-button" :disabled="!isCurrentLayoutNew || columns<=1" v-on:click="removeColumn">-</button>
+          </div>
+          
+          <div style="float:right;">
+            <button class="small-button" :disabled="!isCurrentLayoutNew || rows>=99" v-on:click="addRow">+</button>
+            Rows: <span v-if="layouts.length>0">{{rows}} </span>
+            <button class="small-button" :disabled="!isCurrentLayoutNew || rows<=1" v-on:click="removeRow">-</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <br>
-    <br>
+      <br>
+      <br>
 
-    <div id="Grid" class="border">
-      <table v-if="layouts.length>0">
-        <tbody v-bind:class="{isNew: isCurrentLayoutNew}">
-          <tr v-for="(row, i) in currentLayout.layout" v-bind:key="i">
-            <td v-for="(seat, j) in row" v-bind:key="j">
-              <div
-                @click="fromPaintSelect(i,j)" 
-                @mouseover="toPaintSelect(i,j)"
-                v-bind:class="{
-                  'seat': true,
-                  'type-0': seat==0,
-                  'type-1': seat==1,
-                  'type-2': seat==2,
-                  'type-3': seat==3,
-                  'selected': isSeatSelected(i,j)
-                }"
-              ></div>
-            </td>
-          </tr>
-          <tr>
-            <td :colspan="currentLayout.layout[0].length">
-              <div style="margin: 10px auto 0 auto; padding: 0 10px; max-width: 200px" class="border">
-                Whiteboard
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <div class="double-column">
+        <div id="Grid" class="border">
+          <table v-if="layouts.length>0">
+            <tbody v-bind:class="{isNew: isCurrentLayoutNew}">
+              <!-- First row shows the column number -->
+              <tr>
+                <td></td>
+                <td v-for="(column, j) in currentLayout.layout[0]" v-bind:key="j">
+                  {{j+1}}
+                </td>
+              </tr>
+              <!-- Loop through all rows of the layout -->
+              <tr v-for="(row, i) in currentLayout.layout" v-bind:key="i">
+                <!-- First column shows the row number -->
+                <td>{{i+1}}</td>
+                <!-- Loop through each seat in the row -->
+                <td v-for="(seat, j) in row" v-bind:key="j">
+                  <div
+                    @click="fromPaintSelect(i,j)" 
+                    @mouseover="toPaintSelect(i,j)"
+                    v-bind:class="{
+                      'seat': true,
+                      'type-0': seat==0,
+                      'type-1': seat==1,
+                      'type-2': seat==2,
+                      'type-3': seat==3,
+                      'selected': isSeatSelected(i,j)
+                    }"
+                  ></div>
+                </td>
+              </tr>
+              <!-- Put a label as final row to represent the front of the class -->
+              <tr>
+                <td></td>
+                <td :colspan="currentLayout.layout[0].length">
+                  <div style="margin: 10px auto 0 auto; padding: 0 10px; max-width: 200px;" class="border">
+                    Whiteboard
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-    <div class="legend">
-      <h3>Seat Legend</h3>
-      
-      <div>
-        <label>Selected Access</label>
-        <div  
-          v-bind:class="{
-            'seat': true, 
-            'type-2': true, 
-            'selected': currentPaintSelected==2
-          }"
-          v-on:click="paintSelectIndex=2"></div>
+        <div class="legend">
+          <h3>Seat Legend</h3>
+          <div>
+            <label>Selected<br>Access</label>
+            <div v-bind:class="{'seat': true, 'type-2': true, 
+                'selected': currentPaintSelected==2
+              }"
+              v-on:click="paintSelectIndex=2"></div>
+          </div>
+          <div>
+            <label>Extended<br>Access</label>
+            <div v-bind:class="{'seat': true, 'type-3': true, 
+                'selected': currentPaintSelected==3
+              }"
+              v-on:click="paintSelectIndex=3"></div>
+          </div>
+          <div>
+            <label>Open<br>Access</label>
+            <div v-bind:class="{'seat': true, 'type-1': true, 
+                'selected': currentPaintSelected==1
+              }"
+              v-on:click="paintSelectIndex=1"></div>
+          </div>
+          <div>
+            <label>Locked</label>
+            <div v-bind:class="{'seat': true, 'type-0': true, 
+                'selected': currentPaintSelected==0
+              }"
+              v-on:click="paintSelectIndex=0"></div>
+          </div>
+        </div>
       </div>
-      <div>
-        <label>Extended Access</label>
-        <div  
-          v-bind:class="{
-            'seat': true, 
-            'type-3': true, 
-            'selected': currentPaintSelected==3
-          }"
-          v-on:click="paintSelectIndex=3"></div>
-      </div>
-      <div>
-        <label>Open Access</label>
-        <div 
-          v-bind:class="{
-            'seat': true, 
-            'type-1': true, 
-            'selected': currentPaintSelected==1
-          }"
-          v-on:click="paintSelectIndex=1"></div>
-      </div>
-      <div>
-        <label>Locked</label>
-        <div  v-bind:class="{
-            'seat': true, 
-            'type-0': true, 
-            'selected': currentPaintSelected==0
-          }"
-          v-on:click="paintSelectIndex=0"></div>
-      </div>
-    </div>
 
-    <br>
+      <br>
+      <br>
+
+      <!-- Add/Save button: Only one is shown depending if the mode is "add" or "update" -->
+      <SpinnerButton 
+        v-if="mode=='add'"
+        class="blue"
+        label="Create Section"
+        width="300px"
+        height="30px"
+        type="submit"
+        :disabled="$wait.waiting('createSection') || invalid"
+        :loading="$wait.waiting('createSection')"
+      />
+      <SpinnerButton 
+        v-if="mode=='edit'"
+        class="blue"
+        label="Save Section"
+        width="300px"
+        height="30px"
+        type="submit"
+        :disabled="$wait.waiting('saveSection') || invalid"
+        :loading="$wait.waiting('saveSection')"
+      />
+
+    </form>
+    </ValidationObserver>
+    
   </div>
 </template>
 
@@ -695,21 +700,25 @@ export default {
 </script>
 
 <style lang="scss" scoped >
-
 .legend {
   > div {
     display: inline-block;
-    margin-right: 30px;
+      width: 80px;
     .seat {
       margin: auto;
     }
+    
+  }
+  > div:not(:last-child) {
+    margin-right: 10px;
   }
 }
 
 #Grid {
-  overflow-x: auto;
+  overflow: auto;
   box-sizing: border-box;
   width: 100%;
+  height: 350px;
   padding: 10px;
   border: 3px solid black;
 
@@ -773,5 +782,9 @@ label.radio {
   display: inline-block;
   vertical-align: top;
   margin: 0 20px;
+}
+.double-column {
+  max-width: 640px;
+  margin: auto;
 }
 </style>

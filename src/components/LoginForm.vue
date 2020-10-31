@@ -22,7 +22,7 @@
         <br>
         <div>
           <SpinnerButton 
-            class="green"
+            class="blue"
             label="Login"
             width="100%"
             height="30px"

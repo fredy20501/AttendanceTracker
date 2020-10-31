@@ -49,7 +49,7 @@
         <br>
         <div>
           <SpinnerButton 
-            class="green"
+            class="blue"
             label="Create Account"
             width="100%"
             height="30px"

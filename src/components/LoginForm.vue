@@ -24,8 +24,6 @@
           <SpinnerButton 
             class="blue"
             label="Login"
-            width="100%"
-            height="30px"
             type="submit"
             :disabled="$wait.waiting('login') || invalid"
             :loading="$wait.waiting('login')"

@@ -51,8 +51,6 @@
           <SpinnerButton 
             class="blue"
             label="Create Account"
-            width="100%"
-            height="30px"
             type="submit"
             :disabled="$wait.waiting('register') || invalid"
             :loading="$wait.waiting('register')"

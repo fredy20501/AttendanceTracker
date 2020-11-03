@@ -101,6 +101,9 @@ button.blue {
   background-color: #24a0ee;
   color: white;
 }
+button.red:hover:enabled { background-color: #ba0000; }
+button.green:hover:enabled { background-color: #1e901e; }
+button.blue:hover:enabled { background-color: #1e87c9; }
 
 /* Make buttons transparent rather 
 than greyed-out when disabled */

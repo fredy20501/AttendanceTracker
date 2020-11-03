@@ -25,6 +25,8 @@
             class="blue"
             label="Login"
             type="submit"
+            width="100%"
+            height="30px"
             :disabled="$wait.waiting('login') || invalid"
             :loading="$wait.waiting('login')"
           />

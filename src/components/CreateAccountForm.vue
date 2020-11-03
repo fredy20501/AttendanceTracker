@@ -52,6 +52,8 @@
             class="blue"
             label="Create Account"
             type="submit"
+            width="100%"
+            height="30px"
             :disabled="$wait.waiting('register') || invalid"
             :loading="$wait.waiting('register')"
           />

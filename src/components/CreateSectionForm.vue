@@ -14,7 +14,7 @@
         <div>
           <ValidationProvider name="Section Name" rules="required|alpha_dash" v-slot="{ errors }">
             <label for="sectionName">Section Name</label>
-            <input placeholder="SWE4104-FR01A-LEC" type="text" v-model="sectionName">
+            <input id="sectionName" placeholder="SWE4104-FR01A-LEC" type="text" v-model="sectionName">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>
@@ -33,7 +33,7 @@
         <div >
           <ValidationProvider name="Attendance Threshold" rules="required|integer|min_value:0" v-slot="{ errors }">
             <label for="attendanceThreshold">Attendance Threshold</label><br>
-            <input name="attendanceThreshold" type="number" placeholder="Attendance Threshold" v-model="attendanceThreshold">
+            <input id="attendanceThreshold" type="number" placeholder="Attendance Threshold" v-model="attendanceThreshold">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>

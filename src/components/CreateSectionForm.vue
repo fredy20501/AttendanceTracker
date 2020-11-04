@@ -144,9 +144,9 @@
       <br>
 
       <div class="double-column">
-        <div id="Grid" class="border">
+        <div id="Grid">
           <table v-if="layouts.length>0">
-            <tbody v-bind:class="{isNew: isCurrentLayoutNew}">
+            <tbody>
               <!-- First row shows the column number -->
               <tr>
                 <td></td>
@@ -228,7 +228,7 @@
         v-if="mode=='add'"
         class="blue"
         label="Create Section"
-        width="100%"
+        width="300px"
         height="30px"
         type="submit"
         :disabled="$wait.waiting('createSection') || invalid"
@@ -238,7 +238,7 @@
         v-if="mode=='edit'"
         class="blue"
         label="Save Section"
-        width="100%"
+        width="300px"
         height="30px"
         type="submit"
         :disabled="$wait.waiting('saveSection') || invalid"
@@ -462,7 +462,7 @@ export default {
         // Overwrite the current layout with what we just saved
         vue.layouts[vue.layoutSelected] = res.layout
         // Force some computed value(s) to update
-        this.updated++
+        vue.updated++
 
         // show success message
         vue.$notify({ 
@@ -471,7 +471,7 @@ export default {
         })
 
         // Stop the loading spinner
-        this.$wait.end('saveLayout')
+        vue.$wait.end('saveLayout')
       })
       .catch(err => {
         console.log(err)
@@ -483,7 +483,7 @@ export default {
           })
         }
         // Stop the loading spinner
-        this.$wait.end('saveLayout')
+        vue.$wait.end('saveLayout')
       })
     },
 
@@ -500,6 +500,9 @@ export default {
       }
     },
 
+    // Check if the currently selected seating layout is saved
+    // If not, show an error notification and return false
+    // If it is saved, return true
     isSeatingLayoutSaved() {
       if (this.isCurrentLayoutNew) {
         this.$notify({ 
@@ -547,7 +550,7 @@ export default {
         vue.$router.push('/home');
 
         // Stop the loading spinner
-        this.$wait.end('createSection')
+        vue.$wait.end('createSection')
       })
       .catch(err => {
         console.log(err)
@@ -559,7 +562,7 @@ export default {
           })
         }
         // Stop the loading spinner
-        this.$wait.end('createSection')
+        vue.$wait.end('createSection')
       })
     },
 
@@ -604,7 +607,7 @@ export default {
         })
 
         // Stop the loading spinner
-        this.$wait.end('saveSection')
+        vue.$wait.end('saveSection')
       })
       .catch(err => {
         console.log(err)
@@ -616,7 +619,7 @@ export default {
           })
         }
         // Stop the loading spinner
-        this.$wait.end('saveSection')
+        vue.$wait.end('saveSection')
       })
     },
 
@@ -674,7 +677,7 @@ export default {
       if (!this.seatSelect.active) return
       this.seatSelect.second.row = row
       this.seatSelect.second.column = column
-      this.$forceUpdate();
+      this.updated++;
     },
     stopPaintSelect() {
       this.seatSelect.active = false
@@ -693,7 +696,6 @@ export default {
           }
         }
       }
-      this.$forceUpdate();
     },
   },
 };

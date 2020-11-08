@@ -15,6 +15,8 @@ const routes = [
   {
     path: '/create-account',
     name: 'createAccount',
+    // The meta tag "back" determines if the back button is shown in the footer for this page
+    meta: { back: true },
     component: () => import(/* webpackChunkName: "[request]" */ '../views/CreateAccount.vue')
   },
   {
@@ -48,7 +50,7 @@ const routes = [
   {
     path: '/create-section',
     name: 'createSection',
-    meta: { requiresAuth: true, accountType: 'professor' },
+    meta: { back: true, requiresAuth: true, accountType: 'professor' },
     component: () => import(/* webpackChunkName: "[request]" */ '../views/CreateSection.vue')
   },
 

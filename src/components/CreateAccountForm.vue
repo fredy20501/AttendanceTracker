@@ -19,7 +19,7 @@
         <div>
           <ValidationProvider name="Name" rules="required" v-slot="{ errors }">
             <label for="name">Name</label><br>
-            <input name="name" type="text" placeholder="Name" v-model="name">
+            <input id="name" type="text" placeholder="Name" v-model="name">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>
@@ -27,7 +27,7 @@
         <div>
           <ValidationProvider name="Email Address" rules="required|email|unbEmail" v-slot="{ errors }">
             <label for="email">Email Address</label><br>
-            <input name="email" type="email" autocomplete="username" placeholder="Email Address" v-model="email">
+            <input id="email" type="email" autocomplete="username" placeholder="Email Address" v-model="email">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>
@@ -35,7 +35,7 @@
         <div>
           <ValidationProvider name="Password" rules="required|min:6|confirmed:confirmation" v-slot="{ errors }">
             <label for="password">Password</label><br>
-            <input name="password" type="password"  placeholder="Password" v-model="password">
+            <input id="password" type="password"  placeholder="Password" v-model="password">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>
@@ -43,17 +43,17 @@
         <div>
           <ValidationProvider name="Confirmation" vid="confirmation">
             <label for="password-conf">Password Confirmation</label><br>
-            <input name="password-conf" type="password" placeholder="Password" v-model="passwordConfirmation">
+            <input id="password-conf" type="password" placeholder="Password" v-model="passwordConfirmation">
           </ValidationProvider>
         </div>
         <br>
         <div>
           <SpinnerButton 
-            class="green"
+            class="blue"
             label="Create Account"
+            type="submit"
             width="100%"
             height="30px"
-            type="submit"
             :disabled="$wait.waiting('register') || invalid"
             :loading="$wait.waiting('register')"
           />

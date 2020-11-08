@@ -7,7 +7,7 @@
         <div>
           <ValidationProvider name="Email" rules="required|email" v-slot="{ errors }">
             <label for="email">Email Address</label><br>
-            <input name="email" type="email" autocomplete="username" placeholder="Email Address" v-model="email">
+            <input id="email" type="email" autocomplete="username" placeholder="Email Address" v-model="email">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>
@@ -15,18 +15,18 @@
         <div>
           <ValidationProvider name="Password" rules="required|min:6" v-slot="{ errors }">
             <label for="password">Password</label><br>
-            <input name="password" type="password" autocomplete="current-password" placeholder="Password" v-model="password">
+            <input id="password" type="password" autocomplete="current-password" placeholder="Password" v-model="password">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>
         <br>
         <div>
           <SpinnerButton 
-            class="green"
+            class="blue"
             label="Login"
+            type="submit"
             width="100%"
             height="30px"
-            type="submit"
             :disabled="$wait.waiting('login') || invalid"
             :loading="$wait.waiting('login')"
           />

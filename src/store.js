@@ -17,7 +17,6 @@ if (!process.env.TRAVIS) {
 
 // Set API url for all requests
 import Axios from 'axios'
-
 const $http = Axios.create({
   baseURL: "https://dev1.athena.xn--9xa.network/api/"
 })

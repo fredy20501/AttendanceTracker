@@ -6,20 +6,24 @@ Vue.use(Vuex)
 
 
 // Get port from server config
-var config;
+/*var config;
 if (!process.env.TRAVIS) {
   config = require('@/../server/config/config.js')
-}
+}*/
 // Don't change the default port (5000) since both frontend 
 // and backend assume 5000 if config is missing.
 // Change the value in the config file to specify the port you want.
-const PORT = config?.app.port || 5000;
+//const PORT = config?.app.port || 443;
 
 // Set API url for all requests
 import Axios from 'axios'
 const $http = Axios.create({
-  baseURL: "http://localhost:"+PORT+"/api/"
+  baseURL: "https://dev1.athena.xn--9xa.network/api/"
 })
+
+/*const $http = Axios.create({
+  baseURL: "http://localhost:"+PORT+"/api/"
+})*/
 
 // Only use strict mode during development
 // More info: https://vuex.vuejs.org/guide/strict.html#development-vs-production

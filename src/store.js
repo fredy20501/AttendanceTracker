@@ -6,24 +6,26 @@ Vue.use(Vuex)
 
 
 // Get port from server config
-/*var config;
+var config;
 if (!process.env.TRAVIS) {
   config = require('@/../server/config/config.js')
-}*/
+}
 // Don't change the default port (5000) since both frontend 
 // and backend assume 5000 if config is missing.
 // Change the value in the config file to specify the port you want.
-//const PORT = config?.app.port || 443;
+const PORT = config?.app.port || 443;
 
 // Set API url for all requests
 import Axios from 'axios'
 const $http = Axios.create({
-  baseURL: "https://dev1.athena.xn--9xa.network/api/"
+  baseURL: "http://localhost:"+PORT+"/api/"
 })
 
-/*const $http = Axios.create({
-  baseURL: "http://localhost:"+PORT+"/api/"
-})*/
+// This is what we need to have for it to work on the server
+// It is commented out since it doesn't work locally (hopefully this will get fixed by another pr)
+// const $http = Axios.create({
+//   baseURL: "https://dev1.athena.xn--9xa.network/api/"
+// })
 
 // Only use strict mode during development
 // More info: https://vuex.vuejs.org/guide/strict.html#development-vs-production
@@ -55,13 +57,15 @@ const store = new Vuex.Store({
 
   state: {
     authenticated: false,
-    user: { ...emptyUser }
+    user: { ...emptyUser },
+    courseId: null
   },
 
   getters: {
     getUser: state => state.user,
     isAuthenticated: state => state.authenticated,
-    isProfessor: state => state.user.is_professor
+    isProfessor: state => state.user.is_professor,
+    getCourse: state => state.courseId
   },
 
   mutations: {
@@ -72,6 +76,9 @@ const store = new Vuex.Store({
     logout(state) {
       state.user = { ...emptyUser }
       state.authenticated = false
+    },
+    setCourse(state, courseId) {
+      state.courseId = courseId
     }
   },
 
@@ -173,6 +180,38 @@ const store = new Vuex.Store({
         throw err
       })
     },
+
+    // ==== FUNCTIONS TODO =====
+    // (you might want more functions, these are just the ones I was able to think of)
+
+    // This function will call the proper api to get the courses for a specific user.
+    // Depending on the api you might need to do a different api call depending if the user is a student or a professor.
+    getCourse(context, payload) {
+      // The data you send from the frontend is in the "payload" object
+
+      // This is the most basic api call where you directly pass in the payload to the api and return a simple message on error.
+      // You might need to modify the data you send to the api or the format you return to the frontend depending on what the api and frontend are each expecting.
+      // (you can look at the other functions above for examples)
+      return $http.get('api/path/to/endpoint', payload)
+      .catch(err => {
+        err.message = "Could not get course data. Please try again later"
+        throw err
+      })
+    },
+
+    // This function will call the proper api to try reserving a seat for a student in a course
+    reserveSeat(context, payload) {
+      // The data you send from the frontend is in the "payload" object
+
+      // This is the most basic api call where you directly pass in the payload to the api and return a simple message on error.
+      // You might need to modify the data you send to the api or the format you return to the frontend depending on what the api and frontend are each expecting.
+      // (you can look at the other functions above for examples)
+      return $http.post('api/path/to/endpoint', payload)
+      .catch(err => {
+        err.message = "Could not reserve the seat. Please try again later"
+        throw err
+      })
+    }
   }
 })
 

@@ -53,6 +53,12 @@ const routes = [
     meta: { back: true, requiresAuth: true, accountType: 'professor' },
     component: () => import(/* webpackChunkName: "[request]" */ '../views/CreateSection.vue')
   },
+  {
+    path: '/course',
+    name: 'course',
+    meta: { requiresAuth: true },
+    component: () => import(/* webpackChunkName: "[course]" */ '../views/CourseView.vue')
+  },
 
   // Default to page not found if url doesn't match any routes
   {

@@ -58,6 +58,63 @@ The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/docu
   body { margin: 0; }
 }
 
+.legend {
+  > div {
+    display: inline-block;
+      width: 80px;
+    .seat {
+      margin: auto;
+    }
+    
+  }
+  > div:not(:last-child) {
+    margin-right: 10px;
+  }
+}
+
+.grid-layout {
+  overflow: auto;
+  box-sizing: border-box;
+  width: 100%;
+  height: 350px;
+  padding: 10px;
+  border: 3px solid black;
+
+  table {
+    margin: auto;
+  }
+}
+
+.seat {
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid black;
+  width: 40px;
+  height: 33px;
+}
+.seat.selected {
+  border: 3px solid #cc0000;
+}
+.seat.type-0 {
+  background-color: darkgray;
+}
+.seat.type-1 {
+  background-color: lightgray;
+}
+.seat.type-2 {
+  background-color: white;
+}
+.seat.type-3 {
+  background-color: lightblue;
+}
+
+.border {
+  border: 1px solid black;
+}
+.bold {
+  font-weight: bold;
+}
+
 .column {
   width: 300px;
   margin: auto;

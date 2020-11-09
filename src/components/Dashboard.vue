@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>My Courses</h2>
+    <h2>My Sections</h2>
     <br>
     
     <div>

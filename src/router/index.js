@@ -17,20 +17,20 @@ const routes = [
     name: 'createAccount',
     // The meta tag "back" determines if the back button is shown in the footer for this page
     meta: { back: true },
-    component: () => import(/* webpackChunkName: "[request]" */ '../views/CreateAccount.vue')
+    component: () => import(/* webpackChunkName: "createAccount" */ '../views/CreateAccount.vue')
   },
   {
     // Genral "home" page which displays the dashboard for both student and professor
     path: '/home',
     name: 'home',
     meta: { requiresAuth: true },
-    component: () => import(/* webpackChunkName: "[request]" */ '../views/Home.vue')
+    component: () => import(/* webpackChunkName: "home" */ '../views/Home.vue')
   },
   {
     path: '/create-section',
     name: 'createSection',
     meta: { back: true, requiresAuth: true, accountType: 'professor' },
-    component: () => import(/* webpackChunkName: "[request]" */ '../views/CreateSection.vue')
+    component: () => import(/* webpackChunkName: "createSection" */ '../views/CreateSection.vue')
   },
 
   // Default to page not found if url doesn't match any routes

@@ -1,6 +1,6 @@
 
 <template>
-  <header class="header">
+  <header class="banner">
     <h1>Attendance Tracker</h1>
   </header>
 </template>
@@ -10,13 +10,3 @@ export default {
   name: "Header"
 }
 </script>
-
-<style scoped>
-.header {
-  background: #333;
-  color: #fff;
-  text-align: center;
-  padding: 10px;
-  border-left: solid 20px #cc0000;
-}
-</style>

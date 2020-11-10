@@ -102,8 +102,9 @@ npm run serve
 - Run `npm run build` to build the frontend into a set of static files (the result is in the `dist` folder)
 - Start the server:
 ```
-npm run production
+nohup npm run production
 ```
+- `nohup` tells ubuntu not to kill the process when we log out
 - Then to kill the process run `ps ux`
 - Look for the 2 processes labelled `node home/.../vue-cli-...` and `node home/.../nodemon server/index.js`, get their IDs
 - Run `$Kill -9 ID` for both of them

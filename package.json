@@ -4,7 +4,7 @@
   "description": "A web application for teachers used to track student attendance in classrooms.",
   "private": true,
   "scripts": {
-    "production": "cross-env NODE_ENV=production concurrently \"nohup node src/production.js\" \"nohup node server/index.js\"",
+    "production": "cross-env NODE_ENV=production concurrently \"node src/production.js\" \"node server/index.js\"",
     "serve": "concurrently \"npm run frontend\" \"npm run backend\"",
     "frontend": "vue-cli-service serve",
     "backend": "nodemon server/index.js",

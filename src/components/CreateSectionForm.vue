@@ -390,17 +390,15 @@ export default {
     
     // Call api to get the list of layouts for the dropdown
     getLayouts() {
-      var vue = this;
-
       this.$store.dispatch('getSeatingLayouts')
       .then(res => {
-        vue.layouts = res.layouts
+        this.layouts = res.layouts
       })
       .catch(err => {
         console.log(err)
         // Show a notification with the error message
         if (err.message) {
-          vue.$notify({ 
+          this.$notify({ 
             title: err.message, 
             type: err.type ?? 'error'
           });
@@ -438,8 +436,6 @@ export default {
 
     // Call api to save the currently selected new layout
     saveLayout() {
-      var vue = this
-
       // Start the loading spinner
       this.$wait.start('saveLayout')
 
@@ -460,30 +456,30 @@ export default {
       })
       .then(res => {
         // Overwrite the current layout with what we just saved
-        vue.layouts[vue.layoutSelected] = res.layout
+        this.layouts[this.layoutSelected] = res.layout
         // Force some computed value(s) to update
-        vue.updated++
+        this.updated++
 
         // show success message
-        vue.$notify({ 
+        this.$notify({ 
           title: "Seating layout saved successfully", 
           type: "success"
         })
 
         // Stop the loading spinner
-        vue.$wait.end('saveLayout')
+        this.$wait.end('saveLayout')
       })
       .catch(err => {
         console.log(err)
         // Show a notification with the error message
         if (err.message) {
-          vue.$notify({ 
+          this.$notify({ 
             title: err.message, 
             type: err.type ?? 'error'
           })
         }
         // Stop the loading spinner
-        vue.$wait.end('saveLayout')
+        this.$wait.end('saveLayout')
       })
     },
 
@@ -519,8 +515,6 @@ export default {
       // Stop if selected layout is not saved
       if (!this.isSeatingLayoutSaved()) return
 
-      var vue = this
-
       // Start the loading spinner
       this.$wait.start('createSection')
 
@@ -542,27 +536,27 @@ export default {
       })
       .then(() => {
         // show success message
-        vue.$notify({ 
+        this.$notify({ 
           title: "Section saved successfully", 
           type: "success"
         })
         // Redirect to their home page
-        vue.$router.push('/home');
+        this.$router.push('/home');
 
         // Stop the loading spinner
-        vue.$wait.end('createSection')
+        this.$wait.end('createSection')
       })
       .catch(err => {
         console.log(err)
         // Show a notification with the error message
         if (err.message) {
-          vue.$notify({ 
+          this.$notify({ 
             title: err.message, 
             type: err.type ?? 'error'
           })
         }
         // Stop the loading spinner
-        vue.$wait.end('createSection')
+        this.$wait.end('createSection')
       })
     },
 
@@ -575,8 +569,6 @@ export default {
 
       // Stop if selected layout is not saved
       if (!this.isSeatingLayoutSaved()) return
-
-      var vue = this
 
       // Start the loading spinner
       this.$wait.start('saveSection')
@@ -601,25 +593,25 @@ export default {
       })
       .then(() => {
         // show success message
-        vue.$notify({ 
+        this.$notify({ 
           title: "Section saved successfully", 
           type: "success"
         })
 
         // Stop the loading spinner
-        vue.$wait.end('saveSection')
+        this.$wait.end('saveSection')
       })
       .catch(err => {
         console.log(err)
         // Show a notification with the error message
         if (err.message) {
-          vue.$notify({ 
+          this.$notify({ 
             title: err.message, 
             type: err.type ?? 'error'
           })
         }
         // Stop the loading spinner
-        vue.$wait.end('saveSection')
+        this.$wait.end('saveSection')
       })
     },
 

@@ -4,6 +4,7 @@
   "description": "A web application for teachers used to track student attendance in classrooms.",
   "private": true,
   "scripts": {
+    "production": "cross-env NODE_ENV=production concurrently \"nohup node src/production.js\" \"nohup node server/index.js\"",
     "serve": "concurrently \"npm run frontend\" \"npm run backend\"",
     "frontend": "vue-cli-service serve",
     "backend": "nodemon server/index.js",
@@ -43,6 +44,7 @@
     "@vue/cli-plugin-router": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
     "babel-eslint": "^10.1.0",
+    "cross-env": "^7.0.2",
     "eslint": "^6.7.2",
     "eslint-plugin-jest": "^24.1.0",
     "eslint-plugin-vue": "^6.2.2",

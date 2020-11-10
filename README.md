@@ -89,24 +89,24 @@ npx npm-merge-driver install --global
 ----
 
 # To start the server:
-- ssh onto google cloud 
-- go to the folder containing the repository
-- run
-export PORT=3000
+- ssh onto the google cloud server
+- Go to the folder containing the repository
+- Run `export PORT=3000`. In your linux terminal, this sets up the port for the project to use (as an environment variable).
+
+## Temporaty hosting
 ```
-In your linux terminal, this sets up the port for the project to use.
-- for a temporary hosting use 
 npm run serve
 ```
-- for a persistent hosting use
-nohup npm run serve
+
+## Persistent hosting
+- Run `npm run build` to build the frontend into a set of static files (the result is in the `dist` folder)
+- Start the server:
 ```
-This tells ubuntu not to kill the process when we log out.
-- Then to kill the process: run 
-ps ux
+npm run production
 ```
-Look for the 2 processes labelled 'node home/.../vue-cli-...' and 'node home/.../nodemon server/index.js', get their IDs.
-- Run '$Kill -9 ID' for both of them
+- Then to kill the process run `ps ux`
+- Look for the 2 processes labelled `node home/.../vue-cli-...` and `node home/.../nodemon server/index.js`, get their IDs
+- Run `$Kill -9 ID` for both of them
 
 # NPM Commands
 
@@ -132,16 +132,3 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
-
-
-# Notes on modifications made to allow deployment
-
-- in .eslintrc.js, I removed the following:
-```
-    "jest/globals": true
-```
-from just after ```env{ root:true```
-
-- Added vue.config.js
-
-- modified default port on index.js (though this is an env variable anyways, so it shouldnt matter too much.

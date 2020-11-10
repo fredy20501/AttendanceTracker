@@ -31,8 +31,14 @@ const courseSchema = new Schema({
     name: { type: String, required: true, unique: true, trim: true },
     admin: { type: ObjectId, ref: 'user' },
     professor: { type: ObjectId, ref: 'user' },
-    students: [ { type: ObjectId, ref: 'user' } ],
     max_capacity: { type: Number, required: true },
+    registered_students: [ { type: ObjectId, ref: 'user' } ],
+    class_list: [
+        {
+            name: String ,
+            email: String
+        } 
+    ],
     attendance_threshold: { type: Number, required: true},
     attendance: [
         {
@@ -75,6 +81,11 @@ module.exports = {User, Course, SeatingLayout};
  * -------------
  * courseSchema|
  * -------------
+ *      class_list: An array of object which represent the name and email of some students. 
+ *                  These students come from an excel file which a professor can upload while creating a course.
+ *                  The students in the class list will have their attendance tracked even if they are not registered for the course in the application.
+ *                  (This means if students aren't registered they will be added in the reports marked as absent).
+ * 
  *      attendence: An array of objects which contain the required elements for recordording a single day of attendence.
  *          -   seating_layout: The ObjectId of the chosen seating layout from the seating layout schema.
  *          -   seating_arrangement: A 2D array of identical coordinates as the seating_layout array. Each element represents a seat in the class

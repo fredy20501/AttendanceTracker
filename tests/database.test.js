@@ -53,7 +53,7 @@ describe('Database Functionality', () => {
         done ()
     });
 
-    it('Should store course to database', async done => {
+    xit('Should store course to database', async done => {
 
         //Create 2 students, an admin, and a professor
         const student1 = await request.post('/api/register').send({
@@ -166,7 +166,7 @@ describe('Database Functionality', () => {
         done()
     });
 
-    it('Should store seating layout to database', async done => {
+   xit('Should store seating layout to database', async done => {
 
         // Create a test seating layout
         var seatingLayout = await request.post('/api/createSeatingLayout').send({

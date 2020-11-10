@@ -85,6 +85,7 @@ module.exports = {User, Course, SeatingLayout};
  *                  These students come from an excel file which a professor can upload while creating a course.
  *                  The students in the class list will have their attendance tracked even if they are not registered for the course in the application.
  *                  (This means if students aren't registered they will be added in the reports marked as absent).
+ *                  *Note that this is only used if the course is set to be mandatory.
  * 
  *      attendence: An array of objects which contain the required elements for recordording a single day of attendence.
  *          -   seating_layout: The ObjectId of the chosen seating layout from the seating layout schema.

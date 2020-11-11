@@ -46,6 +46,11 @@ describe('Backend server fuctionality', () => {
     });
 
     it('Should successfully create, login, logout, and delete test account', async done =>{
+        // Delete test account (if it exists)
+        response = await request.delete("/api/delete-user").send({
+            email: '123test@test456.com'
+        });
+        
         // Create test account
         var response = await request.post("/api/register").send({
             name:'test_user', 
@@ -84,12 +89,14 @@ describe('Backend server fuctionality', () => {
         response = await request.delete("/api/delete-user").send({
             email: 'prof1@test.com'
         });
-        const prof1 = await request.post('/api/register').send({
+        response = await request.post('/api/register').send({
             email: 'prof1@test.com',
             name: 'A Professor',
             password:'pr1234of',
             is_professor: true
         });
+        const prof1 = response.body.user
+
         response = await request.delete("/api/section/deleteSeatingLayout").send({
             name: 'testLayout' 
         });
@@ -101,7 +108,7 @@ describe('Backend server fuctionality', () => {
             layout:[[0]],
             default: false,
             description: 'test',
-            createdBy: prof1.id
+            createdBy: prof1._id
         });
         expect(response.status).toBe(200);
         await request.get("/api/logout");
@@ -151,36 +158,40 @@ describe('Backend server fuctionality', () => {
             name: 'testLayout' 
         });
 
-        const admin1 = await request.post('/api/register').send({
+        response = await request.post('/api/register').send({
             email: 'admin@test.com',
             name: 'An Admin',
             password:'ad1234min',
             is_professor: true
         });
-        const prof1 = await request.post('/api/register').send({
+        const admin1 = response.body.user
+
+        response = await request.post('/api/register').send({
             email: 'prof1@test.com',
             name: 'A Professor',
             password:'pr1234of',
             is_professor: true
         });
+        const prof1 = response.body.user
 
-        const layout1 = await request.post("/api/section/createSeatingLayout").send({
+        response = await request.post("/api/section/createSeatingLayout").send({
             name: 'testLayout',
             capacity : 1,
             dimension: [1,1],
             layout:[[0]],
             default: false,
             description: 'test',
-            createdBy: prof1.id
+            createdBy: prof1._id
         });
+        const layout1 = response.body.seatingLayout
 
         response = await request.post("/api/section/createSection").send({
             courseName: 'testSection',
             attendanceThreshold: '0',
-            seatingLayout: layout1.id, //does not like this. no clue why.
+            seatingLayout: layout1._id,
             attMandatory: false,
-            professor: prof1.id,
-            admin: admin1.id,
+            professor: prof1._id,
+            admin: admin1._id,
             students: [],
             maxCapacity: 30,
             seatingArrangement: [] 
@@ -221,49 +232,54 @@ describe('Backend server fuctionality', () => {
             name: 'testLayout' 
         });
 
-        const admin1 = await request.post('/api/register').send({
+        response = await request.post('/api/register').send({
             email: 'admin@test.com',
             name: 'An Admin',
             password:'ad1234min',
             is_professor: true
         });
-        const prof1 = await request.post('/api/register').send({
+        const admin1 = response.body.user
+
+        response = await request.post('/api/register').send({
             email: 'prof1@test.com',
             name: 'A Professor',
             password:'pr1234of',
             is_professor: true
         });
+        const prof1 = response.body.user
 
-        const layout1 = await request.post("/api/section/createSeatingLayout").send({
+        response = await request.post("/api/section/createSeatingLayout").send({
             name: 'testLayout',
             capacity : 1,
             dimension: [1,1],
             layout:[[0]],
             default: false,
             description: 'test',
-            createdBy: prof1.id
+            createdBy: prof1._id
         });
+        const layout1 = response.body.seatingLayout
 
-        const course1 = await request.get("/api/section/createSection").send({
+        response = await request.get("/api/section/createSection").send({
             courseName: 'testSection',
             attendanceThreshold: '0',
-            seatingLayout: layout1.id,
+            seatingLayout: layout1._id,
             attMandatory: false,
-            professor: prof1.id,
-            admin: admin1.id,
+            professor: prof1._id,
+            admin: admin1._id,
             students: [],
             maxCapacity: 30,
             seatingArrangement: [] 
         });
+        const course1 = response.body.newSection
 
         response = await request.get("/api/section/updateSection").send({
-            courseId: course1.id,
+            courseId: course1._id,
             courseName: 'testSection',
             attendanceThreshold: '0',
-            seatingLayout: layout1.id,
+            seatingLayout: layout1._id,
             attMandatory: false,
-            professor: prof1.id,
-            admin: admin1.id,
+            professor: prof1._id,
+            admin: admin1._id,
             students: [],
             maxCapacity: 30,
             seatingArrangement: [] 

@@ -77,7 +77,14 @@ router.post('/register', (req, res) => {
             return res.status(500).send(err);
         }
 
-        return res.status(200).send(); 
+        return res.status(200).json({
+            user: {
+                _id: newUser._id, 
+                name: newUser.name,
+                email: newUser.email,
+                is_professor: newUser.is_professor 
+            }
+        });
     })
 });
 

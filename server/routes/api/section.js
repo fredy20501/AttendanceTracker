@@ -82,12 +82,14 @@ router.post('/createSection', (req, res) => {
     newSection.seating_arrangement = seatingArrangement;
 
     newSection.save(err => {
-    if(err){
-        console.log(err);
-        return res.status(500).send(err);
-    }
+        if(err){
+            console.log(err);
+            return res.status(500).send(err);
+        }
 
-    return res.status(200).send(); 
+        return res.status(200).json({
+            newSection
+        }); 
     })
 
 });

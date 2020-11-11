@@ -48,16 +48,19 @@ const routes = [
     component: () => import(/* webpackChunkName: "[request]" */ '../views/ProfessorHome.vue')
   },
   {
-    path: '/create-section',
+    // This page requires the course id to be given as a parameter called id, as shown in the path.
+    // The parameter is optional because of the question mark '?'.
+    // This is because no course id means you want to create a section.
+    path: '/create-section/:id?',
     name: 'createSection',
     meta: { back: true, requiresAuth: true, accountType: 'professor' },
     component: () => import(/* webpackChunkName: "[request]" */ '../views/CreateSection.vue')
   },
   {
-    path: '/course',
-    name: 'course',
-    meta: { requiresAuth: true },
-    component: () => import(/* webpackChunkName: "[course]" */ '../views/CourseView.vue')
+    path: '/section/:id',
+    name: 'section',
+    meta: { back: true, requiresAuth: true },
+    component: () => import(/* webpackChunkName: "[course]" */ '../views/SectionView.vue')
   },
 
   // Default to page not found if url doesn't match any routes

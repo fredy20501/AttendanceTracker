@@ -91,6 +91,7 @@ The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/docu
   border: 1px solid black;
   width: 40px;
   height: 33px;
+  cursor: default;
 }
 .seat.selected {
   border: 3px solid #cc0000;

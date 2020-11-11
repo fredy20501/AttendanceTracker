@@ -1,8 +1,8 @@
 <template>
   <div>
-    <!-- Replace the title with the name of the course 
+    <!-- Replace the title with the name of the section 
     (tip: you can use double brackets {{var}} to reference a data variable) -->
-    <h2>Name of the course</h2>
+    <h2>Name of the section</h2>
     <br>
     
     <div>
@@ -57,19 +57,19 @@
         <h3>Seat Legend</h3>
         <div>
           <label>Selected<br>Access</label>
-          <div v-bind:class="{'seat': true, 'type-2': true}"></div>
+          <div class="seat type-2"></div>
         </div>
         <div>
           <label>Extended<br>Access</label>
-          <div v-bind:class="{'seat': true, 'type-3': true}"></div>
+          <div class="seat type-3"></div>
         </div>
         <div>
           <label>Open<br>Access</label>
-          <div v-bind:class="{'seat': true, 'type-1': true}"></div>
+          <div class="seat type-1"></div>
         </div>
         <div>
           <label>Locked</label>
-          <div v-bind:class="{'seat': true, 'type-0': true}"></div>
+          <div class="seat type-0"></div>
         </div>
       </div>
     </div>
@@ -86,7 +86,7 @@
 import { mapGetters } from 'vuex'
 
 export default {
-  name: 'StudentCourseView',
+  name: 'StudentSectionView',
   data() {
     return {
 
@@ -99,66 +99,73 @@ export default {
       layout: [
         // First row
         [
-          {student: 'John A', type: 2},
-          {student: null,     type: 2},
-          {student: 'John C', type: 2},
-          {student: null,     type: 2},
+          {name: 'John A', type: 2},
+          {name: null,     type: 2},
+          {name: 'John C', type: 2},
+          {name: null,     type: 2},
         ],
         // Second row
         [
-          {student: null, type: 2},
-          {student: null, type: 2},
-          {student: null, type: 2},
-          {student: null, type: 2},
+          {name: null, type: 2},
+          {name: null, type: 2},
+          {name: null, type: 2},
+          {name: null, type: 2},
         ],
         // Third row
         [
-          {student: null,     type: 2},
-          {student: 'John F', type: 3},
-          {student: 'John G', type: 3},
-          {student: 'John H', type: 3},
+          {name: null,     type: 2},
+          {name: 'John F', type: 3},
+          {name: 'John G', type: 3},
+          {name: 'John H', type: 3},
         ],
       ]
       */
 
-      // You will probably want more variables to store things like the course name, the professor's name, etc. 
+      // You will probably want more variables to store things like the section name, the professor's name, etc. 
       // (depends on what you want to display in the UI)
     }
   },
 
   computed: {
     // Import the getters from the global store
-    ...mapGetters(['getUser'])
+    ...mapGetters(['getUser']),
+
+    // The section id for this page is given as a route parameter
+    // i.e. to get to this page from another page we need to also pass the section id like so:
+    //      this.$router.push({name: 'section', params: {id: '123EF41'}})
+    sectionId: function() {
+      return this.$route.params.id
+    }
   },
 
   methods: {
 
-    // This function will call the backend api to get the course information, given the course id
-    getCourse() {
-      // The course id is determined by which course you clicked on from the dashboard which got you to this page
-      // To make it easy, the dashboard will set the courseId in the global store so you can access it
-      // using `this.$store.getCourse` (for testing you can set it manually or hardcode it since the dashboard
-      // will be done in a different git branch)
-
+    // This function will call the backend api to get the section information, given the section id
+    getSection() {
+      // The section id is determined by which section you clicked on from the dashboard which got you to this page
+      // To make it easy, the dashboard will pass the coruseId as a parameter using the router.
+      // I have made a computed property (see above) called sectionId which gets the id from the parameters.
+      // So you can access the id from `this.sectionId`
+ 
       // Create a function in store.js which will make the proper api call 
-      // (I have copied a basic one called getCourse and added comments to guide you there)
+      // (I have copied a basic one called getSection and added comments to guide you there)
       // Call that function defined in store.js using the following format:
       /*
-      $store.dispatch('getCourse', {
+      this.$store.dispatch('getSection', {
         // put the data you are sending to the api here as key-value pairs. Ex:
-        courseId: '123456'
+        sectionId: '123456'
       })
       .then(res => {
         // Success!
         // The result is stored in res
-        // Update the variable(s) which contains the course information
+        // Update the variable(s) which contains the section information
       })
       .catch(err => {
         // Error! (this is the default code I use to log the error and show a message to the user)
         console.log(err);
         // Show a notification with the error message
         if (err.message) {
-          vue.$notify({ 
+          this.$notify({ 
             title: err.message, 
             type: err.type ?? 'error'
           });
@@ -196,24 +203,24 @@ export default {
 
       // Call that function defined in store.js using the following format:
       /*
-      $store.dispatch('reserveSeat', {
+      this.$store.dispatch('reserveSeat', {
         // put the data you are sending to the api here as key-value pairs. Ex:
         userId: '123456'
-        // I think the plan for the API is to give the student id, the course id, and the coordinate in the layout for the selected seat
+        // I think the plan for the API is that it will take the student id, the section id, and the coordinate in the layout for the selected seat
       })
       .then(res => {
         // Success!
-        // The result is stored in res
+        // The result (if any) is stored in res
         // We can clear the selection (i.e. the seat doesn't show as being selected anymore) and refresh the grid 
         // to see the new layout (the user's name should now be in the right position)
-        //  -> You can call the getCourse() function again
+        //  -> You can call the getSection() function again
       })
       .catch(err => {
         // Error! (this is the default code I use to log the error and show a message to the user)
         console.log(err);
         // Show a notification with the error message
         if (err.message) {
-          vue.$notify({ 
+          this.$notify({ 
             title: err.message, 
             type: err.type ?? 'error'
           });

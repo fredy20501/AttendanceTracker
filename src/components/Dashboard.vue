@@ -5,13 +5,13 @@
     
     <div>
       <!--
-      Here we want to display the "tiles" which show the courses for this user
-        => You can use the v-for attribute to loop through each course (stored in the variable courses). 
+      Here we want to display the "tiles" which show the sections for this user
+        => You can use the v-for attribute to loop through each section (stored in the variable sections). 
            You can check out the grid from the create section page for an example on how to use the v-for attribute.
         => You can use the css attribute 'display: inline-block' for each tile which will make them appear side-by-side until they run out of space in which case they will wrap to the next row.
            This will make them automatically display as rows which change depending on the width of the container they are in.
         => These tiles will redirect to a different page when we click on them, so you can use the v-on:click="" attribute to call the function which will do that.
-           You can pass in arguments to the function using v-on:click="goToCourse(courseId)" so the function knows which course you have clicked on.
+           You can pass in arguments to the function using v-on:click="goToSection(sectionId)" so the function knows which section you have clicked on.
       -->
     </div>
 
@@ -27,12 +27,12 @@
     <div v-if="isStudent">
       <!--
         Here you can put the buttons for students
-        I believe we need a field to enter a course name and a register button
-          => You can add basic validation for the course name field for consistency. I don't think we need any special validation other than making it required.
+        I believe we need a field to enter a section name and a register button
+          => You can add basic validation for the section name field for consistency. I don't think we need any special validation other than making it required.
           => The basic validation template is shown below. You can use the validation for the login page as an example.
       -->
       <ValidationObserver v-slot="{ handleSubmit, invalid }">
-        <form @submit.prevent="handleSubmit(registerForCourse)">
+        <form @submit.prevent="handleSubmit(registerForSection)">
           <button :disabled="invalid"></button>
         </form>
       </ValidationObserver>
@@ -50,17 +50,17 @@ export default {
   data() {
     return {
 
-      // This variable will hold the list of courses (each an object with specific information)
-      courses: [],
+      // This variable will hold the list of sections (each an object with specific information)
+      sections: [],
       // Here is an example of what it might look like when it has data (this actual data depend on what the api returns and what we need to show on the UI)
       /*
-      courses: [
+      sections: [
         {
           _id: "5fafahlkip2",
           name: "SWE4103_FR01A_LEC",
           professor: "Dawn MacIsaac",
           always_mandatory: true
-        }
+        },
         {
           _id: "5fafahlkip3",
           name: "CE8902_FR01B_LAB",
@@ -70,9 +70,9 @@ export default {
       ]
       */
 
-      // This variable can be bound to the input field for the course name.
+      // This variable can be bound to the input field for the section name.
       // You can bind variables to field values using the v-model attribute.
-      courseName: ""
+      sectionName: ""
 
     }
   },
@@ -82,40 +82,41 @@ export default {
     ...mapGetters(["isProfessor"]),
     
     // Use isProfessor/isStudent to display elements specific to student/professor
-    isStudent: () => !this.isProfessor
+    isStudent: () => !this.isProfessor,
   },
 
-  // mounted is called when the page loads
-  mounted() {
-    
+  // created is called when the page loads
+  created() {
+    // We want to fetch the sections as soon as the page loads
+    this.getSections()
   },
 
   methods: {
     
-    // This function will call the backend api to get the courses for the user
-    // For students it should return the courses they are registered for
-    // For professors it should return the courses they are teaching (i.e. the one they created)
-    getCourses() {
+    // This function will call the backend api to get the sections for the user
+    // For students it should return the sections they are registered for
+    // For professors it should return the sections they are teaching (i.e. the one they created)
+    getSections() {
       // Create a function in store.js which will make the proper api call 
-      // (I have copied a basic one called getCoursesForUser and added comments to guide you ther)
+      // (I have copied a basic one called getSectionsForUser and added comments to guide you ther)
 
       // Call that function defined in store.js using the following format:
       /*
-      $store.dispatch('getCoursesForUser', {
+      this.$store.dispatch('getSectionsForUser', {
         // put the data you are sending to the api here as key-value pairs. Ex:
         userId: '123456'
       })
       .then(res => {
         // Success!
         // The result is stored in res
-        // Update the variable which contains the list of courses
+        // Update the variable which contains the list of sections
       })
       .catch(err => {
         // Error! (this is the default code I use to log the error and show a message to the user)
         console.log(err);
         // Show a notification with the error message
         if (err.message) {
-          vue.$notify({ 
+          this.$notify({ 
             title: err.message, 
             type: err.type ?? 'error'
           });
@@ -124,48 +125,45 @@ export default {
       */
     },
 
-    // This function will redirect to the course view for the specified course
-    goToCourse(courseId) {
-      courseId
+    // This function will redirect to the section view for the specified section
+    goToSection(sectionId) {
+      sectionId
 
-      // Before redirecting to the course view page we need a way to tell the page what course we want to see.
-      // To make it easy, we will use a global variable defined in the vuex store.
-      // I have already defined the variable with a basic getter and setter function
-      // You can update the courseId by using the mutation function like so: 
-      //    this.$store.commit('mutationFunction', data)
+      // Note that we need to tell the page which section we want to see
+      // To do that we will give it the id as part of the url using the router's params option
 
-      // The course view page will then be able to get that data from the store
+      // You can redirect to the page and give the id as a parameter as follows:
+      // this.$router.push({name: 'nameOfThePage', params: {id: variableHoldingTheSectionId }})
 
-      // You can then redirect to the page using 
-      // this.$router.push('pathOfThePage') or this.$router.push({name: 'nameOfThePage'})
+      // Note: you won't actually be able to go to the page until it is all integrated together
     },
 
 
-    // This function will make the proper api call to register the student to the specified course
-    registerForCourse() {
-      // Get the name of the course from the Course Name field
+    // This function will make the proper api call to register the student to the specified section
+    registerForSection() {
+      // Get the name of the section from the section Name field
 
       // Create a function in store.js which will make the proper api call 
-      // (I have copied a basic one called getCoursesForUser and added comments to guide you ther)
+      // (I have copied a basic one called getSectionsForUser and added comments to guide you ther)
       
       // Call that function defined in store.js using the following format:
       /*
-      $store.dispatch('courseRegister', {
+      this.$store.dispatch('registerForSection', {
         // put the data you are sending to the api here as key-value pairs. Ex:
         userId: '123456'
       })
       .then(res => {
         // Success!
         // The result is stored in res
-        // Add the course you have just registered for to the list of courses so it shows up on the UI
-        // (hopefully the api should return the info of the course you have just registered for, so you can update the list of courses with that information)
+        // Add the section you have just registered for to the list of sections so it shows up on the UI
+        // (hopefully the api should return the info of the section you have just registered for, so you can update the list of sections with that information)
       })
       .catch(err => {
         // Error! (this is the default code I use to log the error and show a message to the user)
         console.log(err);
         // Show a notification with the error message
         if (err.message) {
-          vue.$notify({ 
+          this.$notify({ 
             title: err.message, 
             type: err.type ?? 'error'
           });

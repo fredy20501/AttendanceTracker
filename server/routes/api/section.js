@@ -8,10 +8,9 @@ router.get('/', (req, res) => {
 });
 
 router.get('/previousSeatingPlans', (req, res) => {
-    // this is the professor ID
-    let professor = req.body.professor;
-
-    SeatingLayout.find({$or : [{default: true} , {created_by : professor}]}, function(err, seatingLayout){
+    // Return all seating plans stored in the database
+    // (we do not filter by professor id)
+    SeatingLayout.find({}, function(err, seatingLayout){
         if(err){
             console.log(err);
             return res.status(500).send();
@@ -94,7 +93,7 @@ router.post('/createSection', (req, res) => {
 
 
 //currently unfinished
-router.get('/updateSection', (req, res) => {
+router.post('/updateSection', (req, res) => {
 
     let courseId = req.body.courseId;
     let courseName = req.body.courseName;

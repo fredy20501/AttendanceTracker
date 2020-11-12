@@ -108,6 +108,9 @@ The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/docu
 .seat.type-3 {
   background-color: lightblue;
 }
+.seat.type-2-3 {
+  background: linear-gradient(90deg, white 50%, lightblue 50%);
+}
 
 .border {
   border: 1px solid black;

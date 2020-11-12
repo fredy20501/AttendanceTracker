@@ -3,23 +3,30 @@
     <h2>{{courseName}}</h2>
     <br>
     
+    <div style="text-align:left">
+      <div>
+        <b>Date:</b> <span>{{currentDateAndTime}}</span>
+      </div>
+      <div>
+        <b>Professor:</b> <span>{{professor}}</span>
+      </div>
+      <div>
+        <b>Attendance Type:</b> <span>{{courseType}}</span>
+      </div>
+    </div>
+
     <table style="width:100%">
       <tbody>
         <tr class="align-bottom">
-          <td style="text-align:left">
-            <div>
-              <b>Date:</b> <span>{{currentDateAndTime}}</span>
-            </div>
-            <div>
-              <b>Professor:</b> <span>{{professor}}</span>
-            </div>
-            <div>
-              <b>Section Type:</b> <span>{{courseType}}</span>
-            </div>
-          </td>
           <td class="button-width">
-            <button type="button" @click="refreshPage" style="padding: 0 20px">
-              Refresh
+            <button type="button" @click="editSection">
+              Edit Section
+            </button>
+          </td>
+          <td></td>
+          <td class="button-width">
+            <button type="button" @click="refreshPage">
+              Refresh Grid
             </button>
           </td>
         </tr>
@@ -29,6 +36,14 @@
     <div class="grid-layout">
       <table v-if="classLayout.length>0">
         <tbody>
+          <tr>
+            <td :colspan="classLayout[0].length+1">
+              <div style="font-weight:bold">
+                Click to mark absent
+              </div>
+              <br>
+            </td>
+          </tr>
           <!-- First row shows the column number -->
           <tr>
             <td></td>
@@ -68,32 +83,6 @@
       </table>
     </div>
 
-    <table style="width:100%">
-      <tbody>
-        <tr class="align-top">
-          <td style="text-align:left;">
-            <div style="font-weight:bold">
-              Click to mark absent
-            </div>
-            <div>
-              There are {{numPresent}} students present 
-              <span v-if="mandatory">({{percentPresent}}%)</span>
-            </div>
-          </td>
-          <td class="button-width">
-            <button type="button" @click="editSection">
-              Edit Section
-            </button>
-            <button type="button" @click="exportData" style="margin-top:10px">
-              Export Data
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <br>
-
     <div class="legend">
       <h3>Seat Legend</h3>
       <div>
@@ -114,7 +103,28 @@
       </div>
       <div>
         <label>Absent</label>
-        <div class="seat type-2 selected"></div>
+        <div class="seat type-2-3 selected"></div>
+      </div>
+    </div>
+
+    <br>
+
+    <div>
+      <h3>Statistics</h3>
+      <div style="display: inline-block; vertical-align: top; width:250px; margin: 5px">
+        <PieChart :chartData="pieChartData" :options="pieChartOptions"/>
+      </div>
+      <div style="display: inline-block; text-align:left; padding-top: 8px; margin: 5px">
+        <div>
+          Students present: {{numPresent}} <span v-if="mandatory">({{percentPresent}}%)</span>
+        </div>
+        <div v-if="mandatory">
+          Students absent: {{numAbsent}} <span v-if="mandatory">({{percentAbsent}}%)</span>
+        </div>
+        <br>
+        <button class="button-width" type="button" @click="exportData">
+          Export Attendance Data
+        </button>
       </div>
     </div>
 
@@ -138,11 +148,13 @@
 <script>
 import { mapGetters } from 'vuex'
 import SpinnerButton from './SpinnerButton'
+import PieChart from './PieChart'
 
 export default {
   name: 'ProfessorCourseView',
   components: {
-    SpinnerButton
+    SpinnerButton,
+    PieChart
   },
 
   data() {
@@ -158,7 +170,17 @@ export default {
 
       // This variable will store the 2D array of the layout, where each item contains a number representing 
       // the type of seat (0=locked, 1=open access, etc) and the name of the student siting in it (if any).
-      classLayout: []
+      classLayout: [],
+
+      pieChartOptions: {
+        legend: {
+          labels: {
+            fontSize: 17.6,
+            fontColor: 'black',
+            fontFamily: "'Avenir', 'Helvetica', 'Arial', 'sans-serif'"
+          }
+        }
+      }
     }
   },
   
@@ -176,11 +198,17 @@ export default {
       })
       return numPresent
     },
+    numAbsent: function() {
+      return this.registeredStudents.length - this.numPresent
+    },
     percentPresent: function() {
       return Math.round(100*this.numPresent/this.registeredStudents.length)
     },
+    percentAbsent: function() {
+      return 100 - this.percentPresent
+    },
     courseType: function() {
-      return this.mandatory ? 'Opt In' : 'Mandatory'
+      return this.mandatory ? 'Mandatory' : 'Opt In'
     },
 
     // The course id for this page is given as a route parameter
@@ -188,6 +216,17 @@ export default {
     //      this.$router.push({name: 'section', params: {id: '123EF41'}})
     courseId: function() {
       return this.$route.params.id
+    },
+
+    pieChartData: function() {
+      return {
+        labels: ['Present', 'Absent'],
+        datasets: [{
+          backgroundColor: ['#22a222', '#cc0000'],
+          hoverBackgroundColor: ['#1e901e', '#ba0000'],
+          data: [this.numPresent, this.numAbsent]
+        }]
+      }
     }
   },
 
@@ -360,6 +399,7 @@ export default {
 <style lang="scss" scoped >
 .grid-layout {
   margin: 10px 0;
+  height: 450px;
 }
 .grid-layout .seat {
   font-size: 0.7em;
@@ -377,12 +417,6 @@ export default {
 }
 
 .button-width {
-  width: 200px;
-}
-// Make some buttons smaller on small screens (i.e. mobile)
-@media only screen and (max-width: 550px) {
-  .button-width {
-    width: 120px;
-  }
+  width: 300px;
 }
 </style>

@@ -436,6 +436,17 @@ export default {
       this.currentLayout.name = event.srcElement.value
     },
 
+    // Returns the number of non-locked seats in the current layout
+    getLayoutCapacity() {
+      var capacity = 0;
+      this.currentLayout.layout.forEach(row => {
+        row.forEach(seat => {
+          if (seat !== 0) capacity++
+        })
+      })
+      return capacity
+    },
+
     // Call api to save the currently selected new layout
     saveLayout() {
       var vue = this
@@ -445,7 +456,7 @@ export default {
 
       // Calculate fields
       const dimensions = [this.rows, this.columns]
-      const capacity = this.rows * this.columns
+      const capacity = this.getLayoutCapacity()
       const userId = this.getUser.id
       const layoutName = this.currentLayout.name
       const layout = this.currentLayout.layout
@@ -525,7 +536,7 @@ export default {
       this.$wait.start('createSection')
 
       // Calculate fields
-      const capacity = this.rows * this.columns
+      const capacity = this.getLayoutCapacity()
       const userId = this.getUser.id
       const layoutId = this.currentLayout._id
 
@@ -536,9 +547,7 @@ export default {
         attendanceThreshold: this.attendanceThreshold,
         seatingLayout: layoutId,
         attMandatory: this.isMandatory,
-        // TODO: Currently we don't save the classlist 
-        // since the db requires actual user Ids reather than name+email
-        // students: this.classList
+        classList: this.classList
       })
       .then(() => {
         // show success message
@@ -582,7 +591,7 @@ export default {
       this.$wait.start('saveSection')
 
       // Calculate fields
-      const capacity = this.rows * this.columns
+      const capacity = this.getLayoutCapacity()
       const userId = this.getUser.id
       const layoutId = this.currentLayout._id
 
@@ -595,9 +604,7 @@ export default {
         attendanceThreshold: this.attendanceThreshold,
         seatingLayout: layoutId,
         attMandatory: this.isMandatory,
-        // TODO: Currently we don't save the classlist 
-        // since the db requires actual user Ids reather than name+email
-        // students: this.classList
+        classList: this.classList
       })
       .then(() => {
         // show success message

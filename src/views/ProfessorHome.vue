@@ -3,7 +3,7 @@
     <h1>Professor Home</h1>
     <div>Welcome {{ getUser.name }}!</div>
     <br>
-    <button v-on:click="createSection">Create Section</button>
+    <button v-on:click="gotToCreateSection">Create Section</button>
   </div>
 </template>
 
@@ -19,7 +19,7 @@ export default {
   },
 
   methods: {
-    createSection() {
+    gotToCreateSection() {
       // Go to the create section page 
       // (note that we do not pass a course id as a parameter, which means the page will be in 'create section' mode)
       this.$router.push({ name:'createSection' })

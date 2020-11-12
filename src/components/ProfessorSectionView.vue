@@ -15,6 +15,8 @@
       </div>
     </div>
 
+    <br>
+
     <table style="width:100%">
       <tbody>
         <tr class="align-bottom">

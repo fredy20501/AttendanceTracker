@@ -224,8 +224,8 @@ export default {
       return {
         labels: ['Present', 'Absent'],
         datasets: [{
-          backgroundColor: ['#22a222', '#cc0000'],
-          hoverBackgroundColor: ['#1e901e', '#ba0000'],
+          backgroundColor: ['#24a0ee', '#cc0000'],
+          hoverBackgroundColor: ['#1e87c9', '#ba0000'],
           data: [this.numPresent, this.numAbsent]
         }]
       }

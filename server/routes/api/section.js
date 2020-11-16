@@ -1,3 +1,4 @@
+const e = require('express');
 const express = require('express');
 const router = express.Router();
 var { Course, SeatingLayout } = require('../../dbSchemas/attendanceSchema');
@@ -7,6 +8,9 @@ router.get('/', (req, res) => {
 
 });
 
+// --------------- Seating Layout Methods --------------------
+
+// gets information regarding a seating layout given a professor id
 router.get('/previousSeatingPlans', (req, res) => {
     // this is the professor ID
     let professor = req.body.professor;
@@ -25,6 +29,7 @@ router.get('/previousSeatingPlans', (req, res) => {
 
 });
 
+// creates a seating layout
 router.post('/createSeatingLayout', (req,res) => {
     let name  = req.body.name;
     let capacity  = req.body.capacity;
@@ -56,7 +61,9 @@ router.post('/createSeatingLayout', (req,res) => {
     })
 });
 
+// --------------- Section/Course Methods --------------------
 
+// creates a student section
 router.post('/createSection', (req, res) => {
     let courseName = req.body.courseName;
     let attendanceThreshold = req.body.attendanceThreshold;
@@ -92,9 +99,8 @@ router.post('/createSection', (req, res) => {
 
 });
 
-
-//currently unfinished
-router.get('/updateSection', (req, res) => {
+// updates a student section
+router.post('/updateSection', (req, res) => {
 
     let courseId = req.body.courseId;
     let courseName = req.body.courseName;

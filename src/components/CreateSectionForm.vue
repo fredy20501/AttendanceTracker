@@ -4,8 +4,8 @@
       The mode determines if we are currently adding 
       a new section or updating an existing one
      -->
-    <h2 v-if="mode=='add'">Create Section</h2>
-    <h2 v-if="mode=='edit'">Edit Section</h2>
+    <h2 v-if="pageMode=='add'">Create Section</h2>
+    <h2 v-if="pageMode=='edit'">Edit Section</h2>
     <br>
 
     <ValidationObserver v-slot="{ handleSubmit, invalid}">
@@ -108,7 +108,7 @@
       <div class="column">
         <br>
         <!-- Basic button for adding new layout -->
-        <button v-on:click="createLayout">New layout</button><br>
+        <button type="button" v-on:click="createLayout">New layout</button><br>
         <br>
         <SpinnerButton 
           class="blue"
@@ -127,15 +127,15 @@
         <!-- Basic column/rows buttons -->
         <div>
           <div style="float:left;">
-            <button class="small-button" :disabled="!isCurrentLayoutNew || columns>=50" v-on:click="addColumn">+</button>
+            <button type="button" class="small-button" :disabled="!isCurrentLayoutNew || columns<=1" v-on:click="removeColumn">-</button>
             Columns: <span v-if="layouts.length>0">{{columns}} </span>
-            <button class="small-button" :disabled="!isCurrentLayoutNew || columns<=1" v-on:click="removeColumn">-</button>
+            <button type="button" class="small-button" :disabled="!isCurrentLayoutNew || columns>=50" v-on:click="addColumn">+</button>
           </div>
           
           <div style="float:right;">
-            <button class="small-button" :disabled="!isCurrentLayoutNew || rows>=99" v-on:click="addRow">+</button>
+            <button type="button" class="small-button" :disabled="!isCurrentLayoutNew || rows<=1" v-on:click="removeRow">-</button>
             Rows: <span v-if="layouts.length>0">{{rows}} </span>
-            <button class="small-button" :disabled="!isCurrentLayoutNew || rows<=1" v-on:click="removeRow">-</button>
+            <button type="button" class="small-button" :disabled="!isCurrentLayoutNew || rows>=99" v-on:click="addRow">+</button>
           </div>
         </div>
       </div>
@@ -225,7 +225,7 @@
 
       <!-- Add/Save button: Only one is shown depending if the mode is "add" or "update" -->
       <SpinnerButton 
-        v-if="mode=='add'"
+        v-if="pageMode=='add'"
         class="blue"
         label="Create Section"
         width="300px"
@@ -235,7 +235,7 @@
         :loading="$wait.waiting('createSection')"
       />
       <SpinnerButton 
-        v-if="mode=='edit'"
+        v-if="pageMode=='edit'"
         class="blue"
         label="Save Section"
         width="300px"
@@ -264,10 +264,7 @@ export default {
 
   data() {
     return {
-      // The mode determines if we are currently adding 
-      // a new section or updating an existing one
-      mode: "add",
-
+      
       // Field values
       sectionName: "",
       attendanceType: 'optIn',
@@ -276,7 +273,6 @@ export default {
 
       // Layout stuff
       layouts: [],
-      layout_id: "",
       newLayoutName: "",
       layoutSelected: 0,
 
@@ -303,7 +299,12 @@ export default {
   computed: {
     // Import the getters from the global store
     ...mapGetters(["getUser"]),
-    
+
+    // The mode determines if we are currently adding a new section or updating an existing one
+    // (this is determined by whether the courseId is set as a url parameter)
+    pageMode: function() {
+      return this.courseId == null ? 'add' : 'edit'
+    },
     isMandatory: function() { 
       return this.attendanceType == 'mandatory'
     },
@@ -322,15 +323,63 @@ export default {
     },
     currentPaintSelected: function() {
       return this.isCurrentLayoutNew ? this.paintSelectIndex : -1
+    },
+
+    // The course id is given as a route parameter if we want to edit a course
+    // i.e. to get to this page from another page we need to also pass the course id like so:
+    //      this.$router.push({name: 'createEditSection', params: {id: '123EF41'}})
+    courseId: function() {
+      return this.$route.params.id
     }
   },
 
-  // mounted is called when the page loads
-  mounted() {
-    this.getLayouts()
+  // created is called when the page loads
+  created() {
+    this.getLayouts(() => {
+      // When getLayouts is done run this code
+
+      if (this.pageMode == 'edit') {
+        // Load the course information into the fields
+        this.getSectionData()
+      }
+    })
+    
   },
 
   methods: {
+
+    // Call the backend api to get the course information (given the course id)
+    getSectionData() {
+      this.$store.dispatch('getSectionData', {
+        courseId: this.courseId
+      })
+      .then(res => {
+        this.sectionName = res.name
+        this.attendanceType = res.always_mandatory ? 'optIn' : 'mandatory'
+        this.attendanceThreshold = res.attendance_threshold
+        // TODO: fix this once class list is stored in the database
+        // this.classList = res.class_list
+        
+        // Find the index of the layout that matches the layout id from the course
+        var layoutIndex = this.layouts.findIndex(layout => {
+          return layout._id == res.seating_layout._id
+        })
+        // Set the layout selected to match to section's layout id
+        if (layoutIndex !== -1) {
+          this.layoutSelected = layoutIndex
+        }
+      })
+      .catch(err => {
+        console.log(err);
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          });
+        }
+      })
+    },
 
     // Extract the class list from the uploaded .xlsx file
     loadClassList() {
@@ -389,18 +438,19 @@ export default {
     },
     
     // Call api to get the list of layouts for the dropdown
-    getLayouts() {
-      var vue = this;
-
+    getLayouts(callback) {
       this.$store.dispatch('getSeatingLayouts')
       .then(res => {
-        vue.layouts = res.layouts
+        this.layouts = res.layouts
+
+        // Run the callback function (if one was given)
+        if (callback) callback()
       })
       .catch(err => {
         console.log(err)
         // Show a notification with the error message
         if (err.message) {
-          vue.$notify({ 
+          this.$notify({ 
             title: err.message, 
             type: err.type ?? 'error'
           });
@@ -449,8 +499,6 @@ export default {
 
     // Call api to save the currently selected new layout
     saveLayout() {
-      var vue = this
-
       // Start the loading spinner
       this.$wait.start('saveLayout')
 
@@ -471,38 +519,38 @@ export default {
       })
       .then(res => {
         // Overwrite the current layout with what we just saved
-        vue.layouts[vue.layoutSelected] = res.layout
+        this.layouts[this.layoutSelected] = res.layout
         // Force some computed value(s) to update
-        vue.updated++
+        this.updated++
 
         // show success message
-        vue.$notify({ 
+        this.$notify({ 
           title: "Seating layout saved successfully", 
           type: "success"
         })
 
         // Stop the loading spinner
-        vue.$wait.end('saveLayout')
+        this.$wait.end('saveLayout')
       })
       .catch(err => {
         console.log(err)
         // Show a notification with the error message
         if (err.message) {
-          vue.$notify({ 
+          this.$notify({ 
             title: err.message, 
             type: err.type ?? 'error'
           })
         }
         // Stop the loading spinner
-        vue.$wait.end('saveLayout')
+        this.$wait.end('saveLayout')
       })
     },
 
     // General submit function which redirects
     // to the proper function depending on the mode
     submit() {
-      if (this.mode=="add") this.createSection()
-      else if (this.mode=="edit") this.saveSection()
+      if (this.pageMode=="add") this.createSection()
+      else if (this.pageMode=="edit") this.saveSection()
       else {
         this.$notify({ 
           title: "Invalid mode. Please try again", 
@@ -530,8 +578,6 @@ export default {
       // Stop if selected layout is not saved
       if (!this.isSeatingLayoutSaved()) return
 
-      var vue = this
-
       // Start the loading spinner
       this.$wait.start('createSection')
 
@@ -551,41 +597,34 @@ export default {
       })
       .then(() => {
         // show success message
-        vue.$notify({ 
+        this.$notify({ 
           title: "Section saved successfully", 
           type: "success"
         })
         // Redirect to their home page
-        vue.$router.push('/home');
+        this.$router.push('/home');
 
         // Stop the loading spinner
-        vue.$wait.end('createSection')
+        this.$wait.end('createSection')
       })
       .catch(err => {
         console.log(err)
         // Show a notification with the error message
         if (err.message) {
-          vue.$notify({ 
+          this.$notify({ 
             title: err.message, 
             type: err.type ?? 'error'
           })
         }
         // Stop the loading spinner
-        vue.$wait.end('createSection')
+        this.$wait.end('createSection')
       })
     },
 
-    // [WIP] Call api to save the section
-    // TODO: this is missing the courseId of the section we want to update
+    // Call api to save the section
     saveSection() {
-      // Return immediately and do nothing since this function is not complete
-      var myTruth = true
-      if (myTruth) return
-
       // Stop if selected layout is not saved
       if (!this.isSeatingLayoutSaved()) return
-
-      var vue = this
 
       // Start the loading spinner
       this.$wait.start('saveSection')
@@ -596,8 +635,7 @@ export default {
       const layoutId = this.currentLayout._id
 
       this.$store.dispatch('updateSection', {
-        // TODO: Need the courseId
-        // courseId: 
+        courseId: this.courseId,
         courseName: this.sectionName,
         professor: userId,
         maxCapacity: capacity,
@@ -608,25 +646,25 @@ export default {
       })
       .then(() => {
         // show success message
-        vue.$notify({ 
+        this.$notify({ 
           title: "Section saved successfully", 
           type: "success"
         })
 
         // Stop the loading spinner
-        vue.$wait.end('saveSection')
+        this.$wait.end('saveSection')
       })
       .catch(err => {
         console.log(err)
         // Show a notification with the error message
         if (err.message) {
-          vue.$notify({ 
+          this.$notify({ 
             title: err.message, 
             type: err.type ?? 'error'
           })
         }
         // Stop the loading spinner
-        vue.$wait.end('saveSection')
+        this.$wait.end('saveSection')
       })
     },
 

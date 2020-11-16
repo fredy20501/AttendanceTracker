@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-let { Course } = require('../../dbSchemas/attendanceSchema');
+let {
+    Course
+} = require('../../dbSchemas/attendanceSchema');
 
 /**pushes a new attendance object to a course
  * ==========================================
@@ -16,7 +18,9 @@ router.put('/pushNewAttendance', (req, res) => {
     let absent_students = req.body.absent_students;
     let mandatory = req.body.mandatory;
 
-    Course.findOne({ _id: courseID }, function (err, course) {
+    Course.findOne({
+        _id: courseID
+    }, function (err, course) {
 
         if (err || course == null) {
             console.log(err);

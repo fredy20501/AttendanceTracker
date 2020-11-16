@@ -67,13 +67,15 @@ router.post('/createSection', (req, res) => {
     let students = req.body.students;
     let maxCapacity = req.body.maxCapacity;
     let seatingArrangement = req.body.seatingArrangement;
+    let classList = req.body.classList;
     let attendance = [];
 
     const newSection = new Course();
     newSection.name = courseName;
     newSection.admin = admin;
     newSection.professor = professor;
-    newSection.students = students;
+    newSection.registered_students = students;
+    newSection.class_list = classList;
     newSection.max_capacity = maxCapacity;
     newSection.seating_layout = seatingLayout;
     newSection.attendance  = attendance;
@@ -104,6 +106,7 @@ router.get('/updateSection', (req, res) => {
     let professor = req.body.professor;
     let admin = req.body.admin;
     let students = req.body.students;
+    let classList = req.body.classList;
     let maxCapacity = req.body.maxCapacity;
     let seatingArrangement = req.body.seatingArrangement;
     let attendance = [];
@@ -136,7 +139,7 @@ router.get('/updateSection', (req, res) => {
             course.admin = admin;
         }
         if(students != null && students !== ""){
-            course.students = students
+            course.registered_students = students
         }
         if(maxCapacity != null && maxCapacity !== ""){
             course.max_capacity = maxCapacity;
@@ -146,6 +149,9 @@ router.get('/updateSection', (req, res) => {
         }
         if(Array.isArray(attendance) && attendance.length){
             course.attendance = attendance;
+        }
+        if(Array.isArray(classList) && classList.length){
+            course.class_list = classList;
         }
     
         course.save(err => {

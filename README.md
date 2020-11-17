@@ -102,12 +102,16 @@ npm run serve
 - Run `npm run build` to build the frontend into a set of static files (the result is in the `dist` folder)
 - Start the server:
 ```
-nohup npm run production
+- tmux
+- npm run production
+- 'ctrl+b'
+- 'd' 
 ```
-- `nohup` tells ubuntu not to kill the process when we log out
-- Then to kill the process run `ps ux`
-- Look for the 2 processes labelled `node home/.../vue-cli-...` and `node home/.../nodemon server/index.js`, get their IDs
-- Run `$Kill -9 ID` for both of them
+- tmux makes a session that we can leave running
+- we start the server with npm run production
+- ctrl+b and d get us out of the session (so we can leave the ssh)
+- To kill the hosting: enter 'tmux attach' to get into the session again
+- ctrl+c to kill the session as normal
 
 # NPM Commands
 

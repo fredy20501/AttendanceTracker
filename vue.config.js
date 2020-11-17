@@ -1,6 +1,6 @@
 module.exports = {
     devServer: {
         compress: true,
-        public: 'athena.xn--9xa.network'
+        public: process.env.NODE_ENV === 'production' ? 'athena.xn--9xa.network' : ''
     }
 }

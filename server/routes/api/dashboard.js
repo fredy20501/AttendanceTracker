@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-let { Course } = require('../../dbSchemas/attendanceSchema');
+let {
+    Course
+} = require('../../dbSchemas/attendanceSchema');
 
 
 /**GETS all the courses registered by a student
@@ -13,8 +15,12 @@ let { Course } = require('../../dbSchemas/attendanceSchema');
 router.get('/getCoursesByStudent', (req, res) => {
     let studentID = req.body.studentId;
 
-    Course.find({registered_students: {$in: [studentID]}}, function (err, courses) {
-        if(err || courses == null){
+    Course.find({
+        registered_students: {
+            $in: [studentID]
+        }
+    }, function (err, courses) {
+        if (err || courses == null) {
             console.log(err);
             return res.status(500).send(err);
         }
@@ -32,8 +38,10 @@ router.get('/getCoursesByStudent', (req, res) => {
 router.get('/getCoursesCreatedByProfessor', (req, res) => {
     let professorID = req.body.professorId;
 
-    Course.find({professor: professorID}, function (err, courses) {
-        if(err || courses == null){
+    Course.find({
+        professor: professorID
+    }, function (err, courses) {
+        if (err || courses == null) {
             console.log(err);
             return res.status(500).send(err);
         }
@@ -50,8 +58,10 @@ router.post('/registerForCourse', (req, res) => {
     let courseID = req.body.courseID;
     console.log("register for course");
 
-    Course.findOne({_id: courseID}, function (err, course) {
-        if(err || course == null){
+    Course.findOne({
+        _id: courseID
+    }, function (err, course) {
+        if (err || course == null) {
             console.log(err);
             return res.status(500).send(err);
         }
@@ -64,17 +74,16 @@ router.post('/registerForCourse', (req, res) => {
         let mandatory = course.always_mandatory;
 
         course.save(err => {
-            if(err){
+            if (err) {
                 console.log(err);
                 return res.status(500).send(err);
             }
             // return course information
             return res.status(200).json({
-                "courseName" : courseName,
-                "professor" : prof,
-                "isMandatory" : mandatory
+                "courseName": courseName,
+                "professor": prof,
+                "isMandatory": mandatory
             });
-    
         })
     });
 });

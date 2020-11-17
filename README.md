@@ -125,7 +125,10 @@ npm run serve
 ```
 npm run build
 ```
-
+### Runs the production build
+```
+npm run production
+```
 ### Lints and fixes files
 ```
 npm run lint

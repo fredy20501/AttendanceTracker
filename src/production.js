@@ -12,6 +12,7 @@ const publicPath = resolve(__dirname, '../dist')
 const staticConf = { maxAge: '1y', etag: false }
 app.use(express.static(publicPath, staticConf))
 app.use('/', history())
-
-const PORT = 8080
+var config = require('./config.js');
+const PORT = config.productionPort;
+//const PORT = 3000//8080
 app.listen(PORT, () => console.log(`Frontend server started on port ${PORT}`));

@@ -174,9 +174,8 @@ module.exports = router;
 
 // ------------- Combined Seating Layout and Course Methods -------------
 
-// gets information regarding a course given a student/prof id
+// gets information regarding a course given a course id
 router.get('/getCourseView', (req, res) => {
-    // this is the professor ID
     let courseID = req.body.courseID;
 
     Course.findOne( {_id: courseID} , function(err, course){

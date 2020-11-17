@@ -9,4 +9,4 @@ if (!process.env.TRAVIS) {
 // Change the value in the config file to specify the port you want.
 const PORT = config ? config.app.port : 5000;
 
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+app.listen(PORT, () => console.log(`Backend server started on port ${PORT}`));

@@ -1,35 +1,40 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-Vue.use(Vuex)
+import Axios from 'axios'
 
+Vue.use(Vuex)
 // Vuex tutorial: https://scrimba.com/scrim/cMPa2Uk?pl=pnyzgAP
 
+const isProduction = process.env.NODE_ENV === 'production'
 
-// Get port from server config
-var config;
-if (!process.env.TRAVIS) {
-  config = require('@/../server/config/config.js')
+var $http
+if (isProduction) {
+  // Use the correct server url if running in production
+  $http = Axios.create({
+    baseURL: "https://dev1.athena.xn--9xa.network/api/"
+  })
 }
-// Don't change the default port (5000) since both frontend 
-// and backend assume 5000 if config is missing.
-// Change the value in the config file to specify the port you want.
-const PORT = config?.app.port || 443;
+else {
+  // Get port from server config
+  var config
+  if (!process.env.TRAVIS) {
+    config = require('@/../server/config/config.js')
+  }
+  
+  // Don't change the default port (5000) since both frontend 
+  // and backend assume 5000 if config is missing.
+  // Change the value in the config file to specify the port you want.
+  const PORT = config?.app.port || 5000;
 
-// Set API url for all requests
-import Axios from 'axios'
-const $http = Axios.create({
-  baseURL: "http://localhost:"+PORT+"/api/"
-})
-
-// This is what we need to have for it to work on the server
-// It is commented out since it doesn't work locally (hopefully this will get fixed by another pr)
-// const $http = Axios.create({
-//   baseURL: "https://dev1.athena.xn--9xa.network/api/"
-// })
+  // Set API url for all requests
+  $http = Axios.create({
+    baseURL: "http://localhost:"+PORT+"/api/"
+  })
+}
 
 // Only use strict mode during development
 // More info: https://vuex.vuejs.org/guide/strict.html#development-vs-production
-const useStrict = process.env.NODE_ENV !== 'production'
+const useStrict = !isProduction
 
 // Import Vuex plugins. 
 // More info on these plugins: https://vuejsdevelopers.com/2017/09/11/vue-js-vuex-plugins/

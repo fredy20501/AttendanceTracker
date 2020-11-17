@@ -13,7 +13,7 @@ let {
     }
  */
 router.get('/getCoursesByStudent', (req, res) => {
-    let studentID = req.body.studentId;
+    let studentID = req.body.studentID;
 
     Course.find({
         registered_students: {
@@ -36,7 +36,7 @@ router.get('/getCoursesByStudent', (req, res) => {
     }
  */
 router.get('/getCoursesCreatedByProfessor', (req, res) => {
-    let professorID = req.body.professorId;
+    let professorID = req.body.professorID;
 
     Course.find({
         professor: professorID
@@ -53,7 +53,7 @@ router.get('/getCoursesCreatedByProfessor', (req, res) => {
  *  We give a student ID
  *  Returns course data (name, prof name, if it's mandatory)
  */
-router.post('/registerForCourse', (req, res) => {
+router.put('/registerForCourse', (req, res) => {
     let studentID = req.body.studentID;
     let courseID = req.body.courseID;
     console.log("register for course");
@@ -66,12 +66,13 @@ router.post('/registerForCourse', (req, res) => {
             return res.status(500).send(err);
         }
 
+        // check to see if student is already registered
+        if(course.registered_students.indexOf(studentID) != -1){
+            return res.status(520).send(err);
+        }
+
         // push new student into array
         course.registered_students.push(studentID);
-
-        let courseName = course.name;
-        let prof = course.professor;
-        let mandatory = course.always_mandatory;
 
         course.save(err => {
             if (err) {
@@ -80,9 +81,7 @@ router.post('/registerForCourse', (req, res) => {
             }
             // return course information
             return res.status(200).json({
-                "courseName": courseName,
-                "professor": prof,
-                "isMandatory": mandatory
+                course
             });
         })
     });

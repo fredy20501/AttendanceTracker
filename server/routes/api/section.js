@@ -184,7 +184,7 @@ router.get('/getCourseView', (req, res) => {
             return res.status(500).send();
         }
 
-        seatingLayout = SeatingLayout.findOne({_id: course.seating_layout}, function(err, seatingLayout){
+        SeatingLayout.findOne({_id: course.seating_layout}, function(err, seatingLayout){
 
             let myLayout;
             if(err){

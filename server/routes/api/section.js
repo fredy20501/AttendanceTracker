@@ -194,9 +194,8 @@ router.get('/getCourseView', (req, res) => {
     
             if(seatingLayout != null && seatingLayout.layout != null) {
                 myLayout = seatingLayout.layout;
-                console.log("?");
             } else {
-                myLayout = "Layout not found";
+                myLayout = [];
             }
 
             return res.status(200).json({

@@ -4,7 +4,7 @@ var { Course, SeatingLayout } = require('../../dbSchemas/attendanceSchema');
 
 
 // allows updating a seating layout given a student id
-router.post('/updateStudentCourseView', (req, res) => {
+router.put('/updateStudentCourseView', (req, res) => {
     let seatingLayoutID = req.body.seatingLayoutID;
     let layout = req.body.layout;
 

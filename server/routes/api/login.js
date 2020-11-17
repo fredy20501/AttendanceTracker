@@ -1,5 +1,9 @@
 var express = require('express');
+var crypto = require('crypto');
+var nodemailer = require('nodemailer');
 var router = express.Router();
+
+const mailTransport = require("./mail");
 var { User } = require('../../dbSchemas/attendanceSchema');
 
 router.get('/', (req, res) => {
@@ -81,6 +85,63 @@ router.post('/register', (req, res) => {
     })
 });
 
+router.post('/forgot-password', async(req, res) => {
+    var email = req.body.email;
+    
+    console.log('Sent password reset request for ' + email);
+
+    User.findOne({email: email}, function (err, user){
+        if(err){
+            console.log(err); //TODO: don't tell the user if/why it failed
+            return res.status(500).send();
+        }
+
+        if(!user){
+            return res.status(200).send(); //Don't tell the user if we don't find a match.
+        }
+
+        var passwordResetCode = crypto.randomBytes(20).toString("hex");
+
+        var emailInfo = await mailTransport.sendMail({
+            from: '"Attendance Tracker" <at@athena.xn--9xa.network>', // sender address
+            to: email,
+            subject: "Password reset",
+            text: "Follow this link to reset your password: https://athena.xn--9xa.network/reset-password/" + passwordResetCode,
+            html: "<a href=\"https://athena.xn--9xa.network/reset-password/" + passwordResetCode + "\">Click here to reset your password!"
+        });
+
+        //TODO: remove debug logging
+        console.log("Message ID: " + emailInfo.messageId);
+        console.log("Email preview URL: " + nodemailer.getTestMessageUrl(emailInfo));
+
+        user.password_reset_code = passwordResetCode;
+        user.save();
+        
+        return res.status(200).send();
+    })
+});
+
+router.post('/reset-password', (req, res) => {
+    var email = req.body.email;
+    var passwordResetCode = req.body.passwordResetCode;
+    var newPassword = req.body.newPassword;
+
+    User.findOne({email: email, password_reset_code: passwordResetCode}, function (err, user){
+        if(err){
+            console.log(err); //TODO: don't tell the user if/why it failed
+            return res.status(500).send();
+        }
+
+        if(!user){
+            return res.status(401).send();
+        }
+
+        user.password = newPassword;
+        user.save();
+        
+        return res.status(200).send();
+    })
+});
 
 router.delete('/delete-user', (req, res) => {
     // Delete all users with the given email 

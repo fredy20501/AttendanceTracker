@@ -201,7 +201,7 @@ router.get('/getCourseView', (req, res) => {
             return res.status(200).json({
                 "name" : course.name,
                 "alwaysMandatory" : course.always_mandatory,
-                "students": course.students,
+                "students": course.registered_students,
                 "seatingLayout" : myLayout
             });
         })

@@ -144,7 +144,7 @@
       <br>
 
       <div class="double-column">
-        <div id="Grid">
+        <div class="grid-layout">
           <table v-if="layouts.length>0">
             <tbody>
               <!-- First row shows the column number -->
@@ -276,6 +276,10 @@ export default {
       newLayoutName: "",
       layoutSelected: 0,
 
+      // [Edit mode] Storing the old layout allows us to check if the layout was changed
+      // (if it didn't change we don't want to overwrite the seating_arrangement on save)
+      oldSeatingLayoutId: "",
+
       // Select grid data
       paintSelectIndex: 2,
       seatSelect: {
@@ -355,10 +359,10 @@ export default {
       })
       .then(res => {
         this.sectionName = res.name
-        this.attendanceType = res.always_mandatory ? 'optIn' : 'mandatory'
+        this.attendanceType = res.always_mandatory ? 'mandatory' : 'optIn'
         this.attendanceThreshold = res.attendance_threshold
-        // TODO: fix this once class list is stored in the database
-        // this.classList = res.class_list
+        this.classList = res.class_list
+        this.oldSeatingLayoutId = res.seating_layout._id
         
         // Find the index of the layout that matches the layout id from the course
         var layoutIndex = this.layouts.findIndex(layout => {
@@ -586,6 +590,10 @@ export default {
       const userId = this.getUser.id
       const layoutId = this.currentLayout._id
 
+      // Create a seating arrangment the same size as the layout
+      // Filled with null values since there are no studetns to begin with
+      const seatingArrangement = new Array(this.rows).fill(null).map(() => new Array(this.columns).fill(null))
+
       this.$store.dispatch('createSection', {
         courseName: this.sectionName,
         professor: userId,
@@ -593,7 +601,8 @@ export default {
         attendanceThreshold: this.attendanceThreshold,
         seatingLayout: layoutId,
         attMandatory: this.isMandatory,
-        classList: this.classList
+        classList: this.classList,
+        seatingArrangement: seatingArrangement
       })
       .then(() => {
         // show success message
@@ -634,6 +643,14 @@ export default {
       const userId = this.getUser.id
       const layoutId = this.currentLayout._id
 
+      // If the layout changed, reset the seating arrangement (i.e. student lose their seats)
+      var seatingArrangement = null
+      if (this.oldSeatingLayoutId != layoutId) {
+        // Create a seating arrangment the same size as the layout
+        // Filled with null values since there are no studetns to begin with
+        seatingArrangement = new Array(this.rows).fill(null).map(() => new Array(this.columns).fill(null))
+      }
+
       this.$store.dispatch('updateSection', {
         courseId: this.courseId,
         courseName: this.sectionName,
@@ -642,7 +659,8 @@ export default {
         attendanceThreshold: this.attendanceThreshold,
         seatingLayout: layoutId,
         attMandatory: this.isMandatory,
-        classList: this.classList
+        classList: this.classList,
+        seatingArrangement: seatingArrangement
       })
       .then(() => {
         // show success message
@@ -761,17 +779,8 @@ export default {
   }
 }
 
-#Grid {
-  overflow: auto;
-  box-sizing: border-box;
-  width: 100%;
+.grid-layout {
   height: 350px;
-  padding: 10px;
-  border: 3px solid black;
-
-  table {
-    margin: auto;
-  }
 }
 
 .border {

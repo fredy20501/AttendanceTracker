@@ -67,7 +67,7 @@
                   'type-1': seat.type==1,
                   'type-2': seat.type==2,
                   'type-3': seat.type==3,
-                  'selected': seat.absent
+                  'selected': seat.absent===true
                 }"
               >{{seat.name}}</div>
             </td>
@@ -105,7 +105,7 @@
       </div>
       <div>
         <label>Absent</label>
-        <div class="seat type-2-3 selected"></div>
+        <div class="seat type-2 selected"></div>
       </div>
     </div>
 
@@ -113,15 +113,15 @@
 
     <div>
       <h3>Statistics</h3>
-      <div style="display: inline-block; vertical-align: top; width:250px; margin: 5px">
+      <div v-if="showStats" style="display: inline-block; vertical-align: top; width:250px; margin: 5px">
         <PieChart :chartData="pieChartData" :options="pieChartOptions"/>
       </div>
       <div style="display: inline-block; text-align:left; padding-top: 8px; margin: 5px">
         <div>
-          Students present: {{numPresent}} <span v-if="mandatory">({{percentPresent}}%)</span>
+          Students present: {{numPresent}} <span v-if="showStats">({{percentPresent}}%)</span>
         </div>
-        <div v-if="mandatory">
-          Students absent: {{numAbsent}} <span v-if="mandatory">({{percentAbsent}}%)</span>
+        <div v-if="showStats">
+          Students absent: {{numAbsent}} <span v-if="showStats">({{percentAbsent}}%)</span>
         </div>
         <br>
         <button class="button-width" type="button" @click="exportData">
@@ -190,12 +190,15 @@ export default {
     // Import the getters from the global store
     ...mapGetters(['getUser']),
 
+    showStats: function() {
+      return this.mandatory && this.registeredStudents.length>0
+    },
     numPresent: function() {
       // Calculate the number of students present by checking the absent status of each seat
-      var numPresent = this.registeredStudents.length
+      var numPresent = 0
       this.classLayout.forEach(row => {
         row.forEach(seat => {
-          if (seat.absent) numPresent--
+          if (seat.absent === false) numPresent++
         })
       })
       return numPresent
@@ -305,7 +308,7 @@ export default {
 
           if (student == null) {
             // No student in this seat
-            mergedLayout[i][j] = {name: '', type: seatType, absent: false}
+            mergedLayout[i][j] = {name: '', type: seatType}
           }
           else {
             // There is a student, just add the seat type & default absence status
@@ -338,7 +341,7 @@ export default {
       // Loop through the class layout, adding absent students to the array
       this.classLayout.forEach(row => {
         row.forEach(seat => {
-          if (seat.absent) studentIds.push(seat._id)
+          if (seat.absent===true) studentIds.push(seat._id)
         })
       })
       return studentIds
@@ -353,8 +356,9 @@ export default {
       console.log(absentStudents)
 
       this.$store.dispatch('saveAttendance', {
-        courseId: this.courseId,
-        absentStudents: absentStudents
+        courseID: this.courseId,
+        absent_students: absentStudents,
+        mandatory: this.mandatory
       })
       .then(() => {
         // Success!
@@ -401,7 +405,8 @@ export default {
 <style lang="scss" scoped >
 .grid-layout {
   margin: 10px 0;
-  height: 450px;
+  height: auto;
+  max-height: 450px;
 }
 .grid-layout .seat {
   font-size: 0.7em;

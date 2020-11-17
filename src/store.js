@@ -182,77 +182,39 @@ const store = new Vuex.Store({
     },
 
     getSectionData(context, payload) {
-      payload
-
-      // Return test data (will later integrate with the actual api)
-      return {
-        _id: "5fac407ad44a0c3c7803adc7",
-        name: "JPT9411_FR23A_LEC",
-        professor: {
-          name: 'Jarvis Dumbledore'
-        },
-        attendance_threshold: 3,
-        students: [
-          {name: 'Frederic Verret'},
-          {name: 'John F Kennedy'},
-          {name: 'This is a very long name'},
-          {name: 'This is a very long name. Even longer than the other one'},
-          {name: 'Peter Parker'},
-          {name: 'Algernon Prime'},
-          {name: 'Mister Horsey McHorseface'},
-        ],
-        seating_layout: {
-          name: 'PPE405',
-          _id: "5fac3aebddc8393810164444",
-          layout: [
-            [2,1,1,0],
-            [2,2,2,2],
-            [3,3,2,3],
-          ]
-        },
-        seating_arrangement: [
-          [
-            {name: 'Frederic Verret'},
-            null,
-            null,
-            null,
-          ],
-          // Second row
-          [
-            {name: 'John F Kennedy'},
-            null,
-            {name: 'This is a very long name'},
-            {name: 'This is a very long name. Even longer than the other one'},
-          ],
-          // Third row
-          [
-            null,
-            {name: 'Peter Parker'},
-            {name: 'Algernon Prime'},
-            {name: 'Mister Horsey McHorseface'},
-          ],
-        ],
-        always_mandatory: true,
-      }
-
-      // return $http.get('api/path/to/endpoint', payload)
-      // .catch(err => {
-      //   err.message = "Could not get course data. Please try again later"
-      //   throw err
-      // })
+      return $http.get('section/getCourseView', {
+        // Note: for get requests we need to send data through params
+        params: {
+          courseID: payload.courseId
+        }
+      })
+      .then(res => {
+        // Format the response to match what frontend is expecting
+        const course = res.data
+        return {
+          name: course.name,
+          professor: {
+            name: course.professor.name
+          },
+          students: course.registered_students,
+          always_mandatory: course.always_mandatory,
+          seating_layout: course.seating_layout,
+          seating_arrangement: course.seating_arrangement,
+          class_list: course.class_list
+        }
+      })
+      .catch(err => {
+        err.message = "Could not get course data. Please try again later"
+        throw err
+      })
     },
 
     saveAttendance(context, payload) {
-      payload
-
-      // Return test data (will later integrate with the actual api)
-      return
-
-      // return $http.post('api/path/to/endpoint', payload)
-      // .catch(err => {
-      //   err.message = "Could not save attendance. Please try again later"
-      //   throw err
-      // })
+      return $http.put('professor/pushNewAttendance', payload)
+      .catch(err => {
+        err.message = "Could not save attendance. Please try again later"
+        throw err
+      })
     }
   }
 })

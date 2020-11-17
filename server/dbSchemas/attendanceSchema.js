@@ -11,7 +11,7 @@ const userSchema = new Schema({
 { 
     timestamps: true 
 });
-const User = mongoose.model('User', userSchema, 'user');
+const User = mongoose.model('user', userSchema, 'user');
 
 const seatingLayoutSchema = new Schema({
     name: { type: String, required: true, unique : true },
@@ -25,7 +25,7 @@ const seatingLayoutSchema = new Schema({
 { 
     timestamps: true 
 });
-const SeatingLayout = mongoose.model('SeatingLayout', seatingLayoutSchema, 'seatingLayout');
+const SeatingLayout = mongoose.model('seatingLayout', seatingLayoutSchema, 'seatingLayout');
 
 const courseSchema = new Schema({
     name: { type: String, required: true, unique: true, trim: true },

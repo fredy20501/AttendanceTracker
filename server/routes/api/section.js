@@ -216,7 +216,7 @@ router.get('/getCourseView', (req, res) => {
             }
             User.findOne({
                 _id: course.professor
-            }, function (err, profUser) {
+            }, function (err, professor) {
 
                 if (err) {
                     console.log(err);
@@ -227,7 +227,7 @@ router.get('/getCourseView', (req, res) => {
                 return res.status(200).json({
                     course,
                     "seatingLayout": myLayout,
-                    profUser
+                    professor
                 });
 
             })

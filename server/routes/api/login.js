@@ -45,7 +45,7 @@ router.post('/login', (req, res) => {
 
 // the following is a test to test to see if you are logged in correctly
 // may be copied and changed as needed
-router.get('/dashboard', (req, res) => {
+router.get('/secret-api', (req, res) => {
     if (!req.session.user) {
         console.log("Unuathorized request. Please login.");
         return res.status(401).send();

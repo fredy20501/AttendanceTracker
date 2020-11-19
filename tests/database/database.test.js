@@ -1,8 +1,8 @@
-const app = require('../server/app.js');
+const app = require('app.js');
 const supertest = require("supertest");
 const http = require('http');
 const mongoose = require('mongoose');
-const { User, Course, SeatingLayout } = require('../server/dbSchemas/attendanceSchema.js');
+const { User, Course, SeatingLayout } = require('dbSchemas/attendanceSchema.js');
 
 describe('Database Functionality', () => {
 
@@ -170,7 +170,7 @@ describe('Database Functionality', () => {
         ]));
         expect(response.always_mandatory).toBe(false);
 
-        response = response = await SeatingLayout.findOne({
+        response = await SeatingLayout.findOne({
             name: 'testLayout'
         });
 

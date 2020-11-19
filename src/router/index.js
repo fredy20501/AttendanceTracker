@@ -17,35 +17,14 @@ const routes = [
     name: 'createAccount',
     // The meta tag "back" determines if the back button is shown in the footer for this page
     meta: { back: true },
-    component: () => import(/* webpackChunkName: "[request]" */ '../views/CreateAccount.vue')
+    component: () => import(/* webpackChunkName: "createAccount" */ '../views/CreateAccount.vue')
   },
   {
-    // Genral "home" page which redirects to the proper student or 
-    // professor home page depending on the user
+    // Genral "home" page which displays the dashboard for both student and professor
     path: '/home',
     name: 'home',
-    redirect: () => {
-      if (store.getters.isProfessor) {
-        return { name: 'professorHome' }
-      }
-      else {
-        return { name: 'studentHome' }
-      }
-    }
-  },
-  {
-    path: '/student',
-    name: 'studentHome',
-    // We use the meta tag to know whether you need to be logged in to access it (requiresAuth) 
-    // and what account it is associated with (accountType)
-    meta: { requiresAuth: true, accountType: 'student' },
-    component: () => import(/* webpackChunkName: "[request]" */ '../views/StudentHome.vue')
-  },
-  {
-    path: '/professor',
-    name: 'professorHome',
-    meta: { requiresAuth: true, accountType: 'professor' },
-    component: () => import(/* webpackChunkName: "[request]" */ '../views/ProfessorHome.vue')
+    meta: { requiresAuth: true },
+    component: () => import(/* webpackChunkName: "home" */ '../views/Home.vue')
   },
   {
     // This page requires the course id to be given as a parameter called id, as shown in the path.
@@ -54,7 +33,7 @@ const routes = [
     path: '/create-section/:id?',
     name: 'createSection',
     meta: { back: true, requiresAuth: true, accountType: 'professor' },
-    component: () => import(/* webpackChunkName: "[request]" */ '../views/CreateSection.vue')
+    component: () => import(/* webpackChunkName: "createSection" */ '../views/CreateSection.vue')
   },
   {
     path: '/section/:id',
@@ -91,12 +70,12 @@ router.beforeEach((to, from, next) => {
     next({ name: 'home' })
   }
 
-  // Prevent student from accessing professor view and vice-versa
+  // Prevent student from accessing professor pages and vice-versa
   else if (to.matched.some(record => record.meta.accountType == 'professor') && !store.getters.isProfessor) {
-    next({ name: 'studentHome' })
+    next(false) // Cancel the navigation
   }
   else if (to.matched.some(record => record.meta.accountType == 'student') && store.getters.isProfessor) {
-    next({ name: 'professorHome' })
+    next(false)
   }
 
   // Continue as normal

@@ -1,13 +1,14 @@
-const app = require('../server/app.js');
+const app = require('app.js');
 const mongoose = require('mongoose');
 const supertest = require("supertest");
 const http = require('http');
 
 describe('Backend server fuctionality', () => {
+
     let server;
     let request;
 
-    // Open server & database before running tests
+    //Open server & database before running tests
     beforeAll(async (done) => {
         server = http.createServer(app);
         server.listen();
@@ -16,20 +17,19 @@ describe('Backend server fuctionality', () => {
         db.once('open', done);
     });
 
-    // Close database & server when done
+    //Close server & database when done
     afterAll(async (done) => {
         await mongoose.connection.close();
         server.close(done);
     });
 
-    it('reaches server api', async done =>{
-        // tests to see if api is reachable
+    it('can reach server api', async done => {
         const response = await request.get("/");
         expect(response.status).toBe(200);
         done();
     });
 
-    it('send invalid login', async done =>{
+    it('can send invalid login', async done => {
         const response = await request.post("/api/login").send({
             email:'blah', 
             password:'bbbbbb'
@@ -39,14 +39,18 @@ describe('Backend server fuctionality', () => {
         done();
     });
 
-    it('try to access data without being logged in', async done =>{
-        const response = await request.get("/api/dashboard");
-        // expect 401 unauthorized since we are not logged in
+    it('can not allow access to data without being logged in', async done => {
+        const response = await request.get("/api/secret-api");
         expect(response.status).toBe(401);
         done();
     });
 
-    it('create, login, logout, then delete test account', async done =>{
+    it('can successfully create, login, logout, and delete test account', async done =>{
+        // Delete test account (if it exists)
+        response = await request.delete("/api/delete-user").send({
+            email: '123test@test456.com'
+        });
+        
         // Create test account
         var response = await request.post("/api/register").send({
             name:'test_user', 
@@ -75,4 +79,5 @@ describe('Backend server fuctionality', () => {
 
         done();
     });
+
 })

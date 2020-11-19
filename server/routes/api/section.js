@@ -91,7 +91,9 @@ router.post('/createSection', (req, res) => {
             return res.status(500).send(err);
         }
 
-        return res.status(200).send();
+        return res.status(200).json({
+            newSection
+        }); 
     })
 
 });
@@ -170,6 +172,35 @@ router.post('/updateSection', (req, res) => {
 });
 
 
+router.delete('/deleteSeatingLayout', (req, res) => {
+    // Delete all seating layouts with the given name 
+    // (should only delete one since emails are unique)
+    var name = req.body.name;
+
+    SeatingLayout.deleteMany({ name: name }, (err) => {
+        if(err){
+            console.log(err);
+            return res.status(500).send();
+        }
+
+        return res.status(200).send(); 
+    });
+});
+
+router.delete('/deleteSection', (req, res) => {
+    // Delete all sections with the given name 
+    // (should only delete one since emails are unique)
+    var name = req.body.name;
+
+    Course.deleteMany({ name: name }, (err) => {
+        if(err){
+            console.log(err);
+            return res.status(500).send();
+        }
+
+        return res.status(200).send(); 
+    });
+});
 // ------------- Combined Seating Layout and Course Methods -------------
 
 // gets information regarding a course given a course id

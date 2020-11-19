@@ -181,71 +181,60 @@ const store = new Vuex.Store({
       })
     },
 
-
-    // ==== FUNCTIONS TODO =====
-    // (you might want more functions, these are just the ones I was able to think of)
-
-    // This function will call the proper api to get the courses for a specific user.
-    // Depending on the api you might need to do a different api call depending if the user is a student or a professor.
-    getSectionsForUser(context, payload) {
-      payload
-      // The data you send from the frontend is in the "payload" object
-
-      // This is the most basic api call where you directly pass in the payload to the api and return a simple message on error.
-      // You might need to modify the data you send to the api or the format you return to the frontend depending on what the api and frontend are each expecting.
-      /*
-      return $http.post('api/path/to/endpoint', payload)
+    getSectionsForStudent(context, payload) {
+      return $http.get('dashboard/getCoursesByStudent', {
+        // Note: for get requests we need to send data through params
+        params: {
+          studentID: payload.userId
+        }
+      })
+      .then(res => {
+        return {
+          sections: res.data
+        }
+      })
       .catch(err => {
         err.message = "Could not get courses. Please try again later"
         throw err
       })
-      */
-
-      // Since the api won't be functional until we integrate, 
-      // you can just return test data for now. Ex:
-      return {
-        sections: [
-          {
-            _id: "5fafahlkip2",
-            name: "EEE3303_FR08A_LEC",
-            professor: "Crusty the Clown",
-            always_mandatory: true
-          },
-          {
-            _id: "5fafahlkip3",
-            name: "CE8902_FR01B_LAB",
-            professor: "Mr Computer",
-            always_mandatory: false
-          }
-          // ... (add whatever data you expect to receive)
-        ]
-      }
     },
-    
-    // This function will call the proper api to register the student to a specific course.
-    registerForSection(context, payload) {
-      payload
-      // The data you send from the frontend is in the "payload" object
 
-      // This is the most basic api call where you directly pass in the payload to the api and return a simple message on error.
-      // You might need to modify the data you send to the api or the format you return to the frontend depending on what the api and frontend are each expecting.
-      /*
-      return $http.post('api/path/to/endpoint', payload)
+    getSectionsForProfessor(context, payload) {
+      return $http.get('dashboard/getCoursesCreatedByProfessor', {
+        // Note: for get requests we need to send data through params
+        params: {
+          professorID: payload.userId
+        }
+      })
+      .then(res => {
+        return {
+          sections: res.data
+        }
+      })
       .catch(err => {
-        err.message = "Could not register for the course. Please try again later"
+        err.message = "Could not get courses. Please try again later"
         throw err
       })
-      */
-
-      // Since the api won't be functional until we integrate, 
-      // you can just return test data for now. Ex:
-      return {
-        _id: "5fafahlkip3314",
-        name: "KJE2202_FR01C_TUT",
-        professor: "Dr Donald Duck",
-        always_mandatory: false
-        // ... (add whatever data you expect to receive)
-      }
+    },
+    
+    registerForSection(context, payload) {
+      return $http.put('dashboard/registerForCourse', payload)
+      .then(res => {
+        return res.data.course
+      })
+      .catch(err => {
+        // Register failed: Add a message and propagate the error
+        if (err.response.status == 520) {
+          err.message = "You are already registered for this course"
+        }
+        else if (err.response.status == 530) {
+          err.message = "Course does not exist"
+        }
+        else {
+          err.message = "Could not register for the course. Please try again later"
+        }
+        throw err
+      })
     },
     
     getSectionData(context, payload) {

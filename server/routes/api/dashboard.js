@@ -13,13 +13,16 @@ let {
     }
  */
 router.get('/getCoursesByStudent', (req, res) => {
-    let studentID = req.body.studentID;
+    // Note: for get requests data is sent through query params
+    let studentID = req.query.studentID;
 
     Course.find({
         registered_students: {
             $in: [studentID]
         }
-    }, function (err, courses) {
+    })
+    .populate('professor')
+    .exec(function (err, courses) {
         if (err || courses == null) {
             console.log(err);
             return res.status(500).send(err);
@@ -36,11 +39,14 @@ router.get('/getCoursesByStudent', (req, res) => {
     }
  */
 router.get('/getCoursesCreatedByProfessor', (req, res) => {
-    let professorID = req.body.professorID;
+    // Note: for get requests data is sent through query params
+    let professorID = req.query.professorID;
 
     Course.find({
         professor: professorID
-    }, function (err, courses) {
+    })
+    .populate('professor')
+    .exec(function (err, courses) {
         if (err || courses == null) {
             console.log(err);
             return res.status(500).send(err);
@@ -55,15 +61,15 @@ router.get('/getCoursesCreatedByProfessor', (req, res) => {
  */
 router.put('/registerForCourse', (req, res) => {
     let studentID = req.body.studentID;
-    let courseID = req.body.courseID;
+    let courseName = req.body.courseName;
     console.log("register for course");
 
     Course.findOne({
-        _id: courseID
+        name: courseName
     }, function (err, course) {
         if (err || course == null) {
             console.log(err);
-            return res.status(500).send(err);
+            return res.status(530).send(err);
         }
 
         // check to see if student is already registered

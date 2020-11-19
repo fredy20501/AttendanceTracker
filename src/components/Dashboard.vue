@@ -13,29 +13,43 @@
         => These tiles will redirect to a different page when we click on them, so you can use the v-on:click="" attribute to call the function which will do that.
            You can pass in arguments to the function using v-on:click="goToSection(sectionId)" so the function knows which section you have clicked on.
       -->
+      <div v-for="section in sections" v-bind:key="section" style=" display: inline-block"> 
+        <div class = "tile" v-on:click="goToSection(section._id)">
+          {{section.name}}
+          <br>
+          {{section.professor}}
+          <br>
+          {{section.always_mandatory}}
+          <br>
+        </div> 
+      </div>
+    
     </div>
-
-    <!-- Since this page will be used for both students and professors, we will show the specific buttons depending on whether the user is a student or prof -->
+    <br>
+    <br>
     <div v-if="isProfessor">
-      <!--
-        Here you can put the buttons for professor
-        I think we only need the Create Section button which should redirect to the create section page)
-          => You can redirect to a different page by using: $router.push('pathOfThePage') or $router.push({name: 'nameOfThePage'})
-      -->
+      <button type="button" @click="$router.push('create-section')">Create Section</button>
     </div>
 
-    <div v-if="isStudent">
-      <!--
-        Here you can put the buttons for students
-        I believe we need a field to enter a section name and a register button
-          => You can add basic validation for the section name field for consistency. I don't think we need any special validation other than making it required.
-          => The basic validation template is shown below. You can use the validation for the login page as an example.
-      -->
-      <ValidationObserver v-slot="{ handleSubmit, invalid }">
-        <form @submit.prevent="handleSubmit(registerForSection)">
-          <button :disabled="invalid"></button>
-        </form>
-      </ValidationObserver>
+    <div v-else>
+
+      <div v-if="hideRegistration">
+        <button v-on:click="hideRegistration = false">Register for New Section</button>
+      </div>
+      <div v-else>
+        <ValidationObserver name="Section Name" rules="required|alpha_dash" v-slot="{errors}">
+          <label for="sectionName">Section Name</label><br>
+          <input id="sectionName" type="text" placeholder="Section Name" v-model="sectionName">
+          <span v-if="errors.length" class="error">{{ errors[0] }}</span>
+        </ValidationObserver>
+        <br><br>
+        <ValidationObserver v-slot="{ handleSubmit }">
+          <form @submit.prevent="handleSubmit(registerForSection)">
+            <button>Register</button>
+          </form>
+        </ValidationObserver>
+      </div>
+
     </div>
     
   </div>
@@ -72,7 +86,9 @@ export default {
 
       // This variable can be bound to the input field for the section name.
       // You can bind variables to field values using the v-model attribute.
-      sectionName: ""
+      sectionName: "",
+
+      hideRegistration:true
 
     }
   },
@@ -101,20 +117,15 @@ export default {
       // (I have copied a basic one called getSectionsForUser and added comments to guide you ther)
 
       // Call that function defined in store.js using the following format:
-      /*
+      
       this.$store.dispatch('getSectionsForUser', {
-        // put the data you are sending to the api here as key-value pairs. Ex:
-        userId: '123456'
+        userId: this.userId
       })
       .then(res => {
-        // Success!
-        // The result is stored in res
-        // Update the variable which contains the list of sections
+        this.sections = res.sections
       })
       .catch(err => {
-        // Error! (this is the default code I use to log the error and show a message to the user)
         console.log(err);
-        // Show a notification with the error message
         if (err.message) {
           this.$notify({ 
             title: err.message, 
@@ -122,7 +133,6 @@ export default {
           });
         }
       })
-      */
     },
 
     // This function will redirect to the section view for the specified section
@@ -133,7 +143,7 @@ export default {
       // To do that we will give it the id as part of the url using the router's params option
 
       // You can redirect to the page and give the id as a parameter as follows:
-      // this.$router.push({name: 'nameOfThePage', params: {id: variableHoldingTheSectionId }})
+      this.$router.push({name: 'view-section', params: {id: sectionId }})
 
       // Note: you won't actually be able to go to the page until it is all integrated together
     },
@@ -147,12 +157,14 @@ export default {
       // (I have copied a basic one called getSectionsForUser and added comments to guide you ther)
       
       // Call that function defined in store.js using the following format:
-      /*
+      
       this.$store.dispatch('registerForSection', {
         // put the data you are sending to the api here as key-value pairs. Ex:
-        userId: '123456'
+        userId: this.userId,
+        sectionName: this.sectionName
       })
       .then(res => {
+        this.sections.push(res)
         // Success!
         // The result is stored in res
         // Add the section you have just registered for to the list of sections so it shows up on the UI
@@ -169,12 +181,18 @@ export default {
           });
         }
       })
-      */
+      
     }
   },
 }
 </script>
 
 <style lang="scss" scoped >
+
+.tile {
+  display: inline-block;
+  width: 300px;
+  border: 3px solid black;
+}
 
 </style>

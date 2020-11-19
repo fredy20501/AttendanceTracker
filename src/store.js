@@ -256,7 +256,8 @@ const store = new Vuex.Store({
           always_mandatory: course.always_mandatory,
           seating_layout: course.seating_layout,
           seating_arrangement: course.seating_arrangement,
-          class_list: course.class_list
+          class_list: course.class_list,
+          attendance_threshold: course.attendance_threshold
         }
       })
       .catch(err => {

@@ -180,6 +180,99 @@ const store = new Vuex.Store({
         throw err
       })
     },
+
+    getSectionsForStudent(context, payload) {
+      return $http.get('dashboard/getCoursesByStudent', {
+        // Note: for get requests we need to send data through params
+        params: {
+          studentID: payload.userId
+        }
+      })
+      .then(res => {
+        return {
+          sections: res.data
+        }
+      })
+      .catch(err => {
+        err.message = "Could not get courses. Please try again later"
+        throw err
+      })
+    },
+
+    getSectionsForProfessor(context, payload) {
+      return $http.get('dashboard/getCoursesCreatedByProfessor', {
+        // Note: for get requests we need to send data through params
+        params: {
+          professorID: payload.userId
+        }
+      })
+      .then(res => {
+        return {
+          sections: res.data
+        }
+      })
+      .catch(err => {
+        err.message = "Could not get courses. Please try again later"
+        throw err
+      })
+    },
+    
+    registerForSection(context, payload) {
+      return $http.put('dashboard/registerForCourse', payload)
+      .then(res => {
+        return res.data.course
+      })
+      .catch(err => {
+        // Register failed: Add a message and propagate the error
+        if (err.response.status == 520) {
+          err.message = "You are already registered for this course"
+        }
+        else if (err.response.status == 530) {
+          err.message = "Course does not exist"
+        }
+        else {
+          err.message = "Could not register for the course. Please try again later"
+        }
+        throw err
+      })
+    },
+    
+    getSectionData(context, payload) {
+      return $http.get('section/getCourseView', {
+        // Note: for get requests we need to send data through params
+        params: {
+          courseID: payload.courseId
+        }
+      })
+      .then(res => {
+        // Format the response to match what frontend is expecting
+        const course = res.data
+        return {
+          name: course.name,
+          professor: {
+            name: course.professor.name
+          },
+          students: course.registered_students,
+          always_mandatory: course.always_mandatory,
+          seating_layout: course.seating_layout,
+          seating_arrangement: course.seating_arrangement,
+          class_list: course.class_list,
+          attendance_threshold: course.attendance_threshold
+        }
+      })
+      .catch(err => {
+        err.message = "Could not get course data. Please try again later"
+        throw err
+      })
+    },
+
+    saveAttendance(context, payload) {
+      return $http.put('professor/pushNewAttendance', payload)
+      .catch(err => {
+        err.message = "Could not save attendance. Please try again later"
+        throw err
+      })
+    }
   }
 })
 

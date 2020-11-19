@@ -183,18 +183,41 @@ const store = new Vuex.Store({
     // Depending on the api you might need to do a different api call depending if the user is a student or a professor.
     getSection(context, payload) {
       payload
-      // The data you send from the frontend is in the "payload" object
-
-      // This is the most basic api call where you directly pass in the payload to the api and return a simple message on error.
-      // You might need to modify the data you send to the api or the format you return to the frontend depending on what the api and frontend are each expecting.
-      // (you can look at the other functions above for examples)
-      /*
-      return $http.get('api/path/to/endpoint', payload)
-      .catch(err => {
-        err.message = "Could not get section data. Please try again later"
-        throw err
+        return $http.get('section/getCourseView', {
+          // Note: for get requests we need to send data through params
+          params: {
+            courseID: payload.courseId
+          }
+        })
+        .then(res => {
+          // Format the response to match what frontend is expecting
+          const course = res.data
+          return {
+            name: course.name,
+            student: {
+              name: course.students.name
+            },
+            students: course.registered_students,
+            always_mandatory: course.always_mandatory,
+            seating_layout: course.seating_layout,
+            seating_arrangement: course.seating_arrangement,
+            class_list: course.class_list
+          }
+        })
+        .catch(err => {
+          err.message = "Could not get course data. Please try again later"
+          throw err
+        })
+      },
+  
+      saveAttendance(context, payload) {
+        return $http.put('student/pushNewAttendance', payload)
+        .catch(err => {
+          err.message = "Could not save attendance. Please try again later"
+          throw err
       })
-      */
+      
+  
 
       // Since the api won't be functional until we integrate, 
       // you can just return test data for now. Ex:

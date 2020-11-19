@@ -2,9 +2,19 @@
   <div>
     <!-- Replace the title with the name of the section 
     (tip: you can use double brackets {{var}} to reference a data variable) -->
-    <h2>Name of the section</h2>
+    <h2>{{courseName}}</h2>
     <br>
-    
+      <div style="text-align:left">
+        <div>
+            <b>Date:</b> <span>{{currentDateAndTime}}</span>
+          </div>
+              <div>
+                <b>Student:</b> <span>{{student}}</span>
+              </div>
+              <div>
+              <b>Attendance Type:</b> <span>{{courseType}}</span>
+          </div>
+      </div>
     <div>
     <!--
       Here we want to display the layout as a grid
@@ -146,11 +156,13 @@ export default {
       // To make it easy, the dashboard will pass the coruseId as a parameter using the router.
       // I have made a computed property (see above) called sectionId which gets the id from the parameters.
       // So you can access the id from `this.sectionId`
+      id = this.sectionId;
+
  
       // Create a function in store.js which will make the proper api call 
       // (I have copied a basic one called getSection and added comments to guide you there)
       // Call that function defined in store.js using the following format:
-      /*
+  
       this.$store.dispatch('getSection', {
         // put the data you are sending to the api here as key-value pairs. Ex:
         sectionId: '123456'
@@ -171,7 +183,7 @@ export default {
           });
         }
       })
-      */
+  
     },
 
     // This function will be called when a seat is selected
@@ -202,10 +214,11 @@ export default {
       // (I have copied a basic one called reserveSeat and added comments to guide you there)
 
       // Call that function defined in store.js using the following format:
-      /*
+      this.$wait.start('submitSeatSelection')
       this.$store.dispatch('reserveSeat', {
         // put the data you are sending to the api here as key-value pairs. Ex:
-        userId: '123456'
+        userId: '123456',
+        sectionID: this.sectionId,
         // I think the plan for the API is that it will take the student id, the section id, and the coordinate in the layout for the selected seat
       })
       .then(res => {
@@ -226,7 +239,7 @@ export default {
           });
         }
       })
-      */
+      
 
     }
   }

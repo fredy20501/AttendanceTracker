@@ -180,6 +180,42 @@ const store = new Vuex.Store({
         throw err
       })
     },
+
+    getSectionData(context, payload) {
+      return $http.get('section/getCourseView', {
+        // Note: for get requests we need to send data through params
+        params: {
+          courseID: payload.courseId
+        }
+      })
+      .then(res => {
+        // Format the response to match what frontend is expecting
+        const course = res.data
+        return {
+          name: course.name,
+          professor: {
+            name: course.professor.name
+          },
+          students: course.registered_students,
+          always_mandatory: course.always_mandatory,
+          seating_layout: course.seating_layout,
+          seating_arrangement: course.seating_arrangement,
+          class_list: course.class_list
+        }
+      })
+      .catch(err => {
+        err.message = "Could not get course data. Please try again later"
+        throw err
+      })
+    },
+
+    saveAttendance(context, payload) {
+      return $http.put('professor/pushNewAttendance', payload)
+      .catch(err => {
+        err.message = "Could not save attendance. Please try again later"
+        throw err
+      })
+    }
   }
 })
 

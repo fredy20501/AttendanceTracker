@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-var { Course, SeatingLayout } = require('../../dbSchemas/attendanceSchema');
+var { Course, SeatingLayout, User } = require('../../dbSchemas/attendanceSchema');
 
 router.get('/', (req, res) => {
 
@@ -8,10 +8,9 @@ router.get('/', (req, res) => {
 });
 
 router.get('/previousSeatingPlans', (req, res) => {
-    // this is the professor ID
-    let professor = req.body.professor;
-
-    SeatingLayout.find({$or : [{default: true} , {created_by : professor}]}, function(err, seatingLayout){
+    // Return all seating plans stored in the database
+    // (we do not filter by professor id)
+    SeatingLayout.find({}, function(err, seatingLayout){
         if(err){
             console.log(err);
             return res.status(500).send();
@@ -64,10 +63,10 @@ router.post('/createSection', (req, res) => {
     let attMandatory = req.body.attMandatory;
     let professor = req.body.professor;
     let admin = req.body.admin;
-    let students = req.body.students;
     let maxCapacity = req.body.maxCapacity;
     let seatingArrangement = req.body.seatingArrangement;
     let classList = req.body.classList;
+    let students = [];
     let attendance = [];
 
     const newSection = new Course();
@@ -96,7 +95,7 @@ router.post('/createSection', (req, res) => {
 
 
 //currently unfinished
-router.get('/updateSection', (req, res) => {
+router.post('/updateSection', (req, res) => {
 
     let courseId = req.body.courseId;
     let courseName = req.body.courseName;
@@ -164,5 +163,49 @@ router.get('/updateSection', (req, res) => {
         })
     });
 });
+
+
+// ------------- Combined Seating Layout and Course Methods -------------
+
+// gets information regarding a course given a course id
+router.get('/getCourseView', (req, res) => {
+
+    // Note: for get requests data is sent through query params
+    let courseID = req.query.courseID;
+    
+    Course.findById(courseID)
+    // The populate method replaces an objectId reference with the actual object
+    // Documentation: https://mongoosejs.com/docs/populate.html
+    .populate('professor', 'name')
+    .populate('seating_layout')
+    .exec()
+    .then(course => {
+        // Here we want to populate the seating arrangement
+        // (we need to do it 'manually' since it is a 2d array)
+        // Inspired by: https://stackoverflow.com/questions/55878496/mongoose-populate-on-two-dimensional-array
+
+        // Generate all the seating arrangement position of the 2d array
+        let seating_positions = [];
+        for(let i=0; i<=course.seating_arrangement.length; i++) {
+            for(let j=0; j<=course.seating_arrangement[0].length; j++) {
+                seating_positions.push(`seating_arrangement.${i}.${j}`);
+            }
+        }
+
+        // Populate all the positions of the seating_arrangement
+        course.populate(seating_positions.join(' '), (err, fullCourse) => {
+            if(err) {
+                console.log(err)
+                return res.status(500).send(err)
+            }
+            return res.status(200).json(fullCourse) 
+        });
+    })
+    .catch(err => {
+        console.log(err)
+        return res.status(500).send(err)
+    })
+})
+
 
 module.exports = router;

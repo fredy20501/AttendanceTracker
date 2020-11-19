@@ -46,5 +46,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/', require('./routes/api/login'));
 app.use('/api/section', require('./routes/api/section'));
 app.use('/api/student', require('./routes/api/student'));
+app.use('/api/dashboard', require('./routes/api/dashboard'));
+app.use('/api/professor', require('./routes/api/professor'));
 
 module.exports = app;

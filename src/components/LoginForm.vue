@@ -79,11 +79,6 @@ export default {
 
   methods: {
     login() {
-
-      // Need to store 'this' since it won't work inside the .then() and .catch() blocks
-      // More details: https://riptutorial.com/vue-js/example/28955/right--use-a-closure-to-capture--this-
-      var vue = this;
-
       // Start the loading spinner
       this.$wait.start('login')
 
@@ -94,21 +89,21 @@ export default {
       })
       .then(() => {
         // Redirect to their home page
-        vue.$router.push('/home');
+        this.$router.push('/home');
         // Stop the loading spinner
-        vue.$wait.end('login')
+        this.$wait.end('login')
       })
       .catch(err => {
         console.log(err);
         // Show a notification with the error message
         if (err.message) {
-          vue.$notify({ 
+          this.$notify({ 
             title: err.message, 
             type: err.type ?? 'error'
           });
         }
         // Stop the loading spinner
-        vue.$wait.end('login')
+        this.$wait.end('login')
       });
     },
 

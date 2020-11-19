@@ -80,7 +80,7 @@ describe('Backend server fuctionality', () => {
         done();
     });
 
-    it("Should reach createSeatingLayout endpoint", async done => {
+    it("Should reach createSeatingLayout and deleteSeatingLayout endpoints", async done => {
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
@@ -96,7 +96,13 @@ describe('Backend server fuctionality', () => {
             is_professor: true
         });
         const prof1 = response.body.user
+        
+        // Delete before to make sure it doesn't exist
+        response = await request.delete("/api/section/deleteSeatingLayout").send({
+            name: 'testLayout' 
+        });
 
+        // Create layout successfully
         response = await request.post("/api/section/createSeatingLayout").send({
             name: 'testLayout',
             capacity : 1,
@@ -106,35 +112,16 @@ describe('Backend server fuctionality', () => {
             description: 'test',
             createdBy: prof1._id
         });
-
         expect(response.status).toBe(200);
 
-        await request.get("/api/logout");
-        done()
-    });
-    /* No update-seating-plan endpoint
-    xit("Should reach update-seating-plan endpoint", async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-        response = await request.get("/api/section/updateSeatingLayout");
-        expect(response.status).toBe(200);
-        await request.get("/api/logout");
-        done();
-    });
-    */
-    it("Should reach deleteSeatingLayout endpoint", async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
+        // Delete layout successfully
         response = await request.delete("/api/section/deleteSeatingLayout").send({
             name: 'testLayout' 
         });
         expect(response.status).toBe(200);
+
         await request.get("/api/logout");
-        done();
+        done()
     });
 
     it("Should reach createSection endpoint", async done => {
@@ -214,8 +201,7 @@ describe('Backend server fuctionality', () => {
         done()
     });
 
-    //Disabled because the /updateSection endpoint is currently unfinished
-    xit("Should reach updateSection endpoint", async done => {
+    it("Should reach updateSection endpoint", async done => {
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
@@ -226,6 +212,9 @@ describe('Backend server fuctionality', () => {
         });
         response = await request.delete("/api/delete-user").send({
             email: 'prof1@test.com'
+        });
+        response = await request.delete("/api/section/deleteSection").send({
+            name: 'testSection'
         });
         response = await request.delete("/api/section/deleteSeatingLayout").send({
             name: 'testLayout' 
@@ -258,7 +247,7 @@ describe('Backend server fuctionality', () => {
         });
         const layout1 = response.body.seatingLayout
 
-        response = await request.get("/api/section/createSection").send({
+        response = await request.post("/api/section/createSection").send({
             courseName: 'testSection',
             attendanceThreshold: '0',
             seatingLayout: layout1._id,
@@ -270,8 +259,10 @@ describe('Backend server fuctionality', () => {
             seatingArrangement: [] 
         });
         const course1 = response.body.newSection
+        console.log("COURSE: ", course1)
+        console.log("RESPONSE: ", response.body)
 
-        response = await request.get("/api/section/updateSection").send({
+        response = await request.post("/api/section/updateSection").send({
             courseId: course1._id,
             courseName: 'testSection',
             attendanceThreshold: '0',
@@ -337,6 +328,9 @@ describe('Backend server fuctionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection'
         });
+        response = await request.delete("/api/section/deleteSeatingLayout").send({
+            name: 'testLayout'
+        });
 
         response = await request.post('/api/register').send({
             email: 'st1@test.com',
@@ -360,7 +354,7 @@ describe('Backend server fuctionality', () => {
             password:'pr1234of',
             is_professor: true
         });
-        const prof1 = response.body.professor;
+        const prof1 = response.body.user;
 
         response = await request.post('/api/register').send({
             email: 'admin@test.com',
@@ -404,7 +398,7 @@ describe('Backend server fuctionality', () => {
         const course1 = response.body.newSection
 
         response = await request.put("/api/professor/pushNewAttendance").send({
-            courseID: testSection._id,
+            courseID: course1._id,
             absent_students: [student1],
             mandatory: false
         });
@@ -432,14 +426,20 @@ describe('Backend server fuctionality', () => {
 
     });
 
-    xit("Should reach getCourseView endpoint", async done => {
+    it("Should reach getCourseView endpoint", async done => {
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
         });
-        response = await request.get("/api/section/getCourseView");
+        const prof1 = response.body.user
+        response = await request.get("/api/dashboard/getCoursesCreatedByProfessor", {
+            params: {
+                professorID: prof1.id
+            }
+        });
         expect(response.status).toBe(200);
         await request.get("/api/logout");
+        done();
     });
 
 })

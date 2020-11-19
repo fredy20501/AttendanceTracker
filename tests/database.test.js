@@ -116,7 +116,7 @@ describe('Database Functionality', () => {
             password:'pr1234of',
             is_professor: true
         });
-        const prof1 = response.body.professor;
+        const prof1 = response.body.user;
 
         // Create a sample seating layout for this test
         response = await request.post('/api/section/createSeatingLayout').send({
@@ -129,10 +129,10 @@ describe('Database Functionality', () => {
                 [2, 1, 1, 1, 0],
                 [2, 1, 1, 1, 0],
                 [2, 3, 3, 3, 0]
-            ], 
+            ],
             default: true,
             description: 'This is a sample',
-            createdBy: prof1
+            createdBy: prof1._id
         });
         const layout1 = response.body.seatingLayout
 
@@ -140,19 +140,17 @@ describe('Database Functionality', () => {
         response = await request.post('/api/section/createSection').send({
             courseName: 'testSection',
             attendanceThreshold: '0',
-            seatingLayout: layout1,
+            seatingLayout: layout1._id,
             attMandatory: false,
-            professor: prof1,
-            admin: admin1,
-            students: [student1, student2],
+            professor: prof1._id,
+            admin: admin1._id,
             maxCapacity: 25,
             seatingArrangement: [
-                [null, student1, null, null, null],
+                [null, student1._id, null, null, student2._id],
             ],
             classList: [],
-            attendance: [Date.now(), student1, false]
+            attendance: [Date.now(), student1._id, false]
         });
-        const course1 = response.body.newSection
         
         //Search course in database by name
         response = await Course.findOne({
@@ -163,14 +161,12 @@ describe('Database Functionality', () => {
         //Check that course information is stored
         expect(response.name).toBe('testSection');
         expect(JSON.stringify(response.admin)).toBe(JSON.stringify(admin1._id));
-        expect(JSON.stringify(response.professor)).toBe(JSON.stringify(prof1));
-        expect(response.max_capacity).toBe(30);
-        expect(JSON.stringify(response.registered_students)).toBe(JSON.stringify([student1._id, student2._id]))
+        expect(JSON.stringify(response.professor)).toBe(JSON.stringify(prof1._id));
+        expect(response.max_capacity).toBe(25);
         expect(response.attendance_threshold).toBe(0);
-        //expect(JSON.stringify(response.attendance)).toBe(JSON.stringify([Date, [student2._id], false]));
         expect(JSON.stringify(response.seating_layout)).toBe(JSON.stringify(layout1._id));
         expect(JSON.stringify(response.seating_arrangement)).toBe(JSON.stringify([
-            [null, student1._id, null, null, null],
+            [null, student1._id, null, null, student2._id],
         ]));
         expect(response.always_mandatory).toBe(false);
 
@@ -182,14 +178,16 @@ describe('Database Functionality', () => {
         expect(response.name).toBe('testLayout');
         expect(response.capacity).toBe(25);
         expect(JSON.stringify(response.created_by)).toBe(JSON.stringify(prof1._id));
-        expect(response.dimensions).toBe([5,5]);
-        expect(response.layout).toBe([
-            [2, 1, 1, 1, 0],
-            [2, 1, 1, 1, 0],
-            [2, 1, 1, 1, 0],
-            [2, 1, 1, 1, 0],
-            [2, 3, 3, 3, 0]
-        ]);
+        expect(JSON.stringify(response.dimensions)).toBe(JSON.stringify([5,5]));
+        expect(JSON.stringify(response.layout)).toBe(
+            JSON.stringify([
+                [2, 1, 1, 1, 0],
+                [2, 1, 1, 1, 0],
+                [2, 1, 1, 1, 0],
+                [2, 1, 1, 1, 0],
+                [2, 3, 3, 3, 0]
+            ])
+        );
         expect(response.default).toBe(true);
         expect(response.description).toBe('This is a sample');
 

@@ -21,10 +21,13 @@ describe('Database Functionality', () => {
     // Close database & server when done
     afterAll(async (done) => {
         await mongoose.connection.close();
-        await server.close(done);
+        server.close(done);
     });
 
     it('Should store user to database', async done => {
+        var response = await request.delete("/api/delete-user").send({
+            email: 'dummy@test.com'
+        });
         //Send request to register a user
         var user = await request.post('/api/register').send({
             email: 'dummy@test.com',
@@ -45,7 +48,7 @@ describe('Database Functionality', () => {
         expect(user.is_professor).toBe(true);
 
         //Delete test user after testing
-        const response = await request.delete("/api/delete-user").send({
+        response = await request.delete("/api/delete-user").send({
             email: 'dummy@test.com'
         });
         expect(response.status).toBe(200);
@@ -53,38 +56,70 @@ describe('Database Functionality', () => {
         done ()
     });
 
-    xit('Should store course to database', async done => {
+    it('Should store course & seating layout to database', async done => {
+        //Delete test users that may be existing in the database
+        response = await request.delete("/api/delete-user").send({
+            email: 'prof1@test.com'
+        });
+        response = await request.delete("/api/delete-user").send({
+            email: 'st1@test.com'
+        });
+        response = await request.delete("/api/delete-user").send({
+            email: 'st2@test.com'
+        });
+        response = await request.delete("/api/delete-user").send({
+            email: 'admin@test.com'
+        });
+        response = await request.delete("/api/section/deleteSeatingLayout").send({
+            name: 'Sample layout'
+        });
+        response = await request.delete("/api/section/deleteSection").send({
+            name: 'testSection' 
+        });
 
+        var response = await request.post("/api/login").send({
+            email:'test.professor@unb.ca', 
+            password:'testing123'
+        });
         //Create 2 students, an admin, and a professor
-        const student1 = await request.post('/api/register').send({
+        response = await request.post('/api/register').send({
             email: 'st1@test.com',
             name: 'Student 1',
             password:'st1234',
             is_professor: false
         });
-        const student2 = await request.post('/api/register').send({
+        const student1 = response.body.user
+
+        response = await request.post('/api/register').send({
             email: 'st2@test.com',
             name: 'Student 2',
             password:'st2345',
             is_professor: false
         });
-        const admin1 = await request.post('/api/register').send({
+        const student2 = response.body.user
+
+        response = await request.post('/api/register').send({
             email: 'admin@test.com',
             name: 'An Admin',
             password:'ad1234min',
             is_professor: true
         });
-        const prof1 = await request.post('/api/register').send({
+        const admin1 = response.body.user
+
+        response = await request.delete("/api/delete-user").send({
+            email: 'prof1@test.com'
+        });
+        response = await request.post('/api/register').send({
             email: 'prof1@test.com',
             name: 'A Professor',
             password:'pr1234of',
             is_professor: true
         });
+        const prof1 = response.body.professor;
 
         // Create a sample seating layout for this test
-        const seatingLayout = await request.post('/api/createSeatingLayout').send({
-            name: 'Sample layout',
-            createdBy: prof1,
+        response = await request.post('/api/section/createSeatingLayout').send({
+            name: 'testLayout',
             capacity: 25,
             dimensions: [ 5 , 5],
             layout: [
@@ -95,119 +130,97 @@ describe('Database Functionality', () => {
                 [2, 3, 3, 3, 0]
             ], 
             default: true,
-            description: 'This is a sample'
+            description: 'This is a sample',
+            createdBy: prof1
         });
+        const layout1 = response.body.seatingLayout
 
         //Create test course
-        var course = await request.post('/api/createSection').send({
-            courseName: 'SWE4103',
-            admin: admin1,
+        response = await request.post('/api/section/createSection').send({
+            courseName: 'testSection',
+            attendanceThreshold: '0',
+            seatingLayout: layout1._id,
+            attMandatory: false,
             professor: prof1,
+            admin: admin1,
+            students: [student1, student2],
             maxCapacity: 30,
-            attendance: [Date, [student2], true],
-            seatingLayout: seatingLayout,
-            attendanceThreshold: 0,
             seatingArrangement: [
-                [2, student1, 1, 1, 0],
+                [null, student1, null, null, null],
             ],
-            attMandatory: true,
+            classList: [],
+            attendance: [Date.now(), student1, false]
         });
+        const course1 = response.body.newSection
         
         //Search course in database by name
-        course = await Course.findOne({
-            name: 'SWE4103'
+        response = await Course.findOne({
+            name: 'testSection'
         });
+        //course = course.body;
 
         //Check that course information is stored
-        expect(course.name).toBe('SWE4103');
-        expect(course.admin).toBe(admin1);
-        expect(course.professor).toBe(prof1);
-        expect(course.maxCapacity).toBe(30);
-        expect(course.attendance).toBe([Date, [student2], true]);
-        expect(course.seating_layout).toBe(SeatingLayout);
-        expect(course.seating_arrangement).toBe([
-            [2, student1, 1, 1, 0],
+        expect(response.name).toBe('testSection');
+        expect(JSON.stringify(response.admin)).toBe(JSON.stringify(admin1._id));
+        expect(JSON.stringify(response.professor)).toBe(JSON.stringify(prof1));
+        expect(response.max_capacity).toBe(30);
+        expect(JSON.stringify(response.registered_students)).toBe(JSON.stringify([student1._id, student2._id]))
+        expect(response.attendance_threshold).toBe(0);
+        //expect(JSON.stringify(response.attendance)).toBe(JSON.stringify([Date, [student2._id], false]));
+        expect(JSON.stringify(response.seating_layout)).toBe(JSON.stringify(layout1._id));
+        expect(JSON.stringify(response.seating_arrangement)).toBe(JSON.stringify([
+            [null, student1._id, null, null, null],
+        ]));
+        expect(response.always_mandatory).toBe(false);
+
+        response = response = await SeatingLayout.findOne({
+            name: 'testLayout'
+        });
+
+        //Check that seating layout is stored
+        expect(response.name).toBe('testLayout');
+        expect(response.capacity).toBe(25);
+        expect(JSON.stringify(response.created_by)).toBe(JSON.stringify(prof1._id));
+        expect(response.dimensions).toBe([5,5]);
+        expect(response.layout).toBe([
+            [2, 1, 1, 1, 0],
+            [2, 1, 1, 1, 0],
+            [2, 1, 1, 1, 0],
+            [2, 1, 1, 1, 0],
+            [2, 3, 3, 3, 0]
         ]);
-        expect(course.always_mandatory).toBe(true);
+        expect(response.default).toBe(true);
+        expect(response.description).toBe('This is a sample');
 
         //Delete sample seating layout after testing
-        var response = await request.delete("/api/deleteSeatingLayout").send({
-            name: 'Sample layout'
+        response = await request.delete("/api/section/deleteSeatingLayout").send({
+            name: 'testLayout'
         });
         expect(response.status).toBe(200);
 
         //Delete test course after testing
-        response = await request.delete("/api/deleteSection").send({
-            name: 'SWE4103'
+        response = await request.delete("/api/section/deleteSection").send({
+            name: 'testSection'
         });
         expect(response.status).toBe(200);
+        await request.get("/api/logout");
 
         //Delete test users after testing
         response = await request.delete("/api/delete-user").send({
             email: 'st1@test.com'
         });
-        expect(response.status).toBe(200);
 
         response = await request.delete("/api/delete-user").send({
             email: 'st2@test.com'
         });
-        expect(response.status).toBe(200);
 
         response = await request.delete("/api/delete-user").send({
             email: 'admin@test.com'
         });
-        expect(response.status).toBe(200);
-
         response = await request.delete("/api/delete-user").send({
             email: 'prof1@test.com'
         });
         expect(response.status).toBe(200);
-
         done()
     });
-
-   xit('Should store seating layout to database', async done => {
-
-        // Create a test seating layout
-        var seatingLayout = await request.post('/api/createSeatingLayout').send({
-            name: 'Sample layout',
-            capacity: 25,
-            dimensions: [ 5 , 5],
-            layout: [
-                [2, 1, 1, 1, 0],
-                [2, 1, 1, 1, 0],
-                [2, 1, 1, 1, 0],
-                [2, 1, 1, 1, 0],
-                [2, 3, 3, 3, 0]
-            ], 
-            default: true,
-            description: 'This is a sample'
-        });
-        
-        //Search layout in database by name
-        seatingLayout = await SeatingLayout.findOne({
-            name: 'Sample layout'
-        });
-
-        //Check that seating layout information is stored
-        expect(seatingLayout.name).toBe('Simple layout');
-        expect(seatingLayout.capacity).toBe(25);
-        expect(seatingLayout.dimensions).toBe([5,5]);
-        expect(seatingLayout.layout).toBe([ [2, 1, 1, 1, 0],
-                                            [2, 1, 1, 1, 0],
-                                            [2, 1, 1, 1, 0],
-                                            [2, 1, 1, 1, 0],
-                                            [2, 3, 3, 3, 0] ]);
-        expect(seatingLayout.default).toBe(true);
-        expect(seatingLayout.description).toBe('This is a sample');
-
-        //Delete test layout after testing
-        const response = await request.delete("/api/deleteSeatingLayout").send({
-            name: 'Sample layout'
-        });
-        expect(response.status).toBe(200);
-        
-        done()
-    })
-
 })

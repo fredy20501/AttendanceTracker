@@ -47,9 +47,13 @@
                   'type-1': seat.type==1,
                   'type-2': seat.type==2,
                   'type-3': seat.type==3,
-                  'selected': isSelected(i,j)
+                  'selected': isSelected(i,j),
+                  'green-selected': seat._id==getUser.id
                 }"
-              >{{seat.name}}</div>
+              >
+                <!-- Show the user's name in the new selected seat -->
+                {{isSelected(i,j) ? getUser.name : seat.name}}
+              </div>
             </td>
           </tr>
           <!-- Put a label as final row to represent the front of the class -->
@@ -83,6 +87,14 @@
         <label>Locked</label>
         <div class="seat type-0"></div>
       </div>
+      <div>
+        <label>Current<br>Seat</label>
+        <div class="seat green-selected"></div>
+      </div>
+      <div>
+        <label>New<br>Seat</label>
+        <div class="seat selected"></div>
+      </div>
     </div>
 
     <br>
@@ -92,6 +104,9 @@
       We will need a "Save Seat" button to reserve the selected seat.
       When clicked it will call a function so we can use v-on:click="" to do that
      -->
+    <button type="button" class="blue button-width" :disabled="isSelected(-1,-1)" @click="submitSeatSelection">
+      Update Seat
+    </button>
 
   </div>
 </template>
@@ -120,7 +135,7 @@ export default {
       selectedSeat: {
         row: -1,
         column: -1
-      }
+      },
     }
   },
 
@@ -214,13 +229,19 @@ export default {
     isSelected(row, column) {
       return this.selectedSeat.row === row && this.selectedSeat.column === column
     },
+    
+    // Returns true if the seat at the given row+column is the current seat of the user
+    isCurrent(row, column) {
+      const seat = this.classLayout[row][column]
+      return seat._id==this.getUser.id
+    },
 
     // This function will be called when a seat is selected
     selectSeat(row, column) {
       // TODO!! -> finish this function
 
       // If that seat is already selected, unselect it
-      if (this.isSelected(row, column)) {
+      if (this.isSelected(row, column) || this.isCurrent(row, column)) {
         this.selectedSeat.row = -1
         this.selectedSeat.column = -1
         return
@@ -308,5 +329,12 @@ export default {
   height: 45px;
   overflow: auto;
   font-weight: bold;
+}
+
+.button-width {
+  width: 300px;
+}
+.green-selected {
+  border: 3px solid #22a222;
 }
 </style>

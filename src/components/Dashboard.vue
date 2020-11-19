@@ -120,8 +120,7 @@ export default {
 
     // This function redirects to the section view for the specified section
     goToSection(sectionId) {
-      this.$router.push({name: 'view-section', params: {id: sectionId }})
-      // Note: you won't actually be able to go to the page until it is all integrated together
+      this.$router.push({name: 'section', params: {id: sectionId }})
     },
 
     // This function will make the proper api call to register the student to the specified section
@@ -133,6 +132,9 @@ export default {
       .then(res => {
         // Add the new course to the UI
         this.sections.push(res)
+        // Clear the field
+        this.sectionName = ""
+        this.hideRegistration = true
         // Show notification
         this.$notify({ 
           title: "Registered successfully", 

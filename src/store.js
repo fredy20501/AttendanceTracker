@@ -181,6 +181,62 @@ const store = new Vuex.Store({
       })
     },
 
+    getSectionsForStudent(context, payload) {
+      return $http.get('dashboard/getCoursesByStudent', {
+        // Note: for get requests we need to send data through params
+        params: {
+          studentID: payload.userId
+        }
+      })
+      .then(res => {
+        return {
+          sections: res.data
+        }
+      })
+      .catch(err => {
+        err.message = "Could not get courses. Please try again later"
+        throw err
+      })
+    },
+
+    getSectionsForProfessor(context, payload) {
+      return $http.get('dashboard/getCoursesCreatedByProfessor', {
+        // Note: for get requests we need to send data through params
+        params: {
+          professorID: payload.userId
+        }
+      })
+      .then(res => {
+        return {
+          sections: res.data
+        }
+      })
+      .catch(err => {
+        err.message = "Could not get courses. Please try again later"
+        throw err
+      })
+    },
+    
+    registerForSection(context, payload) {
+      return $http.put('dashboard/registerForCourse', payload)
+      .then(res => {
+        return res.data.course
+      })
+      .catch(err => {
+        // Register failed: Add a message and propagate the error
+        if (err.response.status == 520) {
+          err.message = "You are already registered for this course"
+        }
+        else if (err.response.status == 530) {
+          err.message = "Course does not exist"
+        }
+        else {
+          err.message = "Could not register for the course. Please try again later"
+        }
+        throw err
+      })
+    },
+    
     getSectionData(context, payload) {
       return $http.get('section/getCourseView', {
         // Note: for get requests we need to send data through params

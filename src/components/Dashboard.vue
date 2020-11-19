@@ -165,11 +165,7 @@ export default {
       })
       .then(res => {
         this.sections.push(res)
-        // Success!
-        // The result is stored in res
-        // Add the section you have just registered for to the list of sections so it shows up on the UI
-        // (hopefully the api should return the info of the section you have just registered for, so you can update the list of sections with that information)
-      })
+        })
       .catch(err => {
         // Error! (this is the default code I use to log the error and show a message to the user)
         console.log(err);
@@ -191,7 +187,8 @@ export default {
 
 .tile {
   display: inline-block;
-  width: 300px;
+  width: 250px;
+  margin:10px;
   border: 3px solid black;
 }
 

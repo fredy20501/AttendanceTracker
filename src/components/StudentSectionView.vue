@@ -273,6 +273,9 @@ export default {
       // Loop through the classLayout and create a new 2d array which contains
       // the student IDs of the student in each seat (or null if no student)
 
+      // NOTE: be careful since the user now has 2 seats: the 'current' one and the new 'selected' one.
+      // that means in the seating arrangement you need to ignore the current one since we want to change it to the new selected one.
+
       // The 2d array should look like this
     },
 

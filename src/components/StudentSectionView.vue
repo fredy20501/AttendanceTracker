@@ -21,7 +21,7 @@
           <tr>
             <td :colspan="classLayout[0].length+1">
               <div style="font-weight:bold">
-                Click to mark absent
+                Click to select a new seat
               </div>
               <br>
             </td>

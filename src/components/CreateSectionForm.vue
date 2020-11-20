@@ -52,7 +52,7 @@
         <div v-if="classList.length>0">
           Class List:
           <br>
-          <table class="students">
+          <table class="students" tabindex="0">
             <tbody>
               <tr v-for="(student, index) in classList" :key="index" >
                 <td>{{student.name}}</td>
@@ -82,8 +82,8 @@
 
       <div class="column">
         <!-- Basic dropdown for selecting layout -->
-        <label>Select Layout</label><br>
-        <select @change="layoutSelectedEvent" style="height: 30px; width:300px;" v-model="layoutSelected">
+        <label for="layoutDropdown">Select Layout</label><br>
+        <select id="layoutDropdown" @change="layoutSelectedEvent" style="height: 30px; width:300px;" v-model="layoutSelected">
           <option v-for="(layout, i) in layouts" v-bind:key="i" :value="i"
             v-bind:class="{bold: layout.type=='new'}"
           >
@@ -94,8 +94,8 @@
         </select><br>
         <br>
         <div v-if="isCurrentLayoutNew">
-          <label>Layout Name</label>
-          <input @change="updateLayoutName($event)" 
+          <label for="layoutName">Layout Name</label>
+          <input id="layoutName" @change="updateLayoutName($event)" 
             type="text" placeholder="Layout Name" v-model="newLayoutName">
         </div>
         <br>

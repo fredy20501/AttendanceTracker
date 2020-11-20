@@ -15,17 +15,10 @@ router.get('/', (req, res) => {
 
 // gets information regarding a seating layout given a professor id
 router.get('/previousSeatingPlans', (req, res) => {
-    // this is the professor ID
-    let professor = req.body.professor;
-
-    SeatingLayout.find({
-        $or: [{
-            default: true
-        }, {
-            created_by: professor
-        }]
-    }, function (err, seatingLayout) {
-        if (err) {
+    // Return all seating plans stored in the database
+    // (we do not filter by professor id)
+    SeatingLayout.find({}, function(err, seatingLayout){
+        if(err){
             console.log(err);
             return res.status(500).send();
         }
@@ -80,10 +73,10 @@ router.post('/createSection', (req, res) => {
     let attMandatory = req.body.attMandatory;
     let professor = req.body.professor;
     let admin = req.body.admin;
-    let students = req.body.students;
     let maxCapacity = req.body.maxCapacity;
     let seatingArrangement = req.body.seatingArrangement;
     let classList = req.body.classList;
+    let students = [];
     let attendance = [];
 
     const newSection = new Course();
@@ -105,7 +98,9 @@ router.post('/createSection', (req, res) => {
             return res.status(500).send(err);
         }
 
-        return res.status(200).send();
+        return res.status(200).json({
+            newSection
+        }); 
     })
 
 });
@@ -155,7 +150,7 @@ router.put('/updateSection', (req, res) => {
         if (admin != null && admin !== "") {
             course.admin = admin;
         }
-        if(students != null && students !== ""){
+        if (students != null && students !== "") {
             course.registered_students = students
         }
         if (maxCapacity != null && maxCapacity !== "") {
@@ -167,11 +162,10 @@ router.put('/updateSection', (req, res) => {
         if (Array.isArray(attendance) && attendance.length) {
             course.attendance = attendance;
         }
-
-        if(Array.isArray(classList) && classList.length){
+        if (Array.isArray(classList) && classList.length) {
             course.class_list = classList;
         }
-    
+
         course.save(err => {
             if (err) {
                 console.log(err);
@@ -184,6 +178,36 @@ router.put('/updateSection', (req, res) => {
 });
 
 
+router.delete('/deleteSeatingLayout', (req, res) => {
+    // Delete all seating layouts with the given name 
+    // (should only delete one since emails are unique)
+    var name = req.body.name;
+
+    SeatingLayout.deleteMany({ name: name }, (err) => {
+        if(err){
+            console.log(err);
+            return res.status(500).send();
+        }
+
+        return res.status(200).send(); 
+    });
+});
+
+router.delete('/deleteSection', (req, res) => {
+    // Delete all sections with the given name 
+    // (should only delete one since emails are unique)
+    var name = req.body.name;
+
+    Course.deleteMany({ name: name }, (err) => {
+        if(err){
+            console.log(err);
+            return res.status(500).send();
+        }
+
+        return res.status(200).send(); 
+    });
+});
+
 // ------------- Combined Seating Layout and Course Methods -------------
 
 // gets information regarding a course given a course id
@@ -191,7 +215,7 @@ router.get('/getCourseView', (req, res) => {
 
     // Note: for get requests data is sent through query params
     let courseID = req.query.courseID;
-
+    
     Course.findById(courseID)
     // The populate method replaces an objectId reference with the actual object
     // Documentation: https://mongoosejs.com/docs/populate.html
@@ -227,4 +251,4 @@ router.get('/getCourseView', (req, res) => {
 })
 
 
-module.exports = router; 
+module.exports = router;

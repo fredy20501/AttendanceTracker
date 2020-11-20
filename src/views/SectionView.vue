@@ -2,24 +2,21 @@
   <div>
     <!-- Show only one component depending on the user -->
     <StudentSectionView v-if="!isProfessor"/>
-    <!-- <ProfessorSectionView v-if="isProfessor"/> -->
+    <ProfessorSectionView v-if="isProfessor"/>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 import StudentSectionView from '@/components/StudentSectionView.vue'
-// The ProfessorSectionView is commented out since it will be added in a different git branch
-// (we will uncoment it when it gets merged)
-// import ProfessorSectionView from '@/components/ProfessorSectionView.vue'
+import ProfessorSectionView from '@/components/ProfessorSectionView.vue'
 
 export default {
   name: 'SectionView',
   components: {
     StudentSectionView,
-    // ProfessorSectionView
+    ProfessorSectionView
   },
-
   computed: {
     // Import the getters from the global store
     ...mapGetters([

@@ -5,7 +5,7 @@ const session = require('express-session');
 const cors = require('cors')
 
 var config;
-if (!process.env.TRAVIS) {
+if (!process.env.CI) {
   config = require('./config/config.js');
 }
 

@@ -17,7 +17,7 @@ if (isProduction) {
 else {
   // Get port from server config
   var config
-  if (!process.env.TRAVIS) {
+  if (!process.env.CI) {
     config = require('@/../server/config/config.js')
   }
   

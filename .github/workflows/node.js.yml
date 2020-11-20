@@ -3,6 +3,12 @@
 
 name: Node.js CI
 
+# Get the DB passwod & username from our repository's secrets
+env:
+  DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+# Run CI on pushes & pull request for the main branch
 on:
   push:
     branches: [ main ]

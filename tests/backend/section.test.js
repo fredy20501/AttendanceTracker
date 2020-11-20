@@ -205,7 +205,7 @@ describe('Backend server fuctionality', () => {
         console.log("COURSE: ", course1)
         console.log("RESPONSE: ", response.body)
 
-        response = await request.post("/api/section/updateSection").send({
+        response = await request.put("/api/section/updateSection").send({
             courseId: course1._id,
             courseName: 'testSection',
             attendanceThreshold: '0',

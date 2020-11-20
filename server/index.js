@@ -1,7 +1,7 @@
 const app = require('./app');
 
 var config;
-if (!process.env.TRAVIS) {
+if (!process.env.CI) {
   config = require('./config/config.js');
 }
 // Don't change the default port (5000) since both frontend 

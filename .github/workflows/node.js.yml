@@ -16,7 +16,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  buildAndTest:
 
     runs-on: ubuntu-latest
 

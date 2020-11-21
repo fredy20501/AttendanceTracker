@@ -15,7 +15,5 @@ app.use(history())
 app.use(staticFileMiddleware) 
 // ^ Included twice on purpose
 
-var config = require('./config.js');
-const PORT = config.productionPort;
-//const PORT = 3000//8080
+const PORT = 3000;
 app.listen(PORT, () => console.log(`Frontend server started on port ${PORT}`));

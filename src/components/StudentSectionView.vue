@@ -247,21 +247,24 @@ export default {
         return
       }
 
+
       // Get the seat type based on the row+column
       const seatType = this.classLayout[row][column].type
+      const seat = this.classLayout[row][column]
       console.log(seatType)
 
-      // Note that the user should not be able to select a seat which already has a student sitting in it, so we should check that
-      // Note that the user can only select "selected access" or "extended access" seats for reservation (can't select locked or open access seats)
+      if (seatType == 0 || seatType == 1) {
 
-      // We can use a variable to store the currently selected seat so we always know which seat is selected (maybe store the row and column of that seat?)
+         return;
 
-      // You can add the name of the user in the selected seat to further emphasize the selection
-      //   -> You can get the name of the user using the getUser function: `this.getUser.name`
+      }
 
-      // When a seat is successfuly selected, you can add the css class 'selected' to it which will show a red outline (it is defined in the css of App.vue)
-      // Tip: you can use the variable which stores the selected seat to dynamically add the class to a seat in the grid if it matches the selected seat 
-      // (you can do this in the html similar to how I add the seat color css class (type-1, type-2, ...) based on the number of the seat type)
+      if(seat.name != "") {
+
+        return;
+
+      }
+
       this.selectedSeat.row = row
       this.selectedSeat.column = column
     },
@@ -269,28 +272,59 @@ export default {
     // Returns the new seating arrangement
     getNewSeatingArrangement() {
       // TODO!! -> finish this function
+      var newLayout = new Array()
+      
 
-      // Loop through the classLayout and create a new 2d array which contains
-      // the student IDs of the student in each seat (or null if no student)
+      for(var i = 0; i < this.classLayout.length; i++)  {
+        var newRow = new Array()
 
-      // NOTE: be careful since the user now has 2 seats: the 'current' one and the new 'selected' one.
-      // that means in the seating arrangement you need to ignore the current one since we want to change it to the new selected one.
+        newLayout.push(newRow)
 
-      // The 2d array should look like this
+        for(var j = 0; j < this.classLayout[0].length; j++)  {
+
+          const seat = this.classLayout[i][j]
+          if(seat.name != "" && !this.isCurrent(i, j)) {
+
+            newRow.push(seat._id)
+
+          }
+
+          else if(this.isSelected(i, j))  {
+
+            newRow.push(this.getUser.id)
+
+          }
+
+          else  {
+
+            newRow.push(null)
+
+          }
+
+        }
+
+      }
+
+      console.log(newLayout)
+      return newLayout
+
     },
 
     // Calls the proper API to reserve the selected seat for the user
     submitSeatSelection() {
       // TODO!! -> finish this function
 
-      // Get the currently selected seat (make sure there is one)
-      // Make sure the selected seat is not locked, not open access, and not already taken by someone else 
-      //   -> (this should already be taken care of in the selectSeat() function but it is good to double check)
+      if(this.selectedSeat.row == -1 || this.selectedSeat.column == -1) {
+
+        return;
+
+      }
+
 
       // Create a new 2d array showing the new position of all students
       const newSeatingArrangement = this.getNewSeatingArrangement()
 
-      this.$store.dispatch('reserveSeat', {
+      this.$store.dispatch('updateSeatingArrangement', {
         // The API expects the courseid and the new seating arrangment (a 2d array showing the student positions)
         courseID: this.courseId,
         seatingArrangement: newSeatingArrangement
@@ -298,11 +332,16 @@ export default {
       .then(res => {
         console.log(res)
 
-        // Success!
-        // The result (if any) is stored in res
-        // We can clear the selection (i.e. the seat doesn't show as being selected anymore) and refresh the grid 
-        // to see the new layout (the user's name should now be in the right position)
-        //  -> You can call the getSectionData() function again
+        this.getSectionData()
+        
+        this.$notify({ 
+          title: "Seat Updated Successfully", 
+          type: "success"
+        });
+
+        this.selectedSeat.row = -1
+        this.selectedSeat.column = -1
+
       })
       .catch(err => {
         // Error! (this is the default code I use to log the error and show a message to the user)

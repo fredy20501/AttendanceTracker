@@ -275,7 +275,7 @@ const store = new Vuex.Store({
     },
 
     updateSeatingArrangement(context, payload) {
-      return $http.post('student/updateStudentCourseView', payload)
+      return $http.put('student/updateStudentCourseView', payload)
       .catch(err => {
         err.message = "Could not reserve the seat. Please try again later"
         throw err

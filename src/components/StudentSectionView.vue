@@ -100,10 +100,6 @@
     <br>
     <br>
 
-    <!-- 
-      We will need a "Save Seat" button to reserve the selected seat.
-      When clicked it will call a function so we can use v-on:click="" to do that
-     -->
     <button type="button" class="blue button-width" :disabled="isSelected(-1,-1)" @click="submitSeatSelection">
       Update Seat
     </button>
@@ -236,6 +232,18 @@ export default {
       return seat._id==this.getUser.id
     },
 
+    // Returns true if the given seat is selectable, false otherwise
+    // (A seat is not selectable if it is locked, open-access, or a student is already in it)
+    isSelectableSeat(row, column) {
+      const seat = this.classLayout[row][column]
+      var selectable = true;
+      // Can't select locked or open-access seats
+      if (seat.type == 0 || seat.type == 1) selectable = false
+      // Can't select a seat which already has a student
+      if (seat.name != "") selectable = false
+      return selectable
+    },
+
     // This function will be called when a seat is selected
     selectSeat(row, column) {
       // TODO!! -> finish this function
@@ -247,104 +255,69 @@ export default {
         return
       }
 
+      // Make sure the seat is selectable
+      if (!this.isSelectableSeat(row, column)) return
 
-      // Get the seat type based on the row+column
-      const seatType = this.classLayout[row][column].type
-      const seat = this.classLayout[row][column]
-      console.log(seatType)
-
-      if (seatType == 0 || seatType == 1) {
-
-         return;
-
-      }
-
-      if(seat.name != "") {
-
-        return;
-
-      }
-
+      // Select the seat
       this.selectedSeat.row = row
       this.selectedSeat.column = column
     },
 
-    // Returns the new seating arrangement
+    // Returns the new seating arrangement (2d array of student Ids)
     getNewSeatingArrangement() {
-      // TODO!! -> finish this function
       var newLayout = new Array()
-      
 
-      for(var i = 0; i < this.classLayout.length; i++)  {
+      for (var i = 0; i < this.classLayout.length; i++)  {
         var newRow = new Array()
-
-        newLayout.push(newRow)
-
-        for(var j = 0; j < this.classLayout[0].length; j++)  {
-
+        for (var j = 0; j < this.classLayout[0].length; j++)  {
           const seat = this.classLayout[i][j]
-          if(seat.name != "" && !this.isCurrent(i, j)) {
-
+          // Add the id if seat is not empty (but don't add the current seat)
+          if (seat.name != "" && !this.isCurrent(i, j)) {
             newRow.push(seat._id)
-
           }
-
-          else if(this.isSelected(i, j))  {
-
+          // Add the new seat (i.e. the selected one)
+          else if (this.isSelected(i, j))  {
             newRow.push(this.getUser.id)
-
           }
-
+          // Empty seat
           else  {
-
             newRow.push(null)
-
           }
-
         }
-
+        newLayout.push(newRow)
       }
-
-      console.log(newLayout)
       return newLayout
-
     },
 
     // Calls the proper API to reserve the selected seat for the user
     submitSeatSelection() {
-      // TODO!! -> finish this function
-
-      if(this.selectedSeat.row == -1 || this.selectedSeat.column == -1) {
-
+      // Don't do anything if no seat is selected or the selected seat is not valid
+      if (this.isSelected(-1,-1) || !this.isSelectableSeat(this.selectedSeat.row, this.selectedSeat.column)) {
         return;
-
       }
-
 
       // Create a new 2d array showing the new position of all students
       const newSeatingArrangement = this.getNewSeatingArrangement()
 
       this.$store.dispatch('updateSeatingArrangement', {
-        // The API expects the courseid and the new seating arrangment (a 2d array showing the student positions)
         courseID: this.courseId,
         seatingArrangement: newSeatingArrangement
       })
-      .then(res => {
-        console.log(res)
-
+      .then(() => {
+        // Refresh the grid
         this.getSectionData()
-        
+
+        // Show success notification
         this.$notify({ 
           title: "Seat Updated Successfully", 
           type: "success"
         });
 
+        // Clear the seat selection
         this.selectedSeat.row = -1
         this.selectedSeat.column = -1
-
       })
       .catch(err => {
-        // Error! (this is the default code I use to log the error and show a message to the user)
         console.log(err);
         // Show a notification with the error message
         if (err.message) {

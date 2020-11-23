@@ -29,3 +29,13 @@ export default {
 }
 
 </script>
+<style lang="scss" scoped>
+.profileButton {
+  position:absolute;
+  top:5px;
+  right:5px;
+  border:1px solid white;
+  padding: 3px;
+  font-size:1.1em;
+}
+</style>

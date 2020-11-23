@@ -202,8 +202,6 @@ describe('Backend server fuctionality', () => {
             seatingArrangement: [] 
         });
         const course1 = response.body.newSection
-        console.log("COURSE: ", course1)
-        console.log("RESPONSE: ", response.body)
 
         response = await request.put("/api/section/updateSection").send({
             courseId: course1._id,

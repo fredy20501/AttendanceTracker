@@ -20,7 +20,7 @@ router.put('/updateStudentCourseView', (req, res) => {
             console.log("Not found");
         }
 
-        if (Array.isArray(course.seating_arrangement) && course.seating_arrangement.length) {
+        if (Array.isArray(seatingArrangement) && seatingArrangement.length) {
             course.seating_arrangement = seatingArrangement;
         }
 

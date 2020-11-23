@@ -2,7 +2,7 @@
 <template>
   <header class="banner" style="position:relative">
     <h1>Attendance Tracker</h1>
-    <div v-if="isAuthenticated" v-on:click="$router.push('home')" class="profileButton">  <!--Only shows after login-->
+    <div v-if="isAuthenticated" v-on:click="$router.push({name:'home'})" class="profileButton">  <!--Only shows after login-->
       
       <div v-if="isProfessor">
         &#9413; {{this.getUser.name}}

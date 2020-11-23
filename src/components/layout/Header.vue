@@ -5,11 +5,11 @@
     <div v-if="isAuthenticated">  <!--Only shows after login-->
       
       <div v-if="isProfessor">
-         <h2>{{this.getUser.name}}	&#9413; </h2>
+         <h2>&#9413; {{this.getUser.name}}</h2>
       </div>
       
       <div v-else>
-        <h2>{{this.getUser.name}}	&#9416; </h2>
+        <h2>&#9416; {{this.getUser.name}}</h2>
       </div>
 
     </div>

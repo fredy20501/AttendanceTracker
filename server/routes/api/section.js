@@ -119,7 +119,6 @@ router.put('/updateSection', (req, res) => {
     let classList = req.body.classList;
     let maxCapacity = req.body.maxCapacity;
     let seatingArrangement = req.body.seatingArrangement;
-    let attendance = [];
 
     Course.findOne({
         _id: courseId
@@ -158,9 +157,6 @@ router.put('/updateSection', (req, res) => {
         }
         if (seatingArrangement != null && seatingArrangement !== "") {
             course.seating_arrangement = seatingArrangement;
-        }
-        if (Array.isArray(attendance) && attendance.length) {
-            course.attendance = attendance;
         }
         if (Array.isArray(classList) && classList.length) {
             course.class_list = classList;

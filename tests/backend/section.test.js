@@ -213,6 +213,11 @@ describe('Backend server fuctionality', () => {
             admin: admin1._id,
             students: [],
             maxCapacity: 30,
+            classList: [
+                {name: 'test1', email:'test1@unb.ca'},
+                {name: 'test2', email:'test2@unb.ca'},
+                {name: 'test3', email:'test3@unb.ca'},
+            ],
             seatingArrangement: [] 
         });
         expect(response.status).toBe(200);

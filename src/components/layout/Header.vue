@@ -3,11 +3,14 @@
   <header class="banner">
     <h1>Attendance Tracker</h1>
     <div v-if="isAuthenticated">
-      <div v-if="isProfessor">
-        <h2>Welcome, Professor {{this.getUser.name}}</h2>
+      <div style="text-align:left; width:49%; display: inline-block;">
+        <h2>{{this.getUser.name}}</h2>
       </div>
-      <div v-else>
-        <h2>Welcome, {{this.getUser.name}}</h2>
+      <div v-if="isProfessor" style="text-align:right; width:50%; display: inline-block;">
+        <h2>Professor</h2>
+      </div>
+      <div v-else style="text-align:right; width:50%; display: inline-block;">
+        <h2>Student</h2>
       </div>
     </div>
   </header>

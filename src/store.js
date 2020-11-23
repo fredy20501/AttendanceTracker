@@ -174,7 +174,7 @@ const store = new Vuex.Store({
     },
 
     updateSection(context, payload) {
-      return $http.post('section/updateSection', payload)
+      return $http.put('section/updateSection', payload)
       .catch(err => {
         err.message = "Could not save section. Please try again later"
         throw err

@@ -16,7 +16,7 @@
     </div>
 
     <div class="grid-layout">
-      <table v-if="classLayout.length>0">
+      <table v-if="classLayout.length>0" aria-label="Classroom Layout">
         <tbody>
           <tr>
             <td :colspan="classLayout[0].length+1">
@@ -39,7 +39,8 @@
             <td>{{i+1}}</td>
             <!-- Loop through each seat in the row -->
             <td v-for="(seat, j) in row" v-bind:key="j">
-              <div
+              <button
+                type="button"
                 @click="selectSeat(i,j)"
                 v-bind:class="{
                   'seat': true,
@@ -53,7 +54,7 @@
               >
                 <!-- Show the user's name in the new selected seat -->
                 {{isSelected(i,j) ? getUser.name : seat.name}}
-              </div>
+              </button>
             </td>
           </tr>
           <!-- Put a label as final row to represent the front of the class -->

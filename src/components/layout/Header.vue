@@ -1,15 +1,15 @@
 
 <template>
-  <header class="banner">
+  <header class="banner" style="position:relative">
     <h1>Attendance Tracker</h1>
-    <div v-if="isAuthenticated">  <!--Only shows after login-->
+    <div v-if="isAuthenticated" v-on:click="$router.push('home')" class="profileButton">  <!--Only shows after login-->
       
       <div v-if="isProfessor">
-         <h2>&#9413; {{this.getUser.name}}</h2>
+        &#9413; {{this.getUser.name}}
       </div>
       
       <div v-else>
-        <h2>&#9416; {{this.getUser.name}}</h2>
+        &#9416; {{this.getUser.name}}
       </div>
 
     </div>

@@ -55,8 +55,9 @@ const courseSchema = new Schema({
     timestamps: true 
 });
 const Course = mongoose.model('course', courseSchema, 'course');
+const ArchivedSection = mongoose.model('archivedSection', courseSchema, 'archivedSection');
 
-module.exports = {User, Course, SeatingLayout};
+module.exports = {User, Course, SeatingLayout, ArchivedSection};
 
 /********************************
  * Schema Property Explainations*

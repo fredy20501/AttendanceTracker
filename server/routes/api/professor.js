@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 let {
-    Course
+    Course,
+    ArchivedSection
 } = require('../../dbSchemas/attendanceSchema');
 
 /**pushes a new attendance object to a course
@@ -46,3 +47,45 @@ router.put('/pushNewAttendance', (req, res) => {
 });
 
 module.exports = router;
+
+/**
+ * allows the professor to delete a course
+ * and archives the section 
+ * ================================
+ * Example API body call:
+ * {
+ *   "sectionID" : "5fbbeebc85d6314ab80bfc07"
+ * }
+ */
+router.post('/archiveSection', (req, res) => {
+    let sectionID = req.body.sectionID;
+
+    Course.findOne({ _id: sectionID }, function(err, course) {
+
+        if (err || course == null) {
+            console.log(err);
+            return res.status(500).send(err);
+        }
+
+        let swap = new (ArchivedSection)(course.toJSON())
+        /* if desired, you could set a new id
+        swap._id = mongoose.Types.ObjectId()
+        swap.isNew = true
+        */
+        course.remove(err => {
+            if (err) {
+                console.log(err);
+                return res.status(500).send(err);
+            }
+        })
+
+        swap.save(err => {
+            if (err) {
+                console.log(err);
+                return res.status(500).send(err);
+            }
+
+            return res.status(200).send();
+        })
+    })
+});

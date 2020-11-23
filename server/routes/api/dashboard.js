@@ -9,7 +9,7 @@ let {
  * ==========================================
  * Example api call body:
  * {
-	"studentId": "5f984a44da9eb32ba01d31dd"
+	"studentID": "5f984a44da9eb32ba01d31dd"
     }
  */
 router.get('/getCoursesByStudent', (req, res) => {
@@ -29,6 +29,40 @@ router.get('/getCoursesByStudent', (req, res) => {
         }
         res.status(200).send(courses);
     });
+});
+
+
+/**drops a section by a given student, such that it removes him from the registered_students list
+ * of a given course
+ * ==========================================
+ * Example api call body:
+ * {
+    "studentID": "5f984a44da9eb32ba01d31dd",
+    "sectionID" : "5f984a44da9eb32ba01d31df"
+    }
+ */
+router.put('/dropSection', (req, res) => {
+    let studentID = req.body.studentID;
+    let sectionID = req.body.sectionID;
+
+    Course.findOne({ _id: sectionID }, function(err, course) {
+
+        let index = course.registered_students.indexOf(studentID)
+
+        if(index == -1){
+            return res.status(500).send(err);
+        }
+        course.registered_students.splice(index, 1);
+
+        course.save(err => {
+            if (err) {
+                console.log(err);
+                return res.status(500).send(err);
+            }
+
+            return res.status(200).send();
+        })
+    })
 });
 
 /**GETS all the courses created by a professor

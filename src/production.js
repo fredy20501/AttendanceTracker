@@ -6,13 +6,14 @@ const cors = require('cors')
 const app = express();
 app.use(cors())
 
-// Setup the frontend if in production (source: https://dennisreimann.de/articles/vue-cli-serve-express.html)
+// Setup the frontend if in production (source: https://forum.vuejs.org/t/how-do-i-implement-connect-history-api-fallback-so-that-url-paths-redirect-to-index-html/10938/2)
 // Since the frontend is only a set of static pages once built we can serve them as static files on a server
 const publicPath = resolve(__dirname, '../dist')
-const staticConf = { maxAge: '1y', etag: false }
-app.use(express.static(publicPath, staticConf))
-app.use('/', history())
-var config = require('./config.js');
-const PORT = config.productionPort;
-//const PORT = 3000//8080
+const staticFileMiddleware = express.static(publicPath)
+app.use(staticFileMiddleware)
+app.use(history())
+app.use(staticFileMiddleware) 
+// ^ Included twice on purpose
+
+const PORT = 3000;
 app.listen(PORT, () => console.log(`Frontend server started on port ${PORT}`));

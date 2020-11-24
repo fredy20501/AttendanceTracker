@@ -10,10 +10,10 @@ env:
 
 # Run CI on pushes & pull request for the main branch
 on:
-  push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
+    branches:
+      - 'main'
+      - '*-story'
 
 jobs:
   buildAndTest:

@@ -1,11 +1,13 @@
 <template>
   <div id="app">
     <Header />
-    <router-view style="position:relative; margin:10px;"/>
+    <main>
+      <notifications class="custom-notification" position="top center"/>
+      <router-view style="position:relative; margin:10px;"/>
+    </main>
     <br>
     <br>
     <Footer />
-    <notifications style="margin-top:5px" position="top center"/>
   </div>
 </template>
 
@@ -56,6 +58,21 @@ The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/docu
 // Make banners flush with the screen on small screens
 @media only screen and (max-width: 900px) {
   body { margin: 0; }
+}
+
+.custom-notification {
+  // Style of the notification itself 
+  margin-top: 5px;
+ 
+  .notification-title {
+    // Style for title line
+    color: black;
+  }
+ 
+  .notification-content {
+    // Style for content
+    color: black;
+  }
 }
 
 .legend {
@@ -156,11 +173,11 @@ button.red {
 }
 button.green {
   background-color: #22a222;
-  color: white;
+  color: black;
 }
 button.blue {
   background-color: #24a0ee;
-  color: white;
+  color: black;
 }
 button.red:hover:enabled { background-color: #ba0000; }
 button.green:hover:enabled { background-color: #1e901e; }

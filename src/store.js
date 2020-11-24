@@ -160,7 +160,12 @@ const store = new Vuex.Store({
         return { layout: res.data.seatingLayout }
       })
       .catch(err => {
-        err.message = "Could not save seating layout. Please try again later"
+        if (err.response?.data?.code == 11000) {
+          err.message = "A seating layout with this name already exists"
+        }
+        else {
+          err.message = "Could not save seating layout. Please try again later"
+        }
         throw err
       })
     },

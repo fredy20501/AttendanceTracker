@@ -52,7 +52,7 @@
         <div v-if="classList.length>0">
           Class List:
           <br>
-          <table class="students">
+          <table class="students" tabindex="0">
             <tbody>
               <tr v-for="(student, index) in classList" :key="index" >
                 <td>{{student.name}}</td>
@@ -82,8 +82,8 @@
 
       <div class="column">
         <!-- Basic dropdown for selecting layout -->
-        <label>Select Layout</label><br>
-        <select @change="layoutSelectedEvent" style="height: 30px; width:300px;" v-model="layoutSelected">
+        <label for="layoutDropdown">Select Layout</label><br>
+        <select id="layoutDropdown" @change="layoutSelectedEvent" style="height: 30px; width:300px;" v-model="layoutSelected">
           <option v-for="(layout, i) in layouts" v-bind:key="i" :value="i"
             v-bind:class="{bold: layout.type=='new'}"
           >
@@ -94,8 +94,8 @@
         </select><br>
         <br>
         <div v-if="isCurrentLayoutNew">
-          <label>Layout Name</label>
-          <input @change="updateLayoutName($event)" 
+          <label for="layoutName">Layout Name</label>
+          <input id="layoutName" @change="updateLayoutName($event)" 
             type="text" placeholder="Layout Name" v-model="newLayoutName">
         </div>
         <br>
@@ -145,7 +145,7 @@
 
       <div class="double-column">
         <div class="grid-layout">
-          <table v-if="layouts.length>0">
+          <table v-if="layouts.length>0" aria-label="Classroom Layout">
             <tbody>
               <!-- First row shows the column number -->
               <tr>
@@ -160,9 +160,11 @@
                 <td>{{i+1}}</td>
                 <!-- Loop through each seat in the row -->
                 <td v-for="(seat, j) in row" v-bind:key="j">
-                  <div
+                  <button
+                    type="button"
                     @click="fromPaintSelect(i,j)" 
                     @mouseover="toPaintSelect(i,j)"
+                    @focus="toPaintSelect(i,j)"
                     v-bind:class="{
                       'seat': true,
                       'type-0': seat==0,
@@ -171,7 +173,7 @@
                       'type-3': seat==3,
                       'selected': isSeatSelected(i,j)
                     }"
-                  ></div>
+                  ></button>
                 </td>
               </tr>
               <!-- Put a label as final row to represent the front of the class -->
@@ -191,31 +193,35 @@
           <h3>Seat Legend</h3>
           <div>
             <label>Selected<br>Access</label>
-            <div v-bind:class="{'seat': true, 'type-2': true, 
+            <button type="button" 
+              v-bind:class="{'seat': true, 'type-2': true, 
                 'selected': currentPaintSelected==2
               }"
-              v-on:click="paintSelectIndex=2"></div>
+              v-on:click="paintSelectIndex=2"></button>
           </div>
           <div>
             <label>Extended<br>Access</label>
-            <div v-bind:class="{'seat': true, 'type-3': true, 
+            <button type="button" 
+              v-bind:class="{'seat': true, 'type-3': true, 
                 'selected': currentPaintSelected==3
               }"
-              v-on:click="paintSelectIndex=3"></div>
+              v-on:click="paintSelectIndex=3"></button>
           </div>
           <div>
             <label>Open<br>Access</label>
-            <div v-bind:class="{'seat': true, 'type-1': true, 
+            <button type="button" 
+              v-bind:class="{'seat': true, 'type-1': true, 
                 'selected': currentPaintSelected==1
               }"
-              v-on:click="paintSelectIndex=1"></div>
+              v-on:click="paintSelectIndex=1"></button>
           </div>
           <div>
             <label>Locked</label>
-            <div v-bind:class="{'seat': true, 'type-0': true, 
+            <button type="button" 
+              v-bind:class="{'seat': true, 'type-0': true, 
                 'selected': currentPaintSelected==0
               }"
-              v-on:click="paintSelectIndex=0"></div>
+              v-on:click="paintSelectIndex=0"></button>
           </div>
         </div>
       </div>

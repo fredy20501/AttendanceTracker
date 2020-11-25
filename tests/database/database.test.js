@@ -202,6 +202,9 @@ describe('Database Functionality', () => {
             name: 'testSection'
         });
         expect(response.status).toBe(200);
+
+        //temporarily keep the testSection
+
         await request.get("/api/logout");
 
         //Delete test users after testing

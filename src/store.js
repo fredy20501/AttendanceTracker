@@ -277,6 +277,19 @@ const store = new Vuex.Store({
         err.message = "Could not save attendance. Please try again later"
         throw err
       })
+    },
+
+    getAttendanceData(context, payload) {
+      return $http.get('professor/getAttendanceData', {
+        // Note: for get requests we need to send data through params
+        params: {
+          courseID: payload.courseID
+        }
+      })
+      .catch(err => {
+        err.message = "Could not get attendance data. Please try again later"
+        throw err
+      })
     }
   }
 })

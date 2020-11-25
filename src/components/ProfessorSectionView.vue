@@ -151,6 +151,7 @@
 import { mapGetters } from 'vuex'
 import SpinnerButton from './SpinnerButton'
 import PieChart from './PieChart'
+import XLSX from 'xlsx'
 
 export default {
   name: 'ProfessorCourseView',
@@ -390,12 +391,105 @@ export default {
       this.$router.push({ name: 'createSection', params: {id: this.courseId} })
     },
 
-    // TODO: This function will export the attendance data for this course into an excel file
+    // Export the attendance data for this course as an excel file
     exportData() {
-      // Temporary message to tell users it is not currently functional
-      this.$notify({
-        title: 'Export data is not functional yet',
-        type: 'warn'
+      this.$store.dispatch('getAttendanceData', {
+        courseID: this.courseId
+      })
+      .then(res => {
+        var attendanceData = res.data.attendanceData
+        var classList = res.data.classList
+        var registeredStudents = res.data.registeredStudents
+
+        classList = []
+        registeredStudents = []
+
+        // Don't do anything if there is no attendance data or no students
+        if (attendanceData.length == 0) {
+          this.$notify({ 
+            title: 'No attendance data to export', 
+            type: 'warn'
+          });
+          return
+        }
+
+        // 2d array that will store the data we want to download as excel file
+        var excelData = []
+
+        // Build header row
+        var headers = []
+        // First column is student name
+        headers.push('Student Name')
+        // Other columns are date of each attendance
+        attendanceData.forEach(attendance => {
+          // Format date as dd/mm/yyy, hh:mm AM/PM
+          const strDate = new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric'
+          }).format(new Date(attendance.date))
+          // Add date to the header
+          headers.push(strDate)
+        })
+        excelData.push(headers)
+
+        // Get full list of students in the course (registered + classList)
+        // Merge the class list into the registered students list (no duplicates)
+        classList.forEach(student => {
+          // Add the student if it isn't already in the list or registered students
+          const addStudent = -1 == registeredStudents.findIndex(regStudent => {
+            return regStudent.email === student.email
+          })
+          // Add identifier so we know it came from class list (in this case the student will always be marked absent by default)
+          student.isFromClassList = true
+          if (addStudent) registeredStudents.push(student)
+        })
+
+        // Build rows of excel file (each student)
+        registeredStudents.forEach(student => {
+          // Build this student's attendance for each day
+          var studentAttendance = []
+          // First column is the name
+          studentAttendance.push(student.name)
+          // Other columns are X if absent, blank if present
+          attendanceData.forEach(attendance => {
+            var isPresent = -1 == attendance.absent_students.findIndex(abStudent => {
+              return abStudent.email === student.email
+            })
+            // If attendance was mandatory, add class list students as absent by default
+            if (isPresent && attendance.mandatory && student.isFromClassList) {
+              isPresent = false
+            }
+            // Add blank or X to denote present or absent for this day
+            studentAttendance.push(isPresent ? '' : 'X')
+          })
+
+          // Add this student's attendance as a row in the excel file
+          excelData.push(studentAttendance)
+        })
+
+        // Add explanation row
+        excelData.push([], ['X = absent'])
+
+        // Convert 2d array into excel file
+        const worksheet = XLSX.utils.aoa_to_sheet(excelData)
+        const workbook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
+
+        // Download file
+        const fileName = 'AttendanceData ('+this.courseName+').xlsx'
+        XLSX.writeFile(workbook, fileName);
+      })
+      .catch(err => {
+        console.log(err);
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          });
+        }
       })
     }
   }

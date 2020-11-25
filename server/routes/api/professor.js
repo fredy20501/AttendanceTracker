@@ -24,7 +24,7 @@ router.put('/pushNewAttendance', (req, res) => {
 
         if (err || course == null) {
             console.log(err);
-            console.log("Not found");
+            return res.status(500).send(err);
         }
 
         let newAttendance = {
@@ -42,6 +42,44 @@ router.put('/pushNewAttendance', (req, res) => {
             }
             return res.status(200).send();
         })
+    });
+});
+
+/**
+ * Get all attendance objects of the specified course
+ * ==========================================
+ * Example api call: (note that data is passed through query params)
+ { 
+    params: {
+        "courseID": "5f9aa985a74e0454388aa083"
+    }
+ }
+ */
+router.get('/getAttendanceData', (req, res) => {
+    // Note: for get requests data is sent through query params
+    let courseID = req.query.courseID;
+
+    console.log('body', req.body)
+    console.log('query', req.query)
+    console.log('courseID', courseID)
+
+    Course.findById(courseID)
+
+    // Replace the id of students with their names
+    .populate('attendance.absent_students', ['name', 'email'])
+    .populate('registered_students', ['name', 'email'])
+
+    .exec(function (err, course) {
+        if (err || course == null) {
+            console.log(err);
+            return res.status(500).send(err);
+        }
+
+        return res.status(200).json({
+            attendanceData: course.attendance,
+            classList: course.class_list,
+            registeredStudents: course.registered_students
+        });
     });
 });
 

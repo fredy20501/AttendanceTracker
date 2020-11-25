@@ -1,5 +1,8 @@
 <template>
-  <div>
+<transition name="fade" mode="out-in">
+  <Loading v-if="loading && pageMode=='edit'"/>
+
+  <div v-else>
     <!-- 
       The mode determines if we are currently adding 
       a new section or updating an existing one
@@ -255,6 +258,7 @@
     </ValidationObserver>
     
   </div>
+</transition>
 </template>
 
 <script>
@@ -270,6 +274,8 @@ export default {
 
   data() {
     return {
+      // Hide the page until data is loaded
+      loading: true,
       
       // Field values
       sectionName: "",
@@ -378,6 +384,9 @@ export default {
         if (layoutIndex !== -1) {
           this.layoutSelected = layoutIndex
         }
+        
+        // Show the page once data is loaded
+        this.loading = false
       })
       .catch(err => {
         console.log(err);

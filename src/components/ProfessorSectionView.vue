@@ -401,9 +401,6 @@ export default {
         var classList = res.data.classList
         var registeredStudents = res.data.registeredStudents
 
-        classList = []
-        registeredStudents = []
-
         // Don't do anything if there is no attendance data or no students
         if (attendanceData.length == 0) {
           this.$notify({ 

@@ -23,7 +23,7 @@ router.get('/getCoursesByStudent', (req, res) => {
     })
     .populate('professor')
     .exec(function (err, courses) {
-        if (err || courses == null) {
+        if (err || courses == null || courses.length == 0) {
             console.log(err);
             return res.status(500).send(err);
         }
@@ -41,15 +41,17 @@ router.get('/getCoursesByStudent', (req, res) => {
 router.get('/getCoursesCreatedByProfessor', (req, res) => {
     // Note: for get requests data is sent through query params
     let professorID = req.query.professorID;
-    console.log("%%%%%%%%%%%%%%%%%%");
-    console.log(req.query);
-    console.log("%%%%%%%%%%%%%%%%%%");
+    //console.log("%%%%%%%%%%%%%%%%%%");
+    //console.log(req.query);
+    //console.log("%%%%%%%%%%%%%%%%%%");
     Course.find({
         professor: professorID
     })
     .populate('professor')
     .exec(function (err, courses) {
-        if (err || courses == null) {
+        //console.log("#########################")
+        //console.log(courses);
+        if (err || courses == null || courses.length == 0) {
             console.log(err);
             return res.status(500).send(err);
         }

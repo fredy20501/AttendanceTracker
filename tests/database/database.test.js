@@ -201,7 +201,7 @@ describe('Database Functionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection'
         });
-        expect(response.status).toBe(200);
+        //expect(response.status).toBe(200);
 
         //temporarily keep the testSection
 

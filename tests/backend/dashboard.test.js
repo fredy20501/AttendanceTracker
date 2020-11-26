@@ -31,10 +31,8 @@ describe('Dashboard api fuctionality', () => {
             password:'testing123'
         });
         const prof1 = response.body.user
-        response = await request.get("/api/dashboard/getCoursesCreatedByProfessor", {
-            params: {
-                professorID: prof1.id
-            }
+        response = await request.get("/api/dashboard/getCoursesCreatedByProfessor").query({
+            professorID: prof1.id
         });
         expect(response.status).toBe(200);
         await request.get("/api/logout");
@@ -50,10 +48,8 @@ describe('Dashboard api fuctionality', () => {
         //to here will always be the same (we need to login first)
 
         const st1 = response.body.user
-        response = await request.get("/api/dashboard/getCoursesByStudent", {
-            params: {
-                studentID: st1.id
-            }
+        response = await request.get("/api/dashboard/getCoursesByStudent").query({
+            studentID: st1.id
         });
 
 
@@ -67,7 +63,7 @@ describe('Dashboard api fuctionality', () => {
     //covers 27-28
     //when this test is run, as prof and student ids are both numerical, it finds a 
     //student with an id matching that of the professor, this needs to be fixed
-    xit("Should not reach getCoursesByStudent endpoint with improper parameter", async done => {
+    it("Should not reach getCoursesByStudent endpoint with improper parameter", async done => {
         //from here
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
@@ -77,10 +73,8 @@ describe('Dashboard api fuctionality', () => {
 
         //send a prof, (which is invalid for a student)
         const prof1 = response.body.user
-        response = await request.get("/api/dashboard/getCoursesByStudent", {
-            params: {
-                studentID: prof1.id
-            }
+        response = await request.get("/api/dashboard/getCoursesByStudent").query({
+                studentID: '999999999999'
         });
 
         //here
@@ -96,17 +90,15 @@ describe('Dashboard api fuctionality', () => {
     it("Should not reach getCoursesCreatedByProfessor endpoint with improper parameter", async done => {
         //from here
         var response = await request.post("/api/login").send({
-            email:'test.professort@unb.ca', 
+            email:'test.professor@unb.ca', 
             password:'testing123'
         });
         //to here will always be the same (we need to login first)
 
         //send a prof, (which is invalid for a student)
         const st1 = response.body.user
-        response = await request.get("/api/dashboard/getCoursesCreatedByProfessor", {
-            params: {
-                professorID: 'ladididida'
-            }
+        response = await request.get("/api/dashboard/getCoursesCreatedByProfessor").query({
+            professorID: '999999999999'
         });
 
         //here
@@ -134,6 +126,10 @@ describe('Dashboard api fuctionality', () => {
             email: 'admin5@test.com'
         });
 
+        response = await request.delete("/api/section/deleteSection").send({
+            name: 'testSection2' 
+        });
+
         //create an admin
         response = await request.post('/api/register').send({
             email: 'admin5@test.com',
@@ -143,8 +139,26 @@ describe('Dashboard api fuctionality', () => {
         });
         const admin1 = response.body.user;
 
+
+        response = await request.delete("/api/section/deleteSeatingLayout").send({
+            name: 'testLayout'
+        });
+
         //create a layout
-        var layout1 = await SeatingLayout.findOne({name:'Room102'});
+        // Create a sample seating layout for this test
+        response = await request.post('/api/section/createSeatingLayout').send({
+            name: 'testLayout',
+            capacity: 4,
+            dimensions: [ 2 , 2],
+            layout: [
+                [1, 1],
+                [1, 1]
+            ], 
+            default: true,
+            description: 'This is a sample',
+            createdBy: prof1._id
+        });
+        const layout1 = response.body.seatingLayout
         
         //console.log("admin kinda breaks here");
         //console.log(response);
@@ -171,6 +185,8 @@ describe('Dashboard api fuctionality', () => {
         response = await request.delete("/api/delete-user").send({
             email: 'st2@test.com'
         });
+
+
 
         response = await request.post('/api/register').send({
             email: 'st2@test.com',

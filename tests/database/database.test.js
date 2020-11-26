@@ -192,10 +192,11 @@ describe('Database Functionality', () => {
         expect(response.description).toBe('This is a sample');
 
         //Delete sample seating layout after testing
-        response = await request.delete("/api/section/deleteSeatingLayout").send({
-            name: 'testLayout'
+        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
+            if(err){
+                console.log(err);
+            }
         });
-        expect(response.status).toBe(200);
 
         //Delete test course after testing
         response = await request.delete("/api/section/deleteSection").send({

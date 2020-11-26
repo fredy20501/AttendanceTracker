@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const supertest = require("supertest");
 const http = require('http');
 
+const {SeatingLayout } = require('dbSchemas/attendanceSchema.js');
+
 describe('Backend server fuctionality', () => {
     
     let server;
@@ -44,8 +46,11 @@ describe('Backend server fuctionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection'
         });
-        response = await request.delete("/api/section/deleteSeatingLayout").send({
-            name: 'testLayout'
+        //delete just in case
+        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
+            if(err){
+                console.log(err);
+            }
         });
 
         response = await request.post('/api/register').send({

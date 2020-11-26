@@ -39,7 +39,7 @@
     </table>
 
     <div class="grid-layout">
-      <table v-if="classLayout.length>0">
+      <table v-if="classLayout.length>0" aria-label="Classroom Layout">
         <tbody>
           <tr>
             <td :colspan="classLayout[0].length+1">
@@ -62,7 +62,8 @@
             <td>{{i+1}}</td>
             <!-- Loop through each seat in the row -->
             <td v-for="(seat, j) in row" v-bind:key="j">
-              <div
+              <button
+                type="button"
                 @click="toggleSeatAttendance(i,j)"
                 v-bind:class="{
                   'seat': true,
@@ -72,7 +73,7 @@
                   'type-3': seat.type==3,
                   'selected': seat.absent===true
                 }"
-              >{{seat.name}}</div>
+              >{{seat.name}}</button>
             </td>
           </tr>
           <!-- Put a label as final row to represent the front of the class -->

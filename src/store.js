@@ -277,6 +277,38 @@ const store = new Vuex.Store({
         err.message = "Could not save attendance. Please try again later"
         throw err
       })
+    },
+
+    dropSection(context, payload) {
+      payload
+      // return $http.put('student/dropSection', payload)
+      // .catch(err => {
+      //   err.message = "Could not drop section. Please try again later"
+      //   throw err
+      // })
+      
+      // Returns test data (will get removed during integration)
+      return
+    },
+
+    deleteSection(context, payload) {
+      payload
+      // return $http.put('professor/deleteSection', payload)
+      // .catch(err => {
+      //   err.message = "Could not delete section. Please try again later"
+      //   throw err
+      // })
+      
+      // Returns test data (will get removed during integration)
+      return
+    },
+
+    clearStudents(context, payload) {
+      return $http.put('professor/clearStudents', payload)
+      .catch(err => {
+        err.message = "Could not clear students. Please try again later"
+        throw err
+      })
     }
   }
 })

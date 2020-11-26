@@ -4,8 +4,8 @@
       The mode determines if we are currently adding 
       a new section or updating an existing one
      -->
-    <h2 v-if="pageMode=='add'">Create Section</h2>
-    <h2 v-if="pageMode=='edit'">Edit Section</h2>
+    <h2 v-if="isCreateMode">Create Section</h2>
+    <h2 v-if="!isCreateMode">Edit Section</h2>
     <br>
 
     <ValidationObserver v-slot="{ handleSubmit, invalid}">
@@ -77,8 +77,8 @@
 
       <br>
       <br>
-      <hr style="margin: 20px 0; border-top: 10px solid #333;">
-      <br>
+      <hr class="divider">
+      <h2>Class Layout</h2>
 
       <div class="column">
         <!-- Basic dropdown for selecting layout -->
@@ -111,7 +111,7 @@
         <button type="button" v-on:click="createLayout">New layout</button><br>
         <br>
         <SpinnerButton 
-          class="blue"
+          color="blue"
           label="Save Layout"
           type="button"
           width="100%"
@@ -231,8 +231,8 @@
 
       <!-- Add/Save button: Only one is shown depending if the mode is "add" or "update" -->
       <SpinnerButton 
-        v-if="pageMode=='add'"
-        class="blue"
+        v-if="isCreateMode"
+        color="blue"
         label="Create Section"
         width="300px"
         height="30px"
@@ -241,8 +241,8 @@
         :loading="$wait.waiting('createSection')"
       />
       <SpinnerButton 
-        v-if="pageMode=='edit'"
-        class="blue"
+        v-if="!isCreateMode"
+        color="blue"
         label="Save Section"
         width="300px"
         height="30px"
@@ -253,7 +253,59 @@
 
     </form>
     </ValidationObserver>
-    
+
+    <div v-if="!isCreateMode">
+      <br>
+      <br>
+      <hr class="divider">
+      <h2>Danger Zone</h2>
+
+      <div class="double-column danger-zone">
+        <div>
+          <div>
+            <b>Clear Students</b><br>
+            Remove all students from the section. Students may 
+            register again but will have lost their seats.
+          </div>
+          <div>
+            <SpinnerButton 
+              style="margin:5px"
+              color="red"
+              label="Clear Students"
+              width="300px"
+              height="30px"
+              type="button"
+              :disabled="$wait.waiting('clearStudents')"
+              :loading="$wait.waiting('clearStudents')"
+              :onClick="confirmClearStudents"
+            />
+          </div>
+        </div>
+        <br>
+        <div>
+          <div>
+            <b>Delete section</b><br>
+            Delete the section entirely. Deleted sections 
+            are archived so an administrator may be able 
+            to recover them if needed.
+          </div>
+          <div>
+            <SpinnerButton 
+              style="margin:5px"
+              color="red"
+              label="Delete Section"
+              width="300px"
+              height="30px"
+              type="button"
+              :disabled="$wait.waiting('deleteSection')"
+              :loading="$wait.waiting('deleteSection')"
+              :onClick="confirmDeleteSection"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -312,8 +364,8 @@ export default {
 
     // The mode determines if we are currently adding a new section or updating an existing one
     // (this is determined by whether the courseId is set as a url parameter)
-    pageMode: function() {
-      return this.courseId == null ? 'add' : 'edit'
+    isCreateMode: function() {
+      return this.courseId == null
     },
     isMandatory: function() { 
       return this.attendanceType == 'mandatory'
@@ -348,7 +400,7 @@ export default {
     this.getLayouts(() => {
       // When getLayouts is done run this code
 
-      if (this.pageMode == 'edit') {
+      if (!this.isCreateMode) {
         // Load the course information into the fields
         this.getSectionData()
       }
@@ -559,14 +611,8 @@ export default {
     // General submit function which redirects
     // to the proper function depending on the mode
     submit() {
-      if (this.pageMode=="add") this.createSection()
-      else if (this.pageMode=="edit") this.saveSection()
-      else {
-        this.$notify({ 
-          title: "Invalid mode. Please try again", 
-          type: "error"
-        })
-      }
+      if (this.isCreateMode) this.createSection()
+      else this.saveSection()
     },
 
     // Check if the currently selected seating layout is saved
@@ -692,6 +738,83 @@ export default {
       })
     },
 
+    confirmDeleteSection() {
+      this.$dialog.confirm('Are you sure?')
+      .then(() => {
+        this.deleteSection()
+      })
+      .catch(() => {})
+    },
+
+    deleteSection() {
+      // Start the loading spinner
+      this.$wait.start('deleteSection')
+
+      this.$store.dispatch('deleteSection', {
+        sectionID: this.courseId,
+      })
+      .then(() => {
+        // Redirect to home page
+        this.$router.push({name: 'home'})
+        // show success message
+        this.$notify({ 
+          title: "Section deleted successfully", 
+          type: "success"
+        })
+      })
+      .catch(err => {
+        console.log(err)
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          })
+        }
+      })
+      .finally(() => {
+        // Stop the loading spinner
+        this.$wait.end('deleteSection')
+      })
+    },
+
+    confirmClearStudents() {
+      this.$dialog.confirm('Are you sure?')
+      .then(() => {
+        this.clearStudents()
+      })
+      .catch(() => {})
+    },
+
+    clearStudents() {
+      // Start the loading spinner
+      this.$wait.start('clearStudents')
+
+      this.$store.dispatch('clearStudents', {
+        sectionID: this.courseId,
+      })
+      .then(() => {
+        // show success message
+        this.$notify({ 
+          title: "Students cleared successfully", 
+          type: "success"
+        })
+      })
+      .catch(err => {
+        console.log(err)
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          })
+        }
+      })
+      .finally(() => {
+        // Stop the loading spinner
+        this.$wait.end('clearStudents')
+      })
+    },
 
 
     addRow() {
@@ -848,5 +971,18 @@ label.radio {
 .double-column {
   max-width: 640px;
   margin: auto;
+}
+
+.divider {
+  margin: 20px 0; border-top: 10px solid #333;
+}
+
+.danger-zone {
+  > div > div {
+    text-align: left;
+    display: inline-block;
+    max-width: 300px;
+    vertical-align: top;
+  }
 }
 </style>

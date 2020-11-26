@@ -356,6 +356,8 @@ export default {
     
   },
 
+
+
   methods: {
 
     // Call the backend api to get the course information (given the course id)
@@ -447,11 +449,17 @@ export default {
         this.isBetween(column, this.seatSelect.first.column, this.seatSelect.second.column)
     },
     
+
+    //comparison function for layouts so they can be sorted
+    compLayout(firstEl, secondEl){
+      return firstEl.name.localeCompare(secondEl.name);
+    },
+
     // Call api to get the list of layouts for the dropdown
     getLayouts(callback) {
       this.$store.dispatch('getSeatingLayouts')
       .then(res => {
-        this.layouts = res.layouts
+        this.layouts = res.layouts.sort(this.compLayout)
 
         // Run the callback function (if one was given)
         if (callback) callback()

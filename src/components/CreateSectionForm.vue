@@ -111,6 +111,7 @@
         <button type="button" v-on:click="createLayout">New layout</button><br>
         <br>
         <SpinnerButton 
+          v-if="isCurrentLayoutNew"
           class="blue"
           label="Save Layout"
           type="button"
@@ -120,7 +121,17 @@
           :loading="$wait.waiting('saveLayout')"
           :onClick="saveLayout" 
         />
-
+        <SpinnerButton 
+          v-if="!isCurrentLayoutNew && layouts.length != 0"
+          class="red"
+          label="Delete Layout"
+          type="button"
+          width="100%"
+          height="30px"
+          :disabled="$wait.waiting('deleteLayout') || isCurrentLayoutNew "
+          :loading="$wait.waiting('deleteLayout')"
+          :onClick="deleteLayout" 
+        />
         <br>
         <br>
 
@@ -450,7 +461,7 @@ export default {
     // Call api to get the list of layouts for the dropdown
     getLayouts(callback) {
       this.$store.dispatch('getSeatingLayouts')
-      .then(res => {
+      .then( res => {
         this.layouts = res.layouts
 
         // Run the callback function (if one was given)
@@ -470,9 +481,17 @@ export default {
 
     createLayout() {
       this.stopPaintSelect()
-
-      // Make a copy of the current layout as the new layout
-      const newLayout = JSON.parse(JSON.stringify(this.currentLayout))
+      var newLayout;
+      
+      if(this.layouts.length == 0){
+        //if we dont have any layouts, show a default example
+        newLayout = {layout: [[0, 1, 2, 3]]};
+      }
+      else{
+        // Make a copy of the current layout as the new layout
+        newLayout = JSON.parse(JSON.stringify(this.currentLayout));
+      }
+      
       newLayout.type = "new"
       // Remove the id since it isn't correct anymore
       delete newLayout._id
@@ -556,6 +575,43 @@ export default {
       })
     },
 
+    deleteLayout(){
+      this.$wait.start('deleteLayout');
+      console.log("called deleteLayout");
+      this.$store.dispatch('deleteLayout', {
+        id: this.currentLayout._id
+      }).then( () =>{//used to have res
+
+        //this.layouts[this.layoutSelected] = null;
+        this.layouts.splice(this.layoutSelected, 1);
+        this.layoutSelected = 0;
+
+        // show success message
+        this.$notify({ 
+          title: "Seating layout saved successfully", 
+          type: "success"
+        })
+
+        // Stop the loading spinner
+        this.$wait.end('deleteLayout')
+      }).catch(err =>{
+        console.log(err)
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error',
+            duration: 10000
+          })
+        }
+        // Stop the loading spinner
+        this.$wait.end('deleteLayout')        
+      });
+    },
+
+    //call the api to delete the currently selected layout
+
+
     // General submit function which redirects
     // to the proper function depending on the mode
     submit() {
@@ -573,7 +629,7 @@ export default {
     // If not, show an error notification and return false
     // If it is saved, return true
     isSeatingLayoutSaved() {
-      if (this.isCurrentLayoutNew) {
+      if (this.isCurrentLayoutNew || this.layouts.length == 0) {
         this.$notify({ 
           title: "Current seating layout is not saved", 
           type: "error"

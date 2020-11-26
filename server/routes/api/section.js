@@ -172,19 +172,56 @@ router.post('/updateSection', (req, res) => {
 });
 
 
-router.delete('/deleteSeatingLayout', (req, res) => {
-    // Delete all seating layouts with the given name 
-    // (should only delete one since emails are unique)
-    var name = req.body.name;
+router.post('/deleteSeatingLayout', (req, res) => {
+    // Delete all seating layouts with the given name ??
+    // (should only delete one since emails are unique)??
+    //TODO: should not delete a layout if it is used by a course
+    //console.log(req);
+    //console.log("body:");
+    //console.log(req.body);
 
-    SeatingLayout.deleteMany({ name: name }, (err) => {
-        if(err){
+    var id = req.body.id;
+    //console.log("id is :"+id);
+
+    SeatingLayout.findById(id, (err, layout) => {
+
+        //console.log("layout is");
+        //console.log(layout);
+
+        if(err || layout == null){
             console.log(err);
             return res.status(500).send();
         }
 
-        return res.status(200).send(); 
+        Course.findOne({seating_layout:id}, (err, course) => {
+
+            //console.log("course is");
+            //console.log(course);
+
+            if(err){
+                console.log(err);
+                return res.status(500).send();
+            }
+
+            if(course == null){
+                SeatingLayout.findByIdAndDelete(id, (err) => {
+                    if(err){
+                        console.log(err);
+                        return res.status(500).send();
+                    }
+            
+                    return res.status(200).send(); 
+                });
+            }
+            else{
+                return res.status(418).send();
+                //layout is already in use
+            }     
+        });
     });
+
+
+
 });
 
 router.delete('/deleteSection', (req, res) => {

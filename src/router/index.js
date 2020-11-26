@@ -39,7 +39,7 @@ const routes = [
     path: '/section/:id',
     name: 'section',
     meta: { back: true, requiresAuth: true },
-    component: () => import(/* webpackChunkName: "[course]" */ '../views/SectionView.vue')
+    component: () => import(/* webpackChunkName: "course" */ '../views/SectionView.vue')
   },
 
   // Default to page not found if url doesn't match any routes

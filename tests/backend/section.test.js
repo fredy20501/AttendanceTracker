@@ -114,7 +114,7 @@ describe('Backend server fuctionality', () => {
         const layout1 = response.body.seatingLayout
 
         response = await request.post("/api/section/createSection").send({
-            courseName: 'testSection',
+            sectionName: 'testSection',
             attendanceThreshold: '0',
             seatingLayout: layout1._id,
             attMandatory: false,
@@ -191,7 +191,7 @@ describe('Backend server fuctionality', () => {
         const layout1 = response.body.seatingLayout
 
         response = await request.post("/api/section/createSection").send({
-            courseName: 'testSection',
+            sectionName: 'testSection',
             attendanceThreshold: '0',
             seatingLayout: layout1._id,
             attMandatory: false,
@@ -201,13 +201,13 @@ describe('Backend server fuctionality', () => {
             maxCapacity: 30,
             seatingArrangement: [] 
         });
-        const course1 = response.body.newSection
-        console.log("COURSE: ", course1)
+        const section1 = response.body.newSection
+        console.log("COURSE: ", section1)
         console.log("RESPONSE: ", response.body)
 
         response = await request.post("/api/section/updateSection").send({
-            courseId: course1._id,
-            courseName: 'testSection',
+            sectionId: section1._id,
+            sectionName: 'testSection',
             attendanceThreshold: '0',
             seatingLayout: layout1._id,
             attMandatory: false,

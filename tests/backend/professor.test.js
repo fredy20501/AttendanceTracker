@@ -95,9 +95,9 @@ describe('Backend server fuctionality', () => {
         });
         const layout1 = response.body.seatingLayout
 
-        //Create test course
+        //Create test section
         response = await request.post('/api/section/createSection').send({
-            courseName: 'testSection',
+            sectionName: 'testSection',
             attendanceThreshold: '0',
             seatingLayout: layout1._id,
             attMandatory: false,
@@ -111,10 +111,10 @@ describe('Backend server fuctionality', () => {
             classList: [],
             attendance: [Date.now(), student1, false]
         });
-        const course1 = response.body.newSection
+        const section1 = response.body.newSection
 
         response = await request.put("/api/professor/pushNewAttendance").send({
-            courseID: course1._id,
+            sectionID: section1._id,
             absent_students: [student1],
             mandatory: false
         });

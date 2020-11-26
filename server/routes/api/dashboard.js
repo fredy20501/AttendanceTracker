@@ -1,93 +1,93 @@
 const express = require('express');
 const router = express.Router();
 let {
-    Course
+    Section
 } = require('../../dbSchemas/attendanceSchema');
 
 
-/**GETS all the courses registered by a student
+/**GETS all the sections registered by a student
  * ==========================================
  * Example api call body:
  * {
 	"studentId": "5f984a44da9eb32ba01d31dd"
     }
  */
-router.get('/getCoursesByStudent', (req, res) => {
+router.get('/getSectionsByStudent', (req, res) => {
     // Note: for get requests data is sent through query params
     let studentID = req.query.studentID;
 
-    Course.find({
+    Section.find({
         registered_students: {
             $in: [studentID]
         }
     })
     .populate('professor')
-    .exec(function (err, courses) {
-        if (err || courses == null) {
+    .exec(function (err, sections) {
+        if (err || sections == null) {
             console.log(err);
             return res.status(500).send(err);
         }
-        res.status(200).send(courses);
+        res.status(200).send(sections);
     });
 });
 
-/**GETS all the courses created by a professor
+/**GETS all the sections created by a professor
  * ==========================================
  * Example api call body:
  * {
 	"studentId": "5f98967d62a8bb73a0f8c046"
     }
  */
-router.get('/getCoursesCreatedByProfessor', (req, res) => {
+router.get('/getSectionsCreatedByProfessor', (req, res) => {
     // Note: for get requests data is sent through query params
     let professorID = req.query.professorID;
 
-    Course.find({
+    Section.find({
         professor: professorID
     })
     .populate('professor')
-    .exec(function (err, courses) {
-        if (err || courses == null) {
+    .exec(function (err, sections) {
+        if (err || sections == null) {
             console.log(err);
             return res.status(500).send(err);
         }
-        res.status(200).send(courses);
+        res.status(200).send(sections);
     });
 });
 
-/** Registers a student to his course
+/** Registers a student to his section
  *  We give a student ID
- *  Returns course data (name, prof name, if it's mandatory)
+ *  Returns section data (name, prof name, if it's mandatory)
  */
-router.put('/registerForCourse', (req, res) => {
+router.put('/registerForSection', (req, res) => {
     let studentID = req.body.studentID;
-    let courseName = req.body.courseName;
-    console.log("register for course");
+    let sectionName = req.body.sectionName;
+    console.log("register for section");
 
-    Course.findOne({
-        name: courseName
-    }, function (err, course) {
-        if (err || course == null) {
+    Section.findOne({
+        name: sectionName
+    }, function (err, section) {
+        if (err || section == null) {
             console.log(err);
             return res.status(530).send(err);
         }
 
         // check to see if student is already registered
-        if(course.registered_students.indexOf(studentID) != -1){
+        if(section.registered_students.indexOf(studentID) != -1){
             return res.status(520).send(err);
         }
 
         // push new student into array
-        course.registered_students.push(studentID);
+        section.registered_students.push(studentID);
 
-        course.save(err => {
+        section.save(err => {
             if (err) {
                 console.log(err);
                 return res.status(500).send(err);
             }
-            // return course information
+            // return section information
             return res.status(200).json({
-                course
+                section
             });
         })
     });

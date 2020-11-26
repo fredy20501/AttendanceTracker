@@ -250,4 +250,119 @@ describe('Backend server fuctionality', () => {
         done();
     });
 
+
+    it("Should reach previousSeatingPlans endpoint (and it should be an array)", async done => {
+        var response = await request.post("/api/login").send({
+            email:'test.professor@unb.ca', 
+            password:'testing123'
+        });
+
+        response = await request.get("/api/section/previousSeatingPlans");
+        expect(response.status).toBe(200);
+
+        expect(Array.isArray(response.body.seatingLayout)).toBe(true);
+
+        await request.get("/api/logout");
+        done();
+    });
+
+
+    it("Should reach getCourseView endpoint", async done => {
+        var response = await request.post("/api/login").send({
+            email:'test.professor@unb.ca', 
+            password:'testing123'
+        });
+        const prof1 = response.body.user
+
+        response = await request.delete("/api/section/deleteSection").send({
+            name: 'testSection12'
+        });
+        response = await request.delete("/api/section/deleteSeatingLayout").send({
+            name: 'testLayout12'
+        });
+
+        // Create a sample seating layout for this test
+        response = await request.post('/api/section/createSeatingLayout').send({
+            name: 'testLayout12',
+            capacity: 4,
+            dimensions: [ 2 , 2],
+            layout: [
+                [1, 1],
+                [1, 1]
+            ], 
+            default: true,
+            description: 'This is a sample',
+            createdBy: prof1.id
+        });
+        const layout1 = response.body.seatingLayout
+
+        //Create test course
+        response = await request.post('/api/section/createSection').send({
+            courseName: 'testSection12',
+            attendanceThreshold: '0',
+            seatingLayout: layout1._id,
+            attMandatory: false,
+            professor: prof1._id,
+            maxCapacity: 30,
+            seatingArrangement: [
+                [null, null, null, null, null],
+            ],
+            classList: []
+        });
+        const course1 = response.body.newSection
+
+
+        //test here
+
+        response = await request.get("/api/section/getCourseView").query({
+            courseID:course1._id
+        });
+        expect(response.status).toBe(200);
+
+        expect(response.body.name).toBe('testSection12');
+
+
+        response = await request.delete("/api/section/deleteSection").send({
+            name: 'testSection12'
+        });
+        response = await request.delete("/api/section/deleteSeatingLayout").send({
+            name: 'testLayout12'
+        });
+
+
+        await request.get("/api/logout");
+
+        done();
+    });
+
+
+
+
+    it("Shouldnt reach getCourseView endpoint with invalid course", async done => {
+        var response = await request.post("/api/login").send({
+            email:'test.professor@unb.ca', 
+            password:'testing123'
+        });
+        const prof1 = response.body.user
+
+        //test here
+
+        response = await request.get("/api/section/getCourseView").query({
+            courseID:"123499991234"
+        });
+        expect(response.status).toBe(500);
+
+
+        await request.get("/api/logout");
+
+        done();
+    });
+
+
+
+
+
+
+
+
 })

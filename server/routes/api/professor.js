@@ -68,10 +68,6 @@ router.post('/archiveSection', (req, res) => {
         }
 
         let swap = new (ArchivedSection)(course.toJSON())
-        /* if desired, you could set a new id
-        swap._id = mongoose.Types.ObjectId()
-        swap.isNew = true
-        */
         course.remove(err => {
             if (err) {
                 console.log(err);

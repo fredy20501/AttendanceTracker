@@ -45,7 +45,7 @@ router.put('/pushNewAttendance', (req, res) => {
     });
 });
 
-/**Clears the list of registered students & seating_arrangement for the given course
+/**Clears the list of registered students & seating_arrangement for the given section
  * ==========================================
  * Example api call body:
  * {"sectionID": "5f9aa985a74e0454388aa083"}
@@ -53,10 +53,11 @@ router.put('/pushNewAttendance', (req, res) => {
 router.delete('/clearStudents', (req, res) => {
     let sectionID = req.body.sectionID;
 
-    Course.findById(sectionID, function (err, section) {
+    Section.findById(sectionID, function (err, section) {
         if (err || section == null) {
             console.log(err);
-            console.log("Course not found");
+            console.log("Section not found");
+            return res.status(500).send(err);
         }
 
         // Empty the list of registered students

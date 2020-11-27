@@ -751,7 +751,7 @@ export default {
       this.$wait.start('deleteSection')
 
       this.$store.dispatch('deleteSection', {
-        sectionID: this.courseId,
+        sectionID: this.sectionId,
       })
       .then(() => {
         // Redirect to home page
@@ -791,7 +791,7 @@ export default {
       this.$wait.start('clearStudents')
 
       this.$store.dispatch('clearStudents', {
-        sectionID: this.courseId,
+        sectionID: this.sectionId,
       })
       .then(() => {
         // show success message

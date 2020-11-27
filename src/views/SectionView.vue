@@ -58,7 +58,7 @@ export default {
       this.$wait.start('dropSection')
 
       this.$store.dispatch('dropSection', {
-        courseID: this.courseId,
+        sectionID: this.sectionId,
         studentID: this.getUser.id
       })
       .then(() => {

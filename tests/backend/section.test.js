@@ -202,8 +202,6 @@ describe('Backend server fuctionality', () => {
             seatingArrangement: [] 
         });
         const section1 = response.body.newSection
-        console.log("COURSE: ", section1)
-        console.log("RESPONSE: ", response.body)
 
         response = await request.post("/api/section/updateSection").send({
             sectionId: section1._id,
@@ -266,7 +264,7 @@ describe('Backend server fuctionality', () => {
     });
 
 
-    it("Should reach getCourseView endpoint", async done => {
+    it("Should reach getSectionView endpoint", async done => {
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
@@ -295,9 +293,9 @@ describe('Backend server fuctionality', () => {
         });
         const layout1 = response.body.seatingLayout
 
-        //Create test course
+        //Create test section
         response = await request.post('/api/section/createSection').send({
-            courseName: 'testSection12',
+            sectionName: 'testSection12',
             attendanceThreshold: '0',
             seatingLayout: layout1._id,
             attMandatory: false,
@@ -308,11 +306,11 @@ describe('Backend server fuctionality', () => {
             ],
             classList: []
         });
-        const course1 = response.body.newSection
+        const section1 = response.body.newSection
 
-        // Test getting the course view
-        response = await request.get("/api/section/getCourseView").query({
-            courseID:course1._id
+        // Test getting the section view
+        response = await request.get("/api/section/getSectionView").query({
+            sectionID:section1._id
         });
         expect(response.status).toBe(200);
         expect(response.body.name).toBe('testSection12');
@@ -329,16 +327,16 @@ describe('Backend server fuctionality', () => {
         done();
     });
 
-    it("Shouldnt reach getCourseView endpoint with invalid course", async done => {
+    it("Shouldnt reach getSectionView endpoint with invalid section", async done => {
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
         });
         const prof1 = response.body.user
 
-        // Send a course id that doesn't exist
-        response = await request.get("/api/section/getCourseView").query({
-            courseID:"123499991234"
+        // Send a section id that doesn't exist
+        response = await request.get("/api/section/getSectionView").query({
+            sectionID:"123499991234"
         });
         expect(response.status).toBe(500);
 

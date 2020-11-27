@@ -2,7 +2,7 @@ const app = require('app.js');
 const mongoose = require('mongoose');
 const supertest = require("supertest");
 const http = require('http');
-const { User, Course, SeatingLayout } = require('dbSchemas/attendanceSchema.js');
+const { User, Section, SeatingLayout } = require('dbSchemas/attendanceSchema.js');
 
 describe('Dashboard api fuctionality', () => {
     
@@ -31,7 +31,7 @@ describe('Dashboard api fuctionality', () => {
         });
         const prof1 = response.body.user
 
-        response = await request.get("/api/dashboard/getCoursesCreatedByProfessor").query({
+        response = await request.get("/api/dashboard/getSectionsCreatedByProfessor").query({
             professorID: prof1.id
         });
         expect(response.status).toBe(200);
@@ -40,7 +40,7 @@ describe('Dashboard api fuctionality', () => {
         done();
     });
 
-    it("Should reach getCoursesByStudent endpoint", async done => {
+    it("Should reach getSectionsByStudent endpoint", async done => {
         //from here
         var response = await request.post("/api/login").send({
             email:'test.student@unb.ca', 
@@ -49,7 +49,7 @@ describe('Dashboard api fuctionality', () => {
         //to here will always be the same (we need to login first)
 
         const st1 = response.body.user
-        response = await request.get("/api/dashboard/getCoursesByStudent").query({
+        response = await request.get("/api/dashboard/getSectionsByStudent").query({
             studentID: st1.id
         });
 
@@ -60,7 +60,7 @@ describe('Dashboard api fuctionality', () => {
         //to here wont change either
     });
 
-    it("Should not reach getCoursesByStudent endpoint with improper parameter", async done => {
+    it("Should not reach getSectionsByStudent endpoint with improper parameter", async done => {
         //from here
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
@@ -69,7 +69,7 @@ describe('Dashboard api fuctionality', () => {
         //to here will always be the same (we need to login first)
         
         // Send invalid id
-        response = await request.get("/api/dashboard/getCoursesByStudent").query({
+        response = await request.get("/api/dashboard/getSectionsByStudent").query({
                 studentID: '999999999999'
         });
 
@@ -80,7 +80,7 @@ describe('Dashboard api fuctionality', () => {
         //to here wont change either
     });
 
-    it("Should not reach getCoursesCreatedByProfessor endpoint with improper parameter", async done => {
+    it("Should not reach getSectionsCreatedByProfessor endpoint with improper parameter", async done => {
         //from here
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
@@ -89,7 +89,7 @@ describe('Dashboard api fuctionality', () => {
         //to here will always be the same (we need to login first)
 
         // Send invalid id
-        response = await request.get("/api/dashboard/getCoursesCreatedByProfessor").query({
+        response = await request.get("/api/dashboard/getSectionsCreatedByProfessor").query({
             professorID: '999999999999'
         });
 
@@ -101,9 +101,9 @@ describe('Dashboard api fuctionality', () => {
     });
 
 
-    // ====== Register for course endpoint tests ======
+    // ====== Register for section endpoint tests ======
 
-    it("Should reach registerForCourse endpoint", async done => {
+    it("Should reach registerForSection endpoint", async done => {
 
         //login as professor
         var response = await request.post("/api/login").send({
@@ -151,7 +151,7 @@ describe('Dashboard api fuctionality', () => {
 
         //create test section
         response = await request.post('/api/section/createSection').send({
-            courseName: 'testSection2',
+            sectionName: 'testSection2',
             attendanceThreshold: '0',
             seatingLayout: layout1._id,//layout1._id,
             attMandatory: false,
@@ -180,9 +180,9 @@ describe('Dashboard api fuctionality', () => {
         //to here will always be the same (we need to login first)
 
         //const st1 = response.body.user
-        response = await request.put("/api/dashboard/registerForCourse").send({
+        response = await request.put("/api/dashboard/registerForSection").send({
             studentID: st1.id,
-            courseName: 'testSection2'
+            sectionName: 'testSection2'
         });
         expect(response.status).toBe(200);
 
@@ -204,7 +204,7 @@ describe('Dashboard api fuctionality', () => {
         done();
     });
 
-    it("Should not reach registerForCourse endpoint when student already registered", async done => {
+    it("Should not reach registerForSection endpoint when student already registered", async done => {
 
         //login as professor
         var response = await request.post("/api/login").send({
@@ -247,7 +247,7 @@ describe('Dashboard api fuctionality', () => {
 
         //create test section
         response = await request.post('/api/section/createSection').send({
-            courseName: 'testSection',
+            sectionName: 'testSection',
             attendanceThreshold: '0',
             seatingLayout: layout1._id,
             attMandatory: false,
@@ -277,14 +277,14 @@ describe('Dashboard api fuctionality', () => {
 
         /*******************now test registering the student here*********************** */
 
-        response = await request.put("/api/dashboard/registerForCourse").send({
+        response = await request.put("/api/dashboard/registerForSection").send({
             studentID: st1.id,
-            courseName: 'testSection'
+            sectionName: 'testSection'
         });
         // Try to register when you are already registered
-        response = await request.put("/api/dashboard/registerForCourse").send({
+        response = await request.put("/api/dashboard/registerForSection").send({
             studentID: st1.id,
-            courseName: 'testSection'
+            sectionName: 'testSection'
         });
         expect(response.status).toBe(520);
 
@@ -303,7 +303,7 @@ describe('Dashboard api fuctionality', () => {
         done();
     });
 
-    it("Should not reach registerForCourse endpoint when course doesnt exist", async done => {
+    it("Should not reach registerForSection endpoint when section doesnt exist", async done => {
 
         //login as professor
         var response = await request.post("/api/login").send({
@@ -328,9 +328,9 @@ describe('Dashboard api fuctionality', () => {
 
         /*******************now test registering the student here*********************** */
 
-        response = await request.put("/api/dashboard/registerForCourse").send({
+        response = await request.put("/api/dashboard/registerForSection").send({
             studentID: st1.id,
-            courseName: 'testSectionabc123'
+            sectionName: 'testSectionabc123'
         });
         expect(response.status).toBe(530);
 

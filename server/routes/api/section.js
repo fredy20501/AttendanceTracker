@@ -172,19 +172,43 @@ router.post('/updateSection', (req, res) => {
 });
 
 
-router.delete('/deleteSeatingLayout', (req, res) => {
-    // Delete all seating layouts with the given name 
-    // (should only delete one since emails are unique)
-    var name = req.body.name;
+// Delete a seating layout given its id if it is not used by a section.
+// Returns status 200 on success, 500 on error, 418 if it is used by a section.
+router.post('/deleteSeatingLayout', (req, res) => {
+    var id = req.body.id;
 
-    SeatingLayout.deleteMany({ name: name }, (err) => {
-        if(err){
+    SeatingLayout.findById(id, (err, layout) => {
+        if(err || layout == null){
             console.log(err);
             return res.status(500).send();
         }
 
-        return res.status(200).send(); 
+        Section.findOne({seating_layout:id}, (err, section) => {
+            if(err){
+                console.log(err);
+                return res.status(500).send();
+            }
+
+            if(section == null){
+                // Layout is not used: delete it!
+                SeatingLayout.findByIdAndDelete(id, (err) => {
+                    if(err){
+                        console.log(err);
+                        return res.status(500).send();
+                    }
+            
+                    return res.status(200).send(); 
+                });
+            }
+            else{
+                // Layout is used by a section
+                return res.status(418).send();
+            }     
+        });
     });
+
+
+
 });
 
 router.delete('/deleteSection', (req, res) => {

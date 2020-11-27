@@ -121,8 +121,10 @@ describe('Dashboard api fuctionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection2' 
         });
-        response = await request.delete("/api/section/deleteSeatingLayout").send({
-            name: 'testLayout'
+        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
+            if(err){
+                console.log(err);
+            }
         });
 
         //create an admin
@@ -196,8 +198,10 @@ describe('Dashboard api fuctionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection2' 
         });
-        response = await request.delete("/api/section/deleteSeatingLayout").send({
-            name: 'testLayout'
+        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
+            if(err){
+                console.log(err);
+            }
         });
 
         await request.get("/api/logout");
@@ -225,6 +229,12 @@ describe('Dashboard api fuctionality', () => {
             is_professor: true
         });
         const admin1 = response.body.user;
+
+        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
+            if(err){
+                console.log(err);
+            }
+        });
 
         //create a layout
         response = await request.post('/api/section/createSeatingLayout').send({
@@ -297,6 +307,11 @@ describe('Dashboard api fuctionality', () => {
         });
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection' 
+        });
+        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
+            if(err){
+                console.log(err);
+            }
         });
         await request.get("/api/logout");
 

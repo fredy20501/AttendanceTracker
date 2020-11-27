@@ -130,7 +130,7 @@
           height="30px"
           :disabled="$wait.waiting('deleteLayout') || isCurrentLayoutNew "
           :loading="$wait.waiting('deleteLayout')"
-          :onClick="deleteLayout" 
+          :onClick="confirmDeleteLayout" 
         />
         <br>
         <br>
@@ -625,6 +625,14 @@ export default {
         // Stop the loading spinner
         this.$wait.end('saveLayout')
       })
+    },
+
+    confirmDeleteLayout() {
+      this.$dialog.confirm('Are you sure?')
+      .then(() => {
+        this.deleteLayout()
+      })
+      .catch(() => {})
     },
 
     deleteLayout(){

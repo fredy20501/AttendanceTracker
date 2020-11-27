@@ -201,11 +201,7 @@ describe('Database Functionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection'
         });
-        //expect(response.status).toBe(200);
-
-        //temporarily keep the testSection
-
-        await request.get("/api/logout");
+        expect(response.status).toBe(200);
 
         //Delete test users after testing
         response = await request.delete("/api/delete-user").send({
@@ -222,7 +218,8 @@ describe('Database Functionality', () => {
         response = await request.delete("/api/delete-user").send({
             email: 'prof1@test.com'
         });
-        expect(response.status).toBe(200);
+        await request.get("/api/logout");
+        
         done()
     });
 })

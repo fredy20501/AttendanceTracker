@@ -119,7 +119,6 @@ describe('Backend server fuctionality', () => {
             mandatory: false
         });
         expect(response.status).toBe(200);
-        await request.get("/api/logout");
 
         response = await request.delete("/api/delete-user").send({
             email: 'st1@test.com'
@@ -136,7 +135,7 @@ describe('Backend server fuctionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection'
         });
-        expect(response.status).toBe(200);
+        await request.get("/api/logout");
 
         done();
 

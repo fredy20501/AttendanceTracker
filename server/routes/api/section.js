@@ -216,10 +216,6 @@ router.get('/getCourseView', (req, res) => {
     .populate('seating_layout')
     .exec()
     .then(course => {
-
-        //console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-        //console.log(course);
-
         if(course == null){
             console.log("course was null/not found");
             return res.status(500).send(); 

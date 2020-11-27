@@ -125,7 +125,6 @@ describe('Backend server fuctionality', () => {
             seatingArrangement: [] 
         });
         expect(response.status).toBe(200);
-        await request.get("/api/logout");
 
         //delete testing objects
         response = await request.delete("/api/delete-user").send({
@@ -140,6 +139,7 @@ describe('Backend server fuctionality', () => {
             name: 'testLayout' 
         });
         expect(response.status).toBe(200);
+        await request.get("/api/logout");
 
         done()
     });
@@ -218,7 +218,6 @@ describe('Backend server fuctionality', () => {
             seatingArrangement: [] 
         });
         expect(response.status).toBe(200);
-        await request.get("/api/logout");
 
         //delete testing objects
         response = await request.delete("/api/delete-user").send({
@@ -233,6 +232,7 @@ describe('Backend server fuctionality', () => {
             name: 'testLayout' 
         });
         expect(response.status).toBe(200);
+        await request.get("/api/logout");
 
         done();
     });
@@ -259,7 +259,6 @@ describe('Backend server fuctionality', () => {
 
         response = await request.get("/api/section/previousSeatingPlans");
         expect(response.status).toBe(200);
-
         expect(Array.isArray(response.body.seatingLayout)).toBe(true);
 
         await request.get("/api/logout");
@@ -311,32 +310,24 @@ describe('Backend server fuctionality', () => {
         });
         const course1 = response.body.newSection
 
-
-        //test here
-
+        // Test getting the course view
         response = await request.get("/api/section/getCourseView").query({
             courseID:course1._id
         });
         expect(response.status).toBe(200);
-
         expect(response.body.name).toBe('testSection12');
 
-
+        // Delete test data
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection12'
         });
         response = await request.delete("/api/section/deleteSeatingLayout").send({
             name: 'testLayout12'
         });
-
-
         await request.get("/api/logout");
 
         done();
     });
-
-
-
 
     it("Shouldnt reach getCourseView endpoint with invalid course", async done => {
         var response = await request.post("/api/login").send({
@@ -345,24 +336,15 @@ describe('Backend server fuctionality', () => {
         });
         const prof1 = response.body.user
 
-        //test here
-
+        // Send a course id that doesn't exist
         response = await request.get("/api/section/getCourseView").query({
             courseID:"123499991234"
         });
         expect(response.status).toBe(500);
 
-
         await request.get("/api/logout");
 
         done();
     });
-
-
-
-
-
-
-
 
 })

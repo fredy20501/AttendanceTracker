@@ -67,14 +67,14 @@ describe('Backend server fuctionality', () => {
         });
         expect(response.status).toBe(200);
 
-        // Logout
-        response = await request.get("/api/logout");
-        expect(response.status).toBe(200);
-
         // Delete test account
         response = await request.delete("/api/delete-user").send({
             email: '123test@test456.com'
         });
+        expect(response.status).toBe(200);
+
+        // Logout
+        response = await request.get("/api/logout");
         expect(response.status).toBe(200);
 
         done();

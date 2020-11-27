@@ -3,7 +3,7 @@
     <!-- Show only one component depending on the user -->
     <!-- <StudentSectionView v-if="!isProfessor"/> -->
     <div v-if="!isProfessor">
-      <h2>Student Course View</h2>
+      <h2>Student Section View</h2>
       This page has not been implemented yet. Come back later!
       <br>
       <SpinnerButton 
@@ -58,7 +58,7 @@ export default {
       this.$wait.start('dropSection')
 
       this.$store.dispatch('dropSection', {
-        courseID: this.courseId,
+        sectionID: this.sectionId,
         studentID: this.getUser.id
       })
       .then(() => {

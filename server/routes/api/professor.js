@@ -1,29 +1,29 @@
 const express = require('express');
 const router = express.Router();
 let {
-    Course,
+    Section,
     ArchivedSection
 } = require('../../dbSchemas/attendanceSchema');
 
-/**pushes a new attendance object to a course
+/**pushes a new attendance object to a section
  * ==========================================
  * Example api call body:
  * {
-    "courseID": "5f9aa985a74e0454388aa083",
-    "absent_students": [{"_id": "5f983d516d53d00fbcde147d"}, {"_id": "5f983d516d53d00fbcde147d"}],
+	"sectionID": "5f9aa985a74e0454388aa083",
+	"absent_students": [{"_id": "5f983d516d53d00fbcde147d"}, {"_id": "5f983d516d53d00fbcde147d"}],
     "mandatory": true
     }
  */
 router.put('/pushNewAttendance', (req, res) => {
-    let courseID = req.body.courseID;
+    let sectionID = req.body.sectionID;
     let absent_students = req.body.absent_students;
     let mandatory = req.body.mandatory;
 
-    Course.findOne({
-        _id: courseID
-    }, function (err, course) {
+    Section.findOne({
+        _id: sectionID
+    }, function (err, section) {
 
-        if (err || course == null) {
+        if (err || section == null) {
             console.log(err);
             console.log("Not found");
         }
@@ -34,9 +34,9 @@ router.put('/pushNewAttendance', (req, res) => {
             mandatory: mandatory
         }
 
-        course.attendance.push(newAttendance);
+        section.attendance.push(newAttendance);
 
-        course.save(err => {
+        section.save(err => {
             if (err) {
                 console.log(err);
                 return res.status(500).send(err);
@@ -46,7 +46,7 @@ router.put('/pushNewAttendance', (req, res) => {
     });
 });
 
-/**Clears the list of registered students & seating_arrangement for the given course
+/**Clears the list of registered students & seating_arrangement for the given section
  * ==========================================
  * Example api call body:
  * {"sectionID": "5f9aa985a74e0454388aa083"}
@@ -54,10 +54,11 @@ router.put('/pushNewAttendance', (req, res) => {
 router.delete('/clearStudents', (req, res) => {
     let sectionID = req.body.sectionID;
 
-    Course.findById(sectionID, function (err, section) {
+    Section.findById(sectionID, function (err, section) {
         if (err || section == null) {
             console.log(err);
-            console.log("Course not found");
+            console.log("Section not found");
+            return res.status(500).send(err);
         }
 
         // Empty the list of registered students

@@ -3,7 +3,7 @@
     <!-- Show only one component depending on the user -->
     <!-- <StudentSectionView v-if="!isProfessor"/> -->
     <div v-if="!isProfessor">
-      <h2>Student Course View</h2>
+      <h2>Student Section View</h2>
       This page has not been implemented yet. Come back later!
     </div>
 

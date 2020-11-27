@@ -33,7 +33,7 @@ router.get('/getSectionsByStudent', (req, res) => {
 
 
 /**drops a section by a given student, such that it removes him from the registered_students list
- * of a given course
+ * of a given section
  * ==========================================
  * Example api call body:
  * {
@@ -45,16 +45,20 @@ router.put('/dropSection', (req, res) => {
     let studentID = req.body.studentID;
     let sectionID = req.body.sectionID;
 
-    Course.findOne({ _id: sectionID }, function(err, course) {
+    Section.findOne({ _id: sectionID }, function(err, section) {
+        if (err || section == null) {
+            console.log(err);
+            return res.status(500).send(err);
+        }
 
-        let index = course.registered_students.indexOf(studentID)
+        let index = section.registered_students.indexOf(studentID)
 
         if(index == -1){
             return res.status(500).send(err);
         }
-        course.registered_students.splice(index, 1);
+        section.registered_students.splice(index, 1);
 
-        course.save(err => {
+        section.save(err => {
             if (err) {
                 console.log(err);
                 return res.status(500).send(err);

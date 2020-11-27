@@ -83,7 +83,7 @@ router.delete('/clearStudents', (req, res) => {
 module.exports = router;
 
 /**
- * allows the professor to delete a course
+ * allows the professor to delete a section
  * and archives the section 
  * ================================
  * Example API body call:
@@ -94,15 +94,15 @@ module.exports = router;
 router.post('/archiveSection', (req, res) => {
     let sectionID = req.body.sectionID;
 
-    Course.findOne({ _id: sectionID }, function(err, course) {
+    Section.findOne({ _id: sectionID }, function(err, section) {
 
-        if (err || course == null) {
+        if (err || section == null) {
             console.log(err);
             return res.status(500).send(err);
         }
 
-        let swap = new (ArchivedSection)(course.toJSON())
-        course.remove(err => {
+        let swap = new (ArchivedSection)(section.toJSON())
+        section.remove(err => {
             if (err) {
                 console.log(err);
                 return res.status(500).send(err);

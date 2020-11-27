@@ -25,7 +25,7 @@ describe('Backend server fuctionality', () => {
         await mongoose.connection.close();
         server.close(done);
     });
-    it('Should reach updateStudentCourseView endpoint', async done => {
+    it('Should reach updateStudentSectionView endpoint', async done => {
         var response;
         
         // Make sure testing objects don't already exist
@@ -65,7 +65,7 @@ describe('Backend server fuctionality', () => {
         const layout1 = response.body.seatingLayout
 
         response = await request.post("/api/section/createSection").send({
-            courseName: 'testSection',
+            sectionName: 'testSection',
             attendanceThreshold: '0',
             seatingLayout: layout1._id,
             attMandatory: false,
@@ -77,8 +77,8 @@ describe('Backend server fuctionality', () => {
         const section1 = response.body.newSection
 
         // Update the seating arrangement
-        response = await request.put("/api/student/updateStudentCourseView").send({
-            courseID: section1._id,
+        response = await request.put("/api/student/updateStudentSectionView").send({
+            sectionID: section1._id,
             seatingArrangement: [
                 [null, null, '123456789012', null],
                 ['123456789013', null, '123456789014', null],

@@ -1,30 +1,30 @@
 const express = require('express');
 const router = express.Router();
 var {
-    Course,
+    Section,
     SeatingLayout
 } = require('../../dbSchemas/attendanceSchema');
 
 
 // allows updating a seating layout given a student id
-router.put('/updateStudentCourseView', (req, res) => {
-    let courseID = req.body.courseID;
+router.put('/updateStudentSectionView', (req, res) => {
+    let sectionID = req.body.sectionID;
     let seatingArrangement = req.body.seatingArrangement;
 
-    Course.findOne({
-        _id: courseID
-    }, function (err, course) {
+    Section.findOne({
+        _id: sectionID
+    }, function (err, section) {
 
-        if (err || course == null) {
+        if (err || section == null) {
             console.log(err);
             console.log("Not found");
         }
 
         if (Array.isArray(seatingArrangement) && seatingArrangement.length) {
-            course.seating_arrangement = seatingArrangement;
+            section.seating_arrangement = seatingArrangement;
         }
 
-        course.save(err => {
+        section.save(err => {
             if (err) {
                 console.log(err);
                 return res.status(500).send(err);

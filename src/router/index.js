@@ -27,9 +27,9 @@ const routes = [
     component: () => import(/* webpackChunkName: "home" */ '../views/Home.vue')
   },
   {
-    // This page requires the course id to be given as a parameter called id, as shown in the path.
+    // This page requires the section id to be given as a parameter called id, as shown in the path.
     // The parameter is optional because of the question mark '?'.
-    // This is because no course id means you want to create a section.
+    // This is because no section id means you want to create a section.
     path: '/create-section/:id?',
     name: 'createSection',
     meta: { back: true, requiresAuth: true, accountType: 'professor' },
@@ -39,7 +39,7 @@ const routes = [
     path: '/section/:id',
     name: 'section',
     meta: { back: true, requiresAuth: true },
-    component: () => import(/* webpackChunkName: "[course]" */ '../views/SectionView.vue')
+    component: () => import(/* webpackChunkName: "[section]" */ '../views/SectionView.vue')
   },
   {
     // The id of the section we want to view will be given as a url parameter

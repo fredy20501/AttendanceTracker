@@ -27,7 +27,7 @@ const seatingLayoutSchema = new Schema({
 });
 const SeatingLayout = mongoose.model('seatingLayout', seatingLayoutSchema, 'seatingLayout');
 
-const courseSchema = new Schema({
+const sectionSchema = new Schema({
     name: { type: String, required: true, unique: true, trim: true },
     admin: { type: ObjectId, ref: 'user' },
     professor: { type: ObjectId, ref: 'user' },
@@ -54,9 +54,9 @@ const courseSchema = new Schema({
 { 
     timestamps: true 
 });
-const Course = mongoose.model('course', courseSchema, 'course');
+const Section = mongoose.model('section', sectionSchema, 'section');
 
-module.exports = {User, Course, SeatingLayout};
+module.exports = {User, Section, SeatingLayout};
 
 /********************************
  * Schema Property Explainations*
@@ -78,19 +78,19 @@ module.exports = {User, Course, SeatingLayout};
  *      default: a boolean value which indicates whether the seatingLayout is a default or custom layout
  * 
  * -------------
- * courseSchema|
+ * sectionSchema|
  * -------------
  *      class_list: An array of object which represent the name and email of some students. 
- *                  These students come from an excel file which a professor can upload while creating a course.
- *                  The students in the class list will have their attendance tracked even if they are not registered for the course in the application.
+ *                  These students come from an excel file which a professor can upload while creating a section.
+ *                  The students in the class list will have their attendance tracked even if they are not registered for the section in the application.
  *                  (This means if students aren't registered they will be added in the reports marked as absent).
- *                  *Note that this is only used if the course is set to be mandatory.
+ *                  *Note that this is only used if the section is set to be mandatory.
  * 
  *      attendence: An array of objects which contain the required elements for recordording a single day of attendence.
  *          -   seating_layout: The ObjectId of the chosen seating layout from the seating layout schema.
  *          -   seating_arrangement: A 2D array of identical coordinates as the seating_layout array. Each element represents a seat in the class
  *                                   and each element holds the ObjectId of students in the seats.
- *          -   course_type: a string which indicates whether the course is a Lecture, Lab or Tutorial.
+ *          -   section_type: a string which indicates whether the section is a Lecture, Lab or Tutorial.
  *          -   mandatory: A boolean value which indicates if a specifc class had mandatory attendence.
  *          
  *      always_mandatory: a boolean value which indicates whether all classes should be mandatory.

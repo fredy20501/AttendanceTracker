@@ -63,7 +63,7 @@ router.post('/createSeatingLayout', (req, res) => {
     })
 });
 
-// --------------- Section/Course Methods --------------------
+// --------------- Section Methods --------------------
 
 // creates a student section
 router.post('/createSection', (req, res) => {

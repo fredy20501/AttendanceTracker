@@ -7,6 +7,7 @@ name: Node.js CI
 env:
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  DB_NAME: ${{ secrets.DB_NAME }}
 
 # Run CI on pushes & pull request for the main branch
 on:

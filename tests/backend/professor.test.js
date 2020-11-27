@@ -192,7 +192,7 @@ describe('Backend server fuctionality', () => {
         const layout1 = response.body.seatingLayout;
 
         response = await request.post('/api/section/createSection').send({
-            courseName: 'testSection',
+            sectionName: 'testSection',
             attendanceThreshold: '0',
             seatingLayout: layout1._id,
             attMandatory: false,
@@ -203,11 +203,11 @@ describe('Backend server fuctionality', () => {
                 [null, null]
             ]
         });
-        const course1 = response.body.newSection;
+        const section1 = response.body.newSection;
 
-        // Add attendance to the course
+        // Add attendance to the section
         response = await request.put("/api/professor/pushNewAttendance").send({
-            courseID: course1._id,
+            sectionID: section1._id,
             absent_students: [student1._id],
             mandatory: false,
         });
@@ -215,7 +215,7 @@ describe('Backend server fuctionality', () => {
 
         // Make sure getAttendanceData endpoint works
         response = await request.get("/api/professor/getAttendanceData").query({
-            courseID: course1._id
+            sectionID: section1._id
         });
         expect(response.status).toBe(200);
         expect(response.body.attendanceData[0].absent_students[0]._id).toBe(student1._id);

@@ -392,10 +392,10 @@ export default {
       this.$router.push({ name: 'createSection', params: {id: this.sectionId} })
     },
 
-    // Export the attendance data for this course as an excel file
+    // Export the attendance data for this section as an excel file
     exportData() {
       this.$store.dispatch('getAttendanceData', {
-        courseID: this.courseId
+        sectionID: this.sectionId
       })
       .then(res => {
         var attendanceData = res.data.attendanceData
@@ -433,7 +433,7 @@ export default {
         })
         excelData.push(headers)
 
-        // Get full list of students in the course (registered + classList)
+        // Get full list of students in the section (registered + classList)
         // Merge the class list into the registered students list (no duplicates)
         classList.forEach(student => {
           // Add the student if it isn't already in the list or registered students
@@ -476,7 +476,7 @@ export default {
         const workbook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
 
         // Download file
-        const fileName = 'AttendanceData ('+this.courseName+').xlsx'
+        const fileName = 'AttendanceData ('+this.sectionName+').xlsx'
         XLSX.writeFile(workbook, fileName);
       })
       .catch(err => {

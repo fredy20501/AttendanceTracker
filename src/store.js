@@ -283,7 +283,7 @@ const store = new Vuex.Store({
       return $http.get('professor/getAttendanceData', {
         // Note: for get requests we need to send data through params
         params: {
-          courseID: payload.courseID
+          sectionID: payload.sectionID
         }
       })
       .catch(err => {

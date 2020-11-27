@@ -50,7 +50,7 @@ router.put('/pushNewAttendance', (req, res) => {
  * Example api call body:
  * {"sectionID": "5f9aa985a74e0454388aa083"}
  */
-router.delete('/clearStudents', (req, res) => {
+router.put('/clearStudents', (req, res) => {
     let sectionID = req.body.sectionID;
 
     Section.findById(sectionID, function (err, section) {

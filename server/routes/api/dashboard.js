@@ -54,7 +54,8 @@ router.put('/dropSection', (req, res) => {
         let index = section.registered_students.indexOf(studentID)
 
         if(index == -1){
-            return res.status(500).send(err);
+            // Student is not registered
+            return res.status(520).send(err);
         }
         section.registered_students.splice(index, 1);
 

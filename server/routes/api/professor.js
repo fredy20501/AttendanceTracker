@@ -56,8 +56,7 @@ router.put('/clearStudents', (req, res) => {
 
     Section.findById(sectionID, function (err, section) {
         if (err || section == null) {
-            console.log(err);
-            console.log("Section not found");
+            console.log("Section not found:", err);
             return res.status(500).send(err);
         }
 

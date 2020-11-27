@@ -3,7 +3,7 @@
   <Loading v-if="loading"/>
 
   <div v-else>
-    <h2>{{courseName}}</h2>
+    <h2>{{sectionName}}</h2>
     <br>
     
     <div style="text-align:left">
@@ -14,7 +14,7 @@
         <b>Professor:</b> <span>{{professor}}</span>
       </div>
       <div>
-        <b>Attendance Type:</b> <span>{{courseType}}</span>
+        <b>Attendance Type:</b> <span>{{sectionType}}</span>
       </div>
     </div>
 
@@ -158,7 +158,7 @@ import SpinnerButton from './SpinnerButton'
 import PieChart from './PieChart'
 
 export default {
-  name: 'ProfessorCourseView',
+  name: 'ProfessorSectionView',
   components: {
     SpinnerButton,
     PieChart
@@ -171,8 +171,8 @@ export default {
       
       currentDateAndTime: '',
       
-      // Course data
-      courseName: '',
+      // Section data
+      sectionName: '',
       professor: '',
       registeredStudents: [],
       mandatory: false,
@@ -219,14 +219,14 @@ export default {
     percentAbsent: function() {
       return 100 - this.percentPresent
     },
-    courseType: function() {
+    sectionType: function() {
       return this.mandatory ? 'Mandatory' : 'Opt In'
     },
 
-    // The course id for this page is given as a route parameter
-    // i.e. to get to this page from another page we need to also pass the course id like so:
+    // The section id for this page is given as a route parameter
+    // i.e. to get to this page from another page we need to also pass the section id like so:
     //      this.$router.push({name: 'section', params: {id: '123EF41'}})
-    courseId: function() {
+    sectionId: function() {
       return this.$route.params.id
     },
 
@@ -271,14 +271,14 @@ export default {
       }).format(new Date)
     },
 
-    // Call the backend api to get the course information (given the course id in the store)
+    // Call the backend api to get the section information (given the section id in the store)
     getSectionData() {
       this.$store.dispatch('getSectionData', {
-        courseId: this.courseId
+        sectionId: this.sectionId
       })
       .then(res => {
         // Set the page values
-        this.courseName = res.name
+        this.sectionName = res.name
         this.professor = res.professor.name
         this.registeredStudents = res.students
         this.mandatory = res.always_mandatory
@@ -366,7 +366,7 @@ export default {
       console.log(absentStudents)
 
       this.$store.dispatch('saveAttendance', {
-        courseID: this.courseId,
+        sectionID: this.sectionId,
         absent_students: absentStudents,
         mandatory: this.mandatory
       })
@@ -393,14 +393,14 @@ export default {
       })
     },
 
-    // Go to the create section page to edit the course
+    // Go to the create section page to edit the section
     editSection() {
       // Go to the edit section page using the router
-      // We send the courseId as a parameter so that the page knows we want to edit this course
-      this.$router.push({ name: 'createSection', params: {id: this.courseId} })
+      // We send the sectionId as a parameter so that the page knows we want to edit this section
+      this.$router.push({ name: 'createSection', params: {id: this.sectionId} })
     },
 
-    // TODO: This function will export the attendance data for this course into an excel file
+    // TODO: This function will export the attendance data for this section into an excel file
     exportData() {
       // Temporary message to tell users it is not currently functional
       this.$notify({

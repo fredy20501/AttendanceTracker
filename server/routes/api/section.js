@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 var {
-    Course,
+    Section,
     SeatingLayout
 } = require('../../dbSchemas/attendanceSchema');
 
@@ -60,7 +60,7 @@ router.post('/createSeatingLayout', (req, res) => {
 
 
 router.post('/createSection', (req, res) => {
-    let courseName = req.body.courseName;
+    let sectionName = req.body.sectionName;
     let attendanceThreshold = req.body.attendanceThreshold;
     let seatingLayout = req.body.seatingLayout;
     let attMandatory = req.body.attMandatory;
@@ -72,8 +72,8 @@ router.post('/createSection', (req, res) => {
     let students = [];
     let attendance = [];
 
-    const newSection = new Course();
-    newSection.name = courseName;
+    const newSection = new Section();
+    newSection.name = sectionName;
     newSection.admin = admin;
     newSection.professor = professor;
     newSection.registered_students = students;
@@ -102,8 +102,8 @@ router.post('/createSection', (req, res) => {
 //currently unfinished
 router.post('/updateSection', (req, res) => {
 
-    let courseId = req.body.courseId;
-    let courseName = req.body.courseName;
+    let sectionId = req.body.sectionId;
+    let sectionName = req.body.sectionName;
     let attendanceThreshold = req.body.attendanceThreshold;
     let seatingLayout = req.body.seatingLayout;
     let attMandatory = req.body.attMandatory;
@@ -115,52 +115,52 @@ router.post('/updateSection', (req, res) => {
     let seatingArrangement = req.body.seatingArrangement;
     let attendance = [];
 
-    Course.findOne({
-        _id: courseId
-    }, function (err, course) {
-        console.log(courseName);
-        console.log(course)
+    Section.findOne({
+        _id: sectionId
+    }, function (err, section) {
+        console.log(sectionName);
+        console.log(section)
 
-        if (err || course == null) {
+        if (err || section == null) {
             console.log(err);
             return res.status(500).send(err);
         }
 
-        if (courseName != null && courseName !== "") {
-            course.name = courseName;
+        if (sectionName != null && sectionName !== "") {
+            section.name = sectionName;
         }
         if (attendanceThreshold != null && attendanceThreshold !== "") {
-            course.attendance_threshold = attendanceThreshold;
+            section.attendance_threshold = attendanceThreshold;
         }
         if (seatingLayout != null && seatingLayout !== "") {
-            course.seating_layout = seatingLayout;
+            section.seating_layout = seatingLayout;
         }
         if (attMandatory != null && attMandatory !== "") {
-            course.always_mandatory = attMandatory;
+            section.always_mandatory = attMandatory;
         }
         if (professor != null && professor !== "") {
-            course.professor = professor;
+            section.professor = professor;
         }
         if (admin != null && admin !== "") {
-            course.admin = admin;
+            section.admin = admin;
         }
         if (students != null && students !== "") {
-            course.registered_students = students
+            section.registered_students = students
         }
         if (maxCapacity != null && maxCapacity !== "") {
-            course.max_capacity = maxCapacity;
+            section.max_capacity = maxCapacity;
         }
         if (seatingArrangement != null && seatingArrangement !== "") {
-            course.seating_arrangement = seatingArrangement;
+            section.seating_arrangement = seatingArrangement;
         }
         if (Array.isArray(attendance) && attendance.length) {
-            course.attendance = attendance;
+            section.attendance = attendance;
         }
         if (Array.isArray(classList) && classList.length) {
-            course.class_list = classList;
+            section.class_list = classList;
         }
 
-        course.save(err => {
+        section.save(err => {
             if (err) {
                 console.log(err);
                 return res.status(500).send(err);
@@ -192,7 +192,7 @@ router.delete('/deleteSection', (req, res) => {
     // (should only delete one since emails are unique)
     var name = req.body.name;
 
-    Course.deleteMany({ name: name }, (err) => {
+    Section.deleteMany({ name: name }, (err) => {
         if(err){
             console.log(err);
             return res.status(500).send();
@@ -201,40 +201,40 @@ router.delete('/deleteSection', (req, res) => {
         return res.status(200).send(); 
     });
 });
-// ------------- Combined Seating Layout and Course Methods -------------
+// ------------- Combined Seating Layout and Section Methods -------------
 
-// gets information regarding a course given a course id
-router.get('/getCourseView', (req, res) => {
+// gets information regarding a section given a section id
+router.get('/getSectionView', (req, res) => {
 
     // Note: for get requests data is sent through query params
-    let courseID = req.query.courseID;
+    let sectionID = req.query.sectionID;
     
-    Course.findById(courseID)
+    Section.findById(sectionID)
     // The populate method replaces an objectId reference with the actual object
     // Documentation: https://mongoosejs.com/docs/populate.html
     .populate('professor', 'name')
     .populate('seating_layout')
     .exec()
-    .then(course => {
+    .then(section => {
         // Here we want to populate the seating arrangement
         // (we need to do it 'manually' since it is a 2d array)
         // Inspired by: https://stackoverflow.com/questions/55878496/mongoose-populate-on-two-dimensional-array
 
         // Generate all the seating arrangement position of the 2d array
         let seating_positions = [];
-        for(let i=0; i<=course.seating_arrangement.length; i++) {
-            for(let j=0; j<=course.seating_arrangement[0].length; j++) {
+        for(let i=0; i<=section.seating_arrangement.length; i++) {
+            for(let j=0; j<=section.seating_arrangement[0].length; j++) {
                 seating_positions.push(`seating_arrangement.${i}.${j}`);
             }
         }
 
         // Populate all the positions of the seating_arrangement
-        course.populate(seating_positions.join(' '), (err, fullCourse) => {
+        section.populate(seating_positions.join(' '), (err, fullSection) => {
             if(err) {
                 console.log(err)
                 return res.status(500).send(err)
             }
-            return res.status(200).json(fullCourse) 
+            return res.status(200).json(fullSection) 
         });
     })
     .catch(err => {

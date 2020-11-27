@@ -317,9 +317,9 @@ export default {
     ...mapGetters(["getUser"]),
 
     // The mode determines if we are currently adding a new section or updating an existing one
-    // (this is determined by whether the courseId is set as a url parameter)
+    // (this is determined by whether the sectionId is set as a url parameter)
     pageMode: function() {
-      return this.courseId == null ? 'add' : 'edit'
+      return this.sectionId == null ? 'add' : 'edit'
     },
     isMandatory: function() { 
       return this.attendanceType == 'mandatory'
@@ -341,10 +341,10 @@ export default {
       return this.isCurrentLayoutNew ? this.paintSelectIndex : -1
     },
 
-    // The course id is given as a route parameter if we want to edit a course
-    // i.e. to get to this page from another page we need to also pass the course id like so:
+    // The section id is given as a route parameter if we want to edit a section
+    // i.e. to get to this page from another page we need to also pass the section id like so:
     //      this.$router.push({name: 'createEditSection', params: {id: '123EF41'}})
-    courseId: function() {
+    sectionId: function() {
       return this.$route.params.id
     }
   },
@@ -355,7 +355,7 @@ export default {
       // When getLayouts is done run this code
 
       if (this.pageMode == 'edit') {
-        // Load the course information into the fields
+        // Load the section information into the fields
         this.getSectionData()
       }
     })
@@ -364,10 +364,10 @@ export default {
 
   methods: {
 
-    // Call the backend api to get the course information (given the course id)
+    // Call the backend api to get the section information (given the section id)
     getSectionData() {
       this.$store.dispatch('getSectionData', {
-        courseId: this.courseId
+        sectionId: this.sectionId
       })
       .then(res => {
         this.sectionName = res.name
@@ -376,7 +376,7 @@ export default {
         this.classList = res.class_list
         this.oldSeatingLayoutId = res.seating_layout._id
         
-        // Find the index of the layout that matches the layout id from the course
+        // Find the index of the layout that matches the layout id from the section
         var layoutIndex = this.layouts.findIndex(layout => {
           return layout._id == res.seating_layout._id
         })
@@ -610,7 +610,7 @@ export default {
       const seatingArrangement = new Array(this.rows).fill(null).map(() => new Array(this.columns).fill(null))
 
       this.$store.dispatch('createSection', {
-        courseName: this.sectionName,
+        sectionName: this.sectionName,
         professor: userId,
         maxCapacity: capacity,
         attendanceThreshold: this.attendanceThreshold,
@@ -667,8 +667,8 @@ export default {
       }
 
       this.$store.dispatch('updateSection', {
-        courseId: this.courseId,
-        courseName: this.sectionName,
+        sectionId: this.sectionId,
+        sectionName: this.sectionName,
         professor: userId,
         maxCapacity: capacity,
         attendanceThreshold: this.attendanceThreshold,

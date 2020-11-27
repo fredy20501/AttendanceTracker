@@ -23,13 +23,13 @@ describe('Dashboard api fuctionality', () => {
         server.close(done);
     });
 
-    it("Should reach getCourseView endpoint", async done => {
+    it("Should reach getSectionView endpoint", async done => {
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
         });
         const prof1 = response.body.user
-        response = await request.get("/api/dashboard/getCoursesCreatedByProfessor", {
+        response = await request.get("/api/dashboard/getSectionsCreatedByProfessor", {
             params: {
                 professorID: prof1.id
             }

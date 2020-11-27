@@ -135,10 +135,10 @@ export default {
     registerForSection() {
       this.$store.dispatch('registerForSection', {
         studentID: this.getUser.id,
-        courseName: this.sectionName
+        sectionName: this.sectionName
       })
       .then(res => {
-        // Add the new course to the UI
+        // Add the new section to the UI
         this.sections.push(res)
         // Clear the field
         this.sectionName = ""

@@ -212,7 +212,7 @@ describe('Backend server fuctionality', () => {
             seatingArrangement: [] 
         });
         const section1 = response.body.newSection
-        console.log("COURSE: ", section1)
+        console.log("SECTION: ", section1)
         console.log("RESPONSE: ", response.body)
 
         response = await request.post("/api/section/updateSection").send({
@@ -313,7 +313,7 @@ describe('Backend server fuctionality', () => {
         done();
     });
 
-    it("deleteLayout Should not delete a layout in use by a course", async done => {
+    it("deleteLayout Should not delete a layout in use by a section", async done => {
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
@@ -344,7 +344,7 @@ describe('Backend server fuctionality', () => {
         });
 
         response = await request.post("/api/section/createSection").send({
-            courseName: 'testSection42',
+            sectionName: 'testSection42',
             attendanceThreshold: '0',
             seatingLayout: layout1._id,
             attMandatory: false,

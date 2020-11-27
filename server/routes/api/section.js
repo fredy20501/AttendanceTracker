@@ -172,8 +172,8 @@ router.post('/updateSection', (req, res) => {
 });
 
 
-// Delete a seating layout given its id if it is not used by a course.
-// Returns status 200 on success, 500 on error, 418 if it is used by a course.
+// Delete a seating layout given its id if it is not used by a section.
+// Returns status 200 on success, 500 on error, 418 if it is used by a section.
 router.post('/deleteSeatingLayout', (req, res) => {
     var id = req.body.id;
 
@@ -183,13 +183,13 @@ router.post('/deleteSeatingLayout', (req, res) => {
             return res.status(500).send();
         }
 
-        Course.findOne({seating_layout:id}, (err, course) => {
+        Section.findOne({seating_layout:id}, (err, section) => {
             if(err){
                 console.log(err);
                 return res.status(500).send();
             }
 
-            if(course == null){
+            if(section == null){
                 // Layout is not used: delete it!
                 SeatingLayout.findByIdAndDelete(id, (err) => {
                     if(err){
@@ -201,7 +201,7 @@ router.post('/deleteSeatingLayout', (req, res) => {
                 });
             }
             else{
-                // Layout is used by a course
+                // Layout is used by a section
                 return res.status(418).send();
             }     
         });

@@ -2,7 +2,7 @@ const app = require('app.js');
 const supertest = require("supertest");
 const http = require('http');
 const mongoose = require('mongoose');
-const { User, Course, SeatingLayout } = require('dbSchemas/attendanceSchema.js');
+const { User, Section, SeatingLayout } = require('dbSchemas/attendanceSchema.js');
 
 describe('Database Functionality', () => {
 
@@ -56,7 +56,7 @@ describe('Database Functionality', () => {
         done ()
     });
 
-    it('Should store course & seating layout to database', async done => {
+    it('Should store section & seating layout to database', async done => {
         //Delete test users that may be existing in the database
         response = await request.delete("/api/delete-user").send({
             email: 'prof1@test.com'
@@ -138,9 +138,9 @@ describe('Database Functionality', () => {
         });
         const layout1 = response.body.seatingLayout
 
-        //Create test course
+        //Create test section
         response = await request.post('/api/section/createSection').send({
-            courseName: 'testSection',
+            sectionName: 'testSection',
             attendanceThreshold: '0',
             seatingLayout: layout1._id,
             attMandatory: false,
@@ -154,13 +154,13 @@ describe('Database Functionality', () => {
             attendance: [Date.now(), student1._id, false]
         });
         
-        //Search course in database by name
-        response = await Course.findOne({
+        //Search section in database by name
+        response = await Section.findOne({
             name: 'testSection'
         });
-        //course = course.body;
+        //section = section.body;
 
-        //Check that course information is stored
+        //Check that section information is stored
         expect(response.name).toBe('testSection');
         expect(JSON.stringify(response.admin)).toBe(JSON.stringify(admin1._id));
         expect(JSON.stringify(response.professor)).toBe(JSON.stringify(prof1._id));
@@ -200,7 +200,7 @@ describe('Database Functionality', () => {
             }
         });
 
-        //Delete test course after testing
+        //Delete test section after testing
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection'
         });

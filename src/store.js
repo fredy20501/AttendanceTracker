@@ -198,7 +198,7 @@ const store = new Vuex.Store({
     },
 
     getSectionsForStudent(context, payload) {
-      return $http.get('dashboard/getCoursesByStudent', {
+      return $http.get('dashboard/getSectionsByStudent', {
         // Note: for get requests we need to send data through params
         params: {
           studentID: payload.userId
@@ -210,13 +210,13 @@ const store = new Vuex.Store({
         }
       })
       .catch(err => {
-        err.message = "Could not get courses. Please try again later"
+        err.message = "Could not get sections. Please try again later"
         throw err
       })
     },
 
     getSectionsForProfessor(context, payload) {
-      return $http.get('dashboard/getCoursesCreatedByProfessor', {
+      return $http.get('dashboard/getSectionsCreatedByProfessor', {
         // Note: for get requests we need to send data through params
         params: {
           professorID: payload.userId
@@ -228,56 +228,56 @@ const store = new Vuex.Store({
         }
       })
       .catch(err => {
-        err.message = "Could not get courses. Please try again later"
+        err.message = "Could not get sections. Please try again later"
         throw err
       })
     },
     
     registerForSection(context, payload) {
-      return $http.put('dashboard/registerForCourse', payload)
+      return $http.put('dashboard/registerForSection', payload)
       .then(res => {
-        return res.data.course
+        return res.data.section
       })
       .catch(err => {
         // Register failed: Add a message and propagate the error
         if (err.response.status == 520) {
-          err.message = "You are already registered for this course"
+          err.message = "You are already registered for this section"
         }
         else if (err.response.status == 530) {
-          err.message = "Course does not exist"
+          err.message = "Section does not exist"
         }
         else {
-          err.message = "Could not register for the course. Please try again later"
+          err.message = "Could not register for the section. Please try again later"
         }
         throw err
       })
     },
     
     getSectionData(context, payload) {
-      return $http.get('section/getCourseView', {
+      return $http.get('section/getSectionView', {
         // Note: for get requests we need to send data through params
         params: {
-          courseID: payload.courseId
+          sectionID: payload.sectionId
         }
       })
       .then(res => {
         // Format the response to match what frontend is expecting
-        const course = res.data
+        const section = res.data
         return {
-          name: course.name,
+          name: section.name,
           professor: {
-            name: course.professor.name
+            name: section.professor.name
           },
-          students: course.registered_students,
-          always_mandatory: course.always_mandatory,
-          seating_layout: course.seating_layout,
-          seating_arrangement: course.seating_arrangement,
-          class_list: course.class_list,
-          attendance_threshold: course.attendance_threshold
+          students: section.registered_students,
+          always_mandatory: section.always_mandatory,
+          seating_layout: section.seating_layout,
+          seating_arrangement: section.seating_arrangement,
+          class_list: section.class_list,
+          attendance_threshold: section.attendance_threshold
         }
       })
       .catch(err => {
-        err.message = "Could not get course data. Please try again later"
+        err.message = "Could not get section data. Please try again later"
         throw err
       })
     },

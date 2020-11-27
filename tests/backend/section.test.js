@@ -40,9 +40,6 @@ describe('Backend server fuctionality', () => {
             is_professor: true
         });
         const prof1 = response.body.user
-        
-
-        
 
         // Delete before to make sure it doesn't exist
         SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
@@ -63,13 +60,12 @@ describe('Backend server fuctionality', () => {
         });
         expect(response.status).toBe(200);
 
-        // Delete layout successfully
+        // Delete layout
         SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
             if(err){
                 console.log(err);
             }
         });
-        //expect(response.status).toBe(200);
 
         await request.get("/api/logout");
         done()
@@ -273,7 +269,6 @@ describe('Backend server fuctionality', () => {
             password:'testing123'
         });
         var prof1 = response.body.user
-        //console.log(prof1);
 
         //delete just in case
         SeatingLayout.deleteOne({name:'testLayout42'}, (err) =>{
@@ -303,14 +298,11 @@ describe('Backend server fuctionality', () => {
         done();
     });
 
-
     it("deleteLayout Should not delete a layout which doesnt exist", async done => {
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
         });
-        var prof1 = response.body.user
-        //console.log(prof1);
 
         response = await request.post("/api/section/deleteSeatingLayout").send({
             id: "123456789012"
@@ -321,16 +313,12 @@ describe('Backend server fuctionality', () => {
         done();
     });
 
-
-    
-
     it("deleteLayout Should not delete a layout in use by a course", async done => {
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
         });
         var prof1 = response.body.user
-        //console.log(prof1);
 
         //delete just in case
         SeatingLayout.deleteOne({name:'testLayout42'}, (err) =>{
@@ -365,8 +353,6 @@ describe('Backend server fuctionality', () => {
             maxCapacity: 30,
             seatingArrangement: [] 
         });
-        const section1 = response.body.newSection
-
 
         response = await request.post("/api/section/deleteSeatingLayout").send({
             id: layout1._id 
@@ -386,8 +372,6 @@ describe('Backend server fuctionality', () => {
         await request.get("/api/logout");
         done();
     });
-
-
 
 
 })

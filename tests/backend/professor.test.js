@@ -2,7 +2,6 @@ const app = require('app.js');
 const mongoose = require('mongoose');
 const supertest = require("supertest");
 const http = require('http');
-
 const {SeatingLayout } = require('dbSchemas/attendanceSchema.js');
 
 describe('Backend server fuctionality', () => {
@@ -141,9 +140,14 @@ describe('Backend server fuctionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection'
         });
-        expect(response.status).toBe(200);
+        //delete just in case
+        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
+            if(err){
+                console.log(err);
+            }
+            done();
+        });
 
-        done();
 
     });
 

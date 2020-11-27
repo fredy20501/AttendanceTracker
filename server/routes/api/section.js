@@ -172,38 +172,25 @@ router.post('/updateSection', (req, res) => {
 });
 
 
+// Delete a seating layout given its id if it is not used by a course.
+// Returns status 200 on success, 500 on error, 418 if it is used by a course.
 router.post('/deleteSeatingLayout', (req, res) => {
-    // Delete all seating layouts with the given name ??
-    // (should only delete one since emails are unique)??
-    //TODO: should not delete a layout if it is used by a course
-    //console.log(req);
-    //console.log("body:");
-    //console.log(req.body);
-
     var id = req.body.id;
-    //console.log("id is :"+id);
 
     SeatingLayout.findById(id, (err, layout) => {
-
-        //console.log("layout is");
-        //console.log(layout);
-
         if(err || layout == null){
             console.log(err);
             return res.status(500).send();
         }
 
         Course.findOne({seating_layout:id}, (err, course) => {
-
-            //console.log("course is");
-            //console.log(course);
-
             if(err){
                 console.log(err);
                 return res.status(500).send();
             }
 
             if(course == null){
+                // Layout is not used: delete it!
                 SeatingLayout.findByIdAndDelete(id, (err) => {
                     if(err){
                         console.log(err);
@@ -214,8 +201,8 @@ router.post('/deleteSeatingLayout', (req, res) => {
                 });
             }
             else{
+                // Layout is used by a course
                 return res.status(418).send();
-                //layout is already in use
             }     
         });
     });

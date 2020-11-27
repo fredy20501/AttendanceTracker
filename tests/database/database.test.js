@@ -70,8 +70,10 @@ describe('Database Functionality', () => {
         response = await request.delete("/api/delete-user").send({
             email: 'admin@test.com'
         });
-        response = await request.delete("/api/section/deleteSeatingLayout").send({
-            name: 'testLayout'
+        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
+            if(err){
+                console.log(err);
+            }
         });
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection' 

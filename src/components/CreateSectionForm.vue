@@ -461,7 +461,7 @@ export default {
     // Call api to get the list of layouts for the dropdown
     getLayouts(callback) {
       this.$store.dispatch('getSeatingLayouts')
-      .then( res => {
+      .then(res => {
         this.layouts = res.layouts
 
         // Run the callback function (if one was given)
@@ -484,7 +484,7 @@ export default {
       var newLayout;
       
       if(this.layouts.length == 0){
-        //if we dont have any layouts, show a default example
+        // if we dont have any layouts, use a default example as template
         newLayout = {layout: [[0, 1, 2, 3]]};
       }
       else{
@@ -576,8 +576,9 @@ export default {
     },
 
     deleteLayout(){
+      // Start loading spinner
       this.$wait.start('deleteLayout');
-      console.log("called deleteLayout");
+
       this.$store.dispatch('deleteLayout', {
         id: this.currentLayout._id
       }).then( () =>{//used to have res
@@ -591,9 +592,6 @@ export default {
           title: "Seating layout saved successfully", 
           type: "success"
         })
-
-        // Stop the loading spinner
-        this.$wait.end('deleteLayout')
       }).catch(err =>{
         console.log(err)
         // Show a notification with the error message
@@ -603,14 +601,13 @@ export default {
             type: err.type ?? 'error',
             duration: 10000
           })
-        }
+        }    
+      })
+      .finally(() => {
         // Stop the loading spinner
-        this.$wait.end('deleteLayout')        
-      });
+        this.$wait.end('deleteLayout')    
+      })
     },
-
-    //call the api to delete the currently selected layout
-
 
     // General submit function which redirects
     // to the proper function depending on the mode

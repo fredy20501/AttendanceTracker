@@ -111,6 +111,7 @@
         <button type="button" v-on:click="createLayout">New layout</button><br>
         <br>
         <SpinnerButton 
+          v-if="isCurrentLayoutNew"
           color="blue"
           label="Save Layout"
           type="button"
@@ -120,7 +121,17 @@
           :loading="$wait.waiting('saveLayout')"
           :onClick="saveLayout" 
         />
-
+        <SpinnerButton 
+          v-if="!isCurrentLayoutNew && layouts.length != 0"
+          class="red"
+          label="Delete Layout"
+          type="button"
+          width="100%"
+          height="30px"
+          :disabled="$wait.waiting('deleteLayout') || isCurrentLayoutNew "
+          :loading="$wait.waiting('deleteLayout')"
+          :onClick="deleteLayout" 
+        />
         <br>
         <br>
 
@@ -522,9 +533,17 @@ export default {
 
     createLayout() {
       this.stopPaintSelect()
-
-      // Make a copy of the current layout as the new layout
-      const newLayout = JSON.parse(JSON.stringify(this.currentLayout))
+      var newLayout;
+      
+      if(this.layouts.length == 0){
+        // if we dont have any layouts, use a default example as template
+        newLayout = {layout: [[0, 1, 2, 3]]};
+      }
+      else{
+        // Make a copy of the current layout as the new layout
+        newLayout = JSON.parse(JSON.stringify(this.currentLayout));
+      }
+      
       newLayout.type = "new"
       // Remove the id since it isn't correct anymore
       delete newLayout._id
@@ -608,6 +627,40 @@ export default {
       })
     },
 
+    deleteLayout(){
+      // Start loading spinner
+      this.$wait.start('deleteLayout');
+
+      this.$store.dispatch('deleteLayout', {
+        id: this.currentLayout._id
+      }).then( () =>{//used to have res
+
+        //this.layouts[this.layoutSelected] = null;
+        this.layouts.splice(this.layoutSelected, 1);
+        this.layoutSelected = 0;
+
+        // show success message
+        this.$notify({ 
+          title: "Seating layout saved successfully", 
+          type: "success"
+        })
+      }).catch(err =>{
+        console.log(err)
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error',
+            duration: 10000
+          })
+        }    
+      })
+      .finally(() => {
+        // Stop the loading spinner
+        this.$wait.end('deleteLayout')    
+      })
+    },
+
     // General submit function which redirects
     // to the proper function depending on the mode
     submit() {
@@ -619,7 +672,7 @@ export default {
     // If not, show an error notification and return false
     // If it is saved, return true
     isSeatingLayoutSaved() {
-      if (this.isCurrentLayoutNew) {
+      if (this.isCurrentLayoutNew || this.layouts.length == 0) {
         this.$notify({ 
           title: "Current seating layout is not saved", 
           type: "error"

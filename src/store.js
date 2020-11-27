@@ -186,6 +186,17 @@ const store = new Vuex.Store({
       })
     },
 
+    deleteLayout(context, payload) {
+      return $http.post('section/deleteSeatingLayout', payload)
+      .catch(err => {
+        err.message = "Could not delete layout. Please try again later"
+        if(err.response.status == 418){
+          err.message = "Layout cannot be deleted since it is currently used for a section"
+        }
+        throw err
+      })
+    },
+
     getSectionsForStudent(context, payload) {
       return $http.get('dashboard/getSectionsByStudent', {
         // Note: for get requests we need to send data through params

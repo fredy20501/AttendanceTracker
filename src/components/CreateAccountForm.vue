@@ -27,7 +27,7 @@
         <div>
           <ValidationProvider name="Email Address" rules="required|email|unbEmail" v-slot="{ errors }">
             <label for="email">Email Address</label><br>
-            <input id="email" type="email" autocomplete="username" placeholder="Email Address" v-model="email">
+            <input id="email" type="email" autocomplete="email" placeholder="Email Address" v-model="email">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>

@@ -203,7 +203,7 @@ describe('Backend server fuctionality', () => {
         });
         const section1 = response.body.newSection
 
-        response = await request.post("/api/section/updateSection").send({
+        response = await request.put("/api/section/updateSection").send({
             sectionId: section1._id,
             sectionName: 'testSection',
             attendanceThreshold: '0',

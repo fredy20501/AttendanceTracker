@@ -61,7 +61,7 @@
             <td></td>
             <td :colspan="classLayout[0].length">
               <div style="margin: 10px auto 0 auto; padding: 0 10px; max-width: 200px;" class="border">
-                Whiteboard
+                Front of Classroom
               </div>
             </td>
           </tr>

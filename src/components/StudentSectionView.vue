@@ -1,5 +1,8 @@
 <template>
-  <div>
+<transition name="fade" mode="out-in">
+  <Loading v-if="loading"/>
+
+  <div v-else>
     <h2>{{sectionName}}</h2>
     <br>
 
@@ -106,6 +109,7 @@
     </button>
 
   </div>
+</transition>
 </template>
 
 <script>
@@ -115,6 +119,8 @@ export default {
   name: 'StudentSectionView',
   data() {
     return {
+      // Hide the page until data is loaded
+      loading: true,
 
       currentDateAndTime: '',
       
@@ -181,8 +187,12 @@ export default {
         this.professor = res.professor.name
         this.registeredStudents = res.students
         this.mandatory = res.always_mandatory
+        
         // Merge the seat type & student info into the full class layout
         this.classLayout = this.mergeStudentSeatLayouts(res.seating_layout.layout, res.seating_arrangement)
+
+        // Show the page once data is loaded
+        this.loading = false
       })
       .catch(err => {
         console.log(err);

@@ -39,6 +39,23 @@ import {HalfCircleSpinner} from 'epic-spinners'
 Vue.component('HalfCircleSpinner', HalfCircleSpinner)
 
 
+// Import vuejs-dialog globally
+// More info: https://www.npmjs.com/package/vuejs-dialog
+import VuejsDialog from 'vuejs-dialog'
+import 'vuejs-dialog/dist/vuejs-dialog.min.css'
+Vue.use(VuejsDialog, {
+  html: true,
+  okText: 'Yes',
+  cancelText: 'Cancel',
+  backdropClose: true
+})
+
+
+// Import Loading component globally
+import Loading from '@/components/layout/Loading'
+Vue.component('Loading', Loading)
+
+
 // Global store is defined in store.js
 import store from './store'
 

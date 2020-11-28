@@ -1,9 +1,7 @@
 <template>
   <button 
-    :class="css_class"
-    :type="type"
+    :class="color"
     :style="buttonStyle"
-    :disabled="disabled"
     v-on:click="onClick"
   >
     {{ label }}
@@ -12,7 +10,7 @@
       v-if="loading"
       :animation-duration="1000"
       :size="spinnerSize"
-      :color="'#cc0000'"
+      :color="autoColor"
     />
   </button>
 </template>
@@ -21,12 +19,10 @@
 export default {
   name: 'SpinnerButton',
   props: {
-    css_class: String,
+    color: String,
     label: String,
     width: String,
     height: String,
-    type: String,
-    disabled: Boolean,
     loading: Boolean,
     onClick: {
       type: Function,
@@ -48,6 +44,9 @@ export default {
     },
     spinnerStyle() {
       return 'right:'+this.spinnerMargin+'; top:'+this.spinnerMargin
+    },
+    autoColor() {
+      return this.color == 'red' ? 'white' : 'black'
     }
   }
 }

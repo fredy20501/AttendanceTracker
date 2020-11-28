@@ -1,11 +1,14 @@
 <template>
-  <div>
+<transition name="fade" mode="out-in">
+  <Loading v-if="loading && pageMode=='edit'"/>
+
+  <div v-else>
     <!-- 
       The mode determines if we are currently adding 
       a new section or updating an existing one
      -->
-    <h2 v-if="pageMode=='add'">Create Section</h2>
-    <h2 v-if="pageMode=='edit'">Edit Section</h2>
+    <h2 v-if="isCreateMode">Create Section</h2>
+    <h2 v-if="!isCreateMode">Edit Section</h2>
     <br>
 
     <ValidationObserver v-slot="{ handleSubmit, invalid}">
@@ -77,8 +80,8 @@
 
       <br>
       <br>
-      <hr style="margin: 20px 0; border-top: 10px solid #333;">
-      <br>
+      <hr class="divider">
+      <h2>Class Layout</h2>
 
       <div class="column">
         <!-- Basic dropdown for selecting layout -->
@@ -111,7 +114,8 @@
         <button type="button" v-on:click="createLayout">New layout</button><br>
         <br>
         <SpinnerButton 
-          class="blue"
+          v-if="isCurrentLayoutNew"
+          color="blue"
           label="Save Layout"
           type="button"
           width="100%"
@@ -120,7 +124,17 @@
           :loading="$wait.waiting('saveLayout')"
           :onClick="saveLayout" 
         />
-
+        <SpinnerButton 
+          v-if="!isCurrentLayoutNew && layouts.length != 0"
+          class="red"
+          label="Delete Layout"
+          type="button"
+          width="100%"
+          height="30px"
+          :disabled="$wait.waiting('deleteLayout') || isCurrentLayoutNew "
+          :loading="$wait.waiting('deleteLayout')"
+          :onClick="confirmDeleteLayout" 
+        />
         <br>
         <br>
 
@@ -231,8 +245,8 @@
 
       <!-- Add/Save button: Only one is shown depending if the mode is "add" or "update" -->
       <SpinnerButton 
-        v-if="pageMode=='add'"
-        class="blue"
+        v-if="isCreateMode"
+        color="blue"
         label="Create Section"
         width="300px"
         height="30px"
@@ -241,8 +255,8 @@
         :loading="$wait.waiting('createSection')"
       />
       <SpinnerButton 
-        v-if="pageMode=='edit'"
-        class="blue"
+        v-if="!isCreateMode"
+        color="blue"
         label="Save Section"
         width="300px"
         height="30px"
@@ -253,8 +267,61 @@
 
     </form>
     </ValidationObserver>
-    
+
+    <div v-if="!isCreateMode">
+      <br>
+      <br>
+      <hr class="divider">
+      <h2>Danger Zone</h2>
+
+      <div class="double-column danger-zone">
+        <div>
+          <div>
+            <b>Clear Students</b><br>
+            Remove all students from the section. Students may 
+            register again but will have lost their seats.
+          </div>
+          <div>
+            <SpinnerButton 
+              style="margin:5px"
+              color="red"
+              label="Clear Students"
+              width="300px"
+              height="30px"
+              type="button"
+              :disabled="$wait.waiting('clearStudents')"
+              :loading="$wait.waiting('clearStudents')"
+              :onClick="confirmClearStudents"
+            />
+          </div>
+        </div>
+        <br>
+        <div>
+          <div>
+            <b>Delete section</b><br>
+            Delete the section entirely. Deleted sections 
+            are archived so an administrator may be able 
+            to recover them if needed.
+          </div>
+          <div>
+            <SpinnerButton 
+              style="margin:5px"
+              color="red"
+              label="Delete Section"
+              width="300px"
+              height="30px"
+              type="button"
+              :disabled="$wait.waiting('deleteSection')"
+              :loading="$wait.waiting('deleteSection')"
+              :onClick="confirmDeleteSection"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
+</transition>
 </template>
 
 <script>
@@ -270,6 +337,8 @@ export default {
 
   data() {
     return {
+      // Hide the page until data is loaded
+      loading: true,
       
       // Field values
       sectionName: "",
@@ -311,9 +380,9 @@ export default {
     ...mapGetters(["getUser"]),
 
     // The mode determines if we are currently adding a new section or updating an existing one
-    // (this is determined by whether the courseId is set as a url parameter)
-    pageMode: function() {
-      return this.courseId == null ? 'add' : 'edit'
+    // (this is determined by whether the sectionId is set as a url parameter)
+    isCreateMode: function() {
+      return this.sectionId == null
     },
     isMandatory: function() { 
       return this.attendanceType == 'mandatory'
@@ -335,10 +404,10 @@ export default {
       return this.isCurrentLayoutNew ? this.paintSelectIndex : -1
     },
 
-    // The course id is given as a route parameter if we want to edit a course
-    // i.e. to get to this page from another page we need to also pass the course id like so:
+    // The section id is given as a route parameter if we want to edit a section
+    // i.e. to get to this page from another page we need to also pass the section id like so:
     //      this.$router.push({name: 'createEditSection', params: {id: '123EF41'}})
-    courseId: function() {
+    sectionId: function() {
       return this.$route.params.id
     }
   },
@@ -348,8 +417,8 @@ export default {
     this.getLayouts(() => {
       // When getLayouts is done run this code
 
-      if (this.pageMode == 'edit') {
-        // Load the course information into the fields
+      if (!this.isCreateMode) {
+        // Load the section information into the fields
         this.getSectionData()
       }
     })
@@ -358,10 +427,10 @@ export default {
 
   methods: {
 
-    // Call the backend api to get the course information (given the course id)
+    // Call the backend api to get the section information (given the section id)
     getSectionData() {
       this.$store.dispatch('getSectionData', {
-        courseId: this.courseId
+        sectionId: this.sectionId
       })
       .then(res => {
         this.sectionName = res.name
@@ -370,7 +439,7 @@ export default {
         this.classList = res.class_list
         this.oldSeatingLayoutId = res.seating_layout._id
         
-        // Find the index of the layout that matches the layout id from the course
+        // Find the index of the layout that matches the layout id from the section
         var layoutIndex = this.layouts.findIndex(layout => {
           return layout._id == res.seating_layout._id
         })
@@ -378,6 +447,9 @@ export default {
         if (layoutIndex !== -1) {
           this.layoutSelected = layoutIndex
         }
+        
+        // Show the page once data is loaded
+        this.loading = false
       })
       .catch(err => {
         console.log(err);
@@ -470,9 +542,17 @@ export default {
 
     createLayout() {
       this.stopPaintSelect()
-
-      // Make a copy of the current layout as the new layout
-      const newLayout = JSON.parse(JSON.stringify(this.currentLayout))
+      var newLayout;
+      
+      if(this.layouts.length == 0){
+        // if we dont have any layouts, use a default example as template
+        newLayout = {layout: [[0, 1, 2, 3]]};
+      }
+      else{
+        // Make a copy of the current layout as the new layout
+        newLayout = JSON.parse(JSON.stringify(this.currentLayout));
+      }
+      
       newLayout.type = "new"
       // Remove the id since it isn't correct anymore
       delete newLayout._id
@@ -556,24 +636,60 @@ export default {
       })
     },
 
+    confirmDeleteLayout() {
+      this.$dialog.confirm('Are you sure?')
+      .then(() => {
+        this.deleteLayout()
+      })
+      .catch(() => {})
+    },
+
+    deleteLayout(){
+      // Start loading spinner
+      this.$wait.start('deleteLayout');
+
+      this.$store.dispatch('deleteLayout', {
+        id: this.currentLayout._id
+      }).then( () =>{//used to have res
+
+        //this.layouts[this.layoutSelected] = null;
+        this.layouts.splice(this.layoutSelected, 1);
+        this.layoutSelected = 0;
+
+        // show success message
+        this.$notify({ 
+          title: "Seating layout saved successfully", 
+          type: "success"
+        })
+      }).catch(err =>{
+        console.log(err)
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error',
+            duration: 10000
+          })
+        }    
+      })
+      .finally(() => {
+        // Stop the loading spinner
+        this.$wait.end('deleteLayout')    
+      })
+    },
+
     // General submit function which redirects
     // to the proper function depending on the mode
     submit() {
-      if (this.pageMode=="add") this.createSection()
-      else if (this.pageMode=="edit") this.saveSection()
-      else {
-        this.$notify({ 
-          title: "Invalid mode. Please try again", 
-          type: "error"
-        })
-      }
+      if (this.isCreateMode) this.createSection()
+      else this.saveSection()
     },
 
     // Check if the currently selected seating layout is saved
     // If not, show an error notification and return false
     // If it is saved, return true
     isSeatingLayoutSaved() {
-      if (this.isCurrentLayoutNew) {
+      if (this.isCurrentLayoutNew || this.layouts.length == 0) {
         this.$notify({ 
           title: "Current seating layout is not saved", 
           type: "error"
@@ -601,7 +717,7 @@ export default {
       const seatingArrangement = new Array(this.rows).fill(null).map(() => new Array(this.columns).fill(null))
 
       this.$store.dispatch('createSection', {
-        courseName: this.sectionName,
+        sectionName: this.sectionName,
         professor: userId,
         maxCapacity: capacity,
         attendanceThreshold: this.attendanceThreshold,
@@ -658,8 +774,8 @@ export default {
       }
 
       this.$store.dispatch('updateSection', {
-        courseId: this.courseId,
-        courseName: this.sectionName,
+        sectionId: this.sectionId,
+        sectionName: this.sectionName,
         professor: userId,
         maxCapacity: capacity,
         attendanceThreshold: this.attendanceThreshold,
@@ -692,6 +808,83 @@ export default {
       })
     },
 
+    confirmDeleteSection() {
+      this.$dialog.confirm('Are you sure?')
+      .then(() => {
+        this.deleteSection()
+      })
+      .catch(() => {})
+    },
+
+    deleteSection() {
+      // Start the loading spinner
+      this.$wait.start('deleteSection')
+
+      this.$store.dispatch('deleteSection', {
+        sectionID: this.sectionId,
+      })
+      .then(() => {
+        // Redirect to home page
+        this.$router.push({name: 'home'})
+        // show success message
+        this.$notify({ 
+          title: "Section deleted successfully", 
+          type: "success"
+        })
+      })
+      .catch(err => {
+        console.log(err)
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          })
+        }
+      })
+      .finally(() => {
+        // Stop the loading spinner
+        this.$wait.end('deleteSection')
+      })
+    },
+
+    confirmClearStudents() {
+      this.$dialog.confirm('Are you sure?')
+      .then(() => {
+        this.clearStudents()
+      })
+      .catch(() => {})
+    },
+
+    clearStudents() {
+      // Start the loading spinner
+      this.$wait.start('clearStudents')
+
+      this.$store.dispatch('clearStudents', {
+        sectionID: this.sectionId,
+      })
+      .then(() => {
+        // show success message
+        this.$notify({ 
+          title: "Students cleared successfully", 
+          type: "success"
+        })
+      })
+      .catch(err => {
+        console.log(err)
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          })
+        }
+      })
+      .finally(() => {
+        // Stop the loading spinner
+        this.$wait.end('clearStudents')
+      })
+    },
 
 
     addRow() {
@@ -771,30 +964,6 @@ export default {
 </script>
 
 <style lang="scss" scoped >
-.legend {
-  > div {
-    display: inline-block;
-      width: 80px;
-    .seat {
-      margin: auto;
-    }
-    
-  }
-  > div:not(:last-child) {
-    margin-right: 10px;
-  }
-}
-
-.grid-layout {
-  height: 350px;
-}
-
-.border {
-  border: 1px solid black;
-}
-.bold {
-  font-weight: bold;
-}
 .small-button {
   width: 25px;
   height: 25px;
@@ -813,29 +982,6 @@ export default {
   padding: 5px;
 }
 
-.seat {
-  padding: 5px;
-  border-radius: 10px;
-  border: 1px solid black;
-  width: 40px;
-  height: 33px;
-}
-.seat.selected {
-  border: 3px solid #cc0000;
-}
-.seat.type-0 {
-  background-color: darkgray;
-}
-.seat.type-1 {
-  background-color: lightgray;
-}
-.seat.type-2 {
-  background-color: white;
-}
-.seat.type-3 {
-  background-color: lightblue;
-}
-
 label.radio {
   font-weight: normal;
 }
@@ -849,4 +995,9 @@ label.radio {
   max-width: 640px;
   margin: auto;
 }
+
+.divider {
+  margin: 20px 0; border-top: 10px solid #333;
+}
+
 </style>

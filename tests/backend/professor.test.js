@@ -95,7 +95,7 @@ describe('Backend server fuctionality', () => {
             ], 
             default: true,
             description: 'This is a sample',
-            createdBy: prof1._id
+            createdBy: prof1
         });
         const layout1 = response.body.seatingLayout
 
@@ -110,16 +110,16 @@ describe('Backend server fuctionality', () => {
             students: [student1, student2],
             maxCapacity: 30,
             seatingArrangement: [
-                [null, student1._id, null, null, null],
+                [null, student1, null, null, null],
             ],
             classList: [],
-            attendance: [Date.now(), student1._id, false]
+            attendance: [Date.now(), student1, false]
         });
         const section1 = response.body.newSection
 
         response = await request.put("/api/professor/pushNewAttendance").send({
             sectionID: section1._id,
-            absent_students: [student1._id],
+            absent_students: [student1],
             mandatory: false
         });
         expect(response.status).toBe(200);

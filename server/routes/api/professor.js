@@ -24,7 +24,7 @@ router.put('/pushNewAttendance', (req, res) => {
 
         if (err || section == null) {
             console.log(err);
-            return res.status(500).send(err);
+            console.log("Not found");
         }
 
         let newAttendance = {

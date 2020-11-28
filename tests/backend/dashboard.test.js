@@ -29,8 +29,10 @@ describe('Dashboard api fuctionality', () => {
             password:'testing123'
         });
         const prof1 = response.body.user
-        response = await request.get("/api/dashboard/getSectionsCreatedByProfessor").query({
-            professorID: prof1.id
+        response = await request.get("/api/dashboard/getSectionsCreatedByProfessor", {
+            params: {
+                professorID: prof1.id
+            }
         });
         expect(response.status).toBe(200);
         await request.get("/api/logout");

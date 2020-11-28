@@ -1000,12 +1000,4 @@ label.radio {
   margin: 20px 0; border-top: 10px solid #333;
 }
 
-.danger-zone {
-  > div > div {
-    text-align: left;
-    display: inline-block;
-    max-width: 300px;
-    vertical-align: top;
-  }
-}
 </style>

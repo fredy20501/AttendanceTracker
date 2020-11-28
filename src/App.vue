@@ -240,4 +240,13 @@ div.dg-main-content {
     border-color: black;
   }
 }
+
+.danger-zone {
+  > div > div {
+    text-align: left;
+    display: inline-block;
+    max-width: 300px;
+    vertical-align: top;
+  }
+}
 </style>

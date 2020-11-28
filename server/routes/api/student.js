@@ -11,17 +11,26 @@ router.put('/updateStudentSectionView', (req, res) => {
     let sectionID = req.body.sectionID;
     let seatingArrangement = req.body.seatingArrangement;
 
-    Section.findOne({
-        _id: sectionID
-    }, function (err, section) {
-
+    Section.findById(sectionID)
+    .populate('seating_layout')
+    .exec(function (err, section) {
         if (err || section == null) {
             console.log(err);
-            console.log("Not found");
+            return res.status(500).send(err);
         }
 
-        if (Array.isArray(seatingArrangement) && seatingArrangement.length) {
+        // Make sure the new seating arrangement is valid
+        // (must be the same size as the seating layout)
+        const seatingLayout = section.seating_layout.layout;
+        if (Array.isArray(seatingArrangement) 
+            && seatingArrangement.length == seatingLayout.length
+            && seatingArrangement[0].length == seatingLayout[0].length
+        ) {
             section.seating_arrangement = seatingArrangement;
+        }
+        else {
+            console.log("Invalid seating arrangement")
+            return res.status(400).send(err);
         }
 
         section.save(err => {

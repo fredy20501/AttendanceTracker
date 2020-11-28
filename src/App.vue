@@ -3,7 +3,9 @@
     <Header />
     <main>
       <notifications class="custom-notification" position="top center"/>
-      <router-view style="position:relative; margin:10px;"/>
+      <transition name="fade" mode="out-in">
+        <router-view style="margin:10px;"/>
+      </transition>
     </main>
     <br>
     <br>
@@ -36,6 +38,25 @@ The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/docu
   -webkit-box-sizing: border-box;
 }
 
+// ====== Make footer always at the bottom of the screen ======
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+#app {
+  position: relative;
+  height: auto !important;
+  min-height: 100%;
+  padding-bottom: 155px;
+}
+footer {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+}
+// ============================================================
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   font-size: 1.1em;
@@ -58,6 +79,16 @@ The lang="scss" means you can use the syntax of Sass (https://sass-lang.com/docu
 // Make banners flush with the screen on small screens
 @media only screen and (max-width: 900px) {
   body { margin: 0; }
+}
+
+// Custom transition
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity .3s;
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 
 .custom-notification {

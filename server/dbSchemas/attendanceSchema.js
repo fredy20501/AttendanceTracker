@@ -74,7 +74,6 @@ module.exports = {User, Section, SeatingLayout};
  *                1 = light grey for open access - seat exists, can be sat in, but can't be reserved
  *                2 = white for selected access - seat exists, can be chosen to sit in or be reserved
  *                3 = light blue for extended access - seat exists, can be chosen to sit in or be reserved, saved for accessibility
- *                4 = light green for reserved - seat exists, has been reserved by a student
  * 
  *      default: a boolean value which indicates whether the seatingLayout is a default or custom layout
  * 

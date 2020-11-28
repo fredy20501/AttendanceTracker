@@ -230,7 +230,7 @@ router.delete('/deleteSection', (req, res) => {
 
 
 /**drops a section by a given student, such that it removes him from the registered_students list
- * of a given course
+ * of a given section
  * ==========================================
  * Example api call body:
  * {
@@ -242,36 +242,46 @@ router.post('/dropSection', (req, res) => {
     let studentID = req.body.studentID;
     let sectionID = req.body.sectionID;
 
-    Course.findOne({
-        _id: sectionID
-    }, function (err, course) {
-
-        let index = course.registered_students.indexOf(studentID)
-
-        if (index == -1) {
+    Section.findById(sectionID, function (err, section) {
+        if (err || section == null) {
+            console.log(err);
             return res.status(500).send(err);
         }
-        course.registered_students.splice(index, 1);
 
-        // puts the element as null if found
-        course.seatingArrangement.forEach(function(arr){
-            arr.forEach(function(element){
-                element = null;
+        // Find the student in the list of registered students
+        let index = section.registered_students.indexOf(studentID);
+        if (index == -1) {
+            // Error if student is not enrolled
+            return res.status(520).send(err);
+        }
+        // Remove the student from the list of registered students
+        section.registered_students.splice(index, 1);
+
+        // Copy the seating arrangement
+        var newSeatingArrangement = JSON.parse(JSON.stringify(section.seating_arrangement));
+        // Remove the student from the seating arrangement
+        newSeatingArrangement.forEach((row, rowIndex) => {
+            row.forEach((column, columnIndex) => {
+                // Replace seat with null if found
+                const seat = newSeatingArrangement[rowIndex][columnIndex];
+                if (seat == studentID) {
+                    newSeatingArrangement[rowIndex][columnIndex] = null;
+                }
             });
         });
+        // Replace the seating arrangement
+        section.seating_arrangement = newSeatingArrangement;
 
-        course.save(err => {
+        section.save(err => {
             if (err) {
                 console.log(err);
                 return res.status(500).send(err);
             }
-
             return res.status(200).send();
         })
     })
 });
 
-// ------------- Combined Seating Layout and Course Methods -------------
 
 // ------------- Combined Seating Layout and Section Methods -------------
 
@@ -298,7 +308,7 @@ router.get('/getSectionView', (req, res) => {
             for(let j=0; j<=section.seating_arrangement[0].length; j++) {
                 seating_positions.push(`seating_arrangement.${i}.${j}`);
             }
-
+        }
         // Populate all the positions of the seating_arrangement
         section.populate(seating_positions.join(' '), (err, fullSection) => {
             if(err) {

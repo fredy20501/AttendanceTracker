@@ -291,27 +291,19 @@ const store = new Vuex.Store({
     },
 
     dropSection(context, payload) {
-      payload
-      // return $http.put('student/dropSection', payload)
-      // .catch(err => {
-      //   err.message = "Could not drop section. Please try again later"
-      //   throw err
-      // })
-      
-      // Returns test data (will get removed during integration)
-      return
+      return $http.post('section/dropSection', payload)
+      .catch(err => {
+        err.message = "Could not drop section. Please try again later"
+        throw err
+      })
     },
 
     deleteSection(context, payload) {
-      payload
-      // return $http.put('professor/deleteSection', payload)
-      // .catch(err => {
-      //   err.message = "Could not delete section. Please try again later"
-      //   throw err
-      // })
-      
-      // Returns test data (will get removed during integration)
-      return
+      return $http.put('professor/archiveSection', payload)
+      .catch(err => {
+        err.message = "Could not delete section. Please try again later"
+        throw err
+      })
     },
 
     clearStudents(context, payload) {

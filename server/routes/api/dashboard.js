@@ -32,41 +32,6 @@ router.get('/getSectionsByStudent', (req, res) => {
 });
 
 
-/**drops a section by a given student, such that it removes him from the registered_students list
- * of a given section
- * ==========================================
- * Example api call body:
- * {
-    "studentID": "5f984a44da9eb32ba01d31dd",
-    "sectionID" : "5f984a44da9eb32ba01d31df"
-    }
- */
-router.put('/dropSection', (req, res) => {
-    let studentID = req.body.studentID;
-    let sectionID = req.body.sectionID;
-
-    Section.findOne({ _id: sectionID }, function(err, section) {
-        if (err || section == null) {
-            console.log(err);
-            return res.status(500).send(err);
-        }
-
-        let index = section.registered_students.indexOf(studentID)
-
-        if(index == -1){
-            // Student is not registered
-            return res.status(520).send(err);
-        }
-        section.registered_students.splice(index, 1);
-
-        section.save(err => {
-            if (err) {
-                console.log(err);
-                return res.status(500).send(err);
-            }
-            res.status(200).send(courses);
-        });
-});
 
 /**GETS all the sections created by a professor
  * ==========================================

@@ -97,7 +97,7 @@ describe('Dashboard api fuctionality', () => {
         }).exec();
 
         // Drop the section
-        response = await request.put("/api/dashboard/dropSection").send({
+        response = await request.post("/api/section/dropSection").send({
             studentID: student1._id,
             sectionID: section1._id
         });
@@ -110,7 +110,7 @@ describe('Dashboard api fuctionality', () => {
         // Student1 should have lost their seat
         expect(newSection1.seating_arrangement[0][1]).toBe(null);
         // Registered student list should have been reduced by 1
-        expect(newSection1.registered_students.length).toBe(section1.registered_students.length-1);
+        expect(newSection1.registered_students.length).toBe(0);
         // Seating arrangement & layout should still be the same size
         expect(newSection1.seating_arrangement.length).toBe(layout1.layout.length);
         expect(newSection1.seating_arrangement[0].length).toBe(layout1.layout[0].length);
@@ -133,7 +133,7 @@ describe('Dashboard api fuctionality', () => {
         await request.get("/api/logout");
     });
 
-    it("dropSection should fail when student is not registered for the course", async done => {
+    it("dropSection should fail when student is not registered for the section", async done => {
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
@@ -184,7 +184,7 @@ describe('Dashboard api fuctionality', () => {
         const section1 = response.body.newSection
 
         // Drop the section (student is not registered)
-        response = await request.put("/api/dashboard/dropSection").send({
+        response = await request.post("/api/section/dropSection").send({
             studentID: student1._id,
             sectionID: section1._id
         });
@@ -215,7 +215,7 @@ describe('Dashboard api fuctionality', () => {
         });
 
         // Try to archive a section that does not exist
-        response = await request.put("/api/dashboard/dropSection").send({
+        response = await request.post("/api/section/dropSection").send({
             studentID: '123456789012',
             sectionID: '123456789012'
         });

@@ -7,7 +7,7 @@
         <div>
           <ValidationProvider name="Email" rules="required|email" v-slot="{ errors }">
             <label for="email">Email Address</label><br>
-            <input id="email" type="email" autocomplete="username" placeholder="Email Address" v-model="email">
+            <input id="email" type="email" autocomplete="email" placeholder="Email Address" v-model="email">
             <span v-if="errors.length" class="error">{{ errors[0] }}</span>
           </ValidationProvider>
         </div>
@@ -118,11 +118,11 @@ export default {
 .demo-accounts {
   position: absolute;
   right: 10px;
-  top: 10px;
+  top: 125px;
   border: 1px dashed black;
   padding: 10px;
   text-align: left;
-  opacity: 0.25;
+  opacity: 0.8;
 }
 
 // Hide the demo account block on small screen sizes

@@ -11,7 +11,8 @@ if (!process.env.CI) {
 
 const username = process.env.DB_USERNAME || config.db.username;
 const password = process.env.DB_PASSWORD || config.db.password;
-const connectionString = `mongodb+srv://${username}:${password}@athena.8ymku.gcp.mongodb.net/Athena?retryWrites=true&w=majority`;
+const dbName = process.env.DB_NAME || config.db.name;
+const connectionString = `mongodb+srv://${username}:${password}@athena.8ymku.gcp.mongodb.net/${dbName}?retryWrites=true&w=majority`;
 mongoose.connect(connectionString, {useNewUrlParser: true, useUnifiedTopology : true, useCreateIndex:true});
 
 const app = express();

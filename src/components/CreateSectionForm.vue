@@ -771,30 +771,6 @@ export default {
 </script>
 
 <style lang="scss" scoped >
-.legend {
-  > div {
-    display: inline-block;
-      width: 80px;
-    .seat {
-      margin: auto;
-    }
-    
-  }
-  > div:not(:last-child) {
-    margin-right: 10px;
-  }
-}
-
-.grid-layout {
-  height: 350px;
-}
-
-.border {
-  border: 1px solid black;
-}
-.bold {
-  font-weight: bold;
-}
 .small-button {
   width: 25px;
   height: 25px;
@@ -811,29 +787,6 @@ export default {
 .students th, .students td {
   border: 1px solid black;
   padding: 5px;
-}
-
-.seat {
-  padding: 5px;
-  border-radius: 10px;
-  border: 1px solid black;
-  width: 40px;
-  height: 33px;
-}
-.seat.selected {
-  border: 3px solid #cc0000;
-}
-.seat.type-0 {
-  background-color: darkgray;
-}
-.seat.type-1 {
-  background-color: lightgray;
-}
-.seat.type-2 {
-  background-color: white;
-}
-.seat.type-3 {
-  background-color: lightblue;
 }
 
 label.radio {

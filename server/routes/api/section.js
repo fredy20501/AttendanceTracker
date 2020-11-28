@@ -203,6 +203,7 @@ router.delete('/deleteSection', (req, res) => {
         return res.status(200).send(); 
     });
 });
+
 // ------------- Combined Seating Layout and Section Methods -------------
 
 // gets information regarding a section given a section id

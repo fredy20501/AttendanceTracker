@@ -277,6 +277,14 @@ const store = new Vuex.Store({
         err.message = "Could not save attendance. Please try again later"
         throw err
       })
+    },
+
+    updateSeatingArrangement(context, payload) {
+      return $http.put('student/updateStudentSectionView', payload)
+      .catch(err => {
+        err.message = "Could not reserve the seat. Please try again later"
+        throw err
+      })
     }
   }
 })

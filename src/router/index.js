@@ -41,6 +41,14 @@ const routes = [
     meta: { back: true, requiresAuth: true },
     component: () => import(/* webpackChunkName: "[section]" */ '../views/SectionView.vue')
   },
+  {
+    // The id of the section we want to view will be given as a url parameter
+    // This is shown by the ':id' in the path below
+    path: '/section/:id',
+    name: 'section',
+    meta: { requiresAuth: true },
+    component: () => import(/* webpackChunkName: "[section]" */ '../views/SectionView.vue')
+  },
 
   // Default to page not found if url doesn't match any routes
   {

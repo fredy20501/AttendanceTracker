@@ -8,6 +8,10 @@ var {
 
 // allows updating a seating layout given a student id
 router.put('/updateStudentSectionView', (req, res) => {
+    if (!req.session.user.is_professor == false) {
+        console.log("Unuathorized request. Please login.");
+        return res.status(401).send();
+    }
     let sectionID = req.body.sectionID;
     let seatingArrangement = req.body.seatingArrangement;
 

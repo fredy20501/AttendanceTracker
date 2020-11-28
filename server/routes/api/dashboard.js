@@ -13,6 +13,10 @@ let {
     }
  */
 router.get('/getSectionsByStudent', (req, res) => {
+    if (!req.session.user) {
+        console.log("Unuathorized request. Please login.");
+        return res.status(401).send();
+    }
     // Note: for get requests data is sent through query params
     let studentID = req.query.studentID;
 
@@ -39,6 +43,10 @@ router.get('/getSectionsByStudent', (req, res) => {
     }
  */
 router.get('/getSectionsCreatedByProfessor', (req, res) => {
+    if (!req.session.user) {
+        console.log("Unuathorized request. Please login.");
+        return res.status(401).send();
+    }
     // Note: for get requests data is sent through query params
     let professorID = req.query.professorID;
 
@@ -60,6 +68,10 @@ router.get('/getSectionsCreatedByProfessor', (req, res) => {
  *  Returns section data (name, prof name, if it's mandatory)
  */
 router.put('/registerForSection', (req, res) => {
+    if (!req.session.user) {
+        console.log("Unuathorized request. Please login.");
+        return res.status(401).send();
+    }
     let studentID = req.body.studentID;
     let sectionName = req.body.sectionName;
     console.log("register for section");

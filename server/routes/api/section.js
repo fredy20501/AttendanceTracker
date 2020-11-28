@@ -15,6 +15,10 @@ router.get('/', (req, res) => {
 
 // gets information regarding a seating layout given a professor id
 router.get('/previousSeatingPlans', (req, res) => {
+    if (!req.session.user) {
+        console.log("Unuathorized request. Please login.");
+        return res.status(401).send();
+    }
     // Return all seating plans stored in the database
     // (we do not filter by professor id)
     SeatingLayout.find({}, function(err, seatingLayout){
@@ -33,6 +37,10 @@ router.get('/previousSeatingPlans', (req, res) => {
 
 // creates a seating layout
 router.post('/createSeatingLayout', (req, res) => {
+    if (!req.session.user) {
+        console.log("Unuathorized request. Please login.");
+        return res.status(401).send();
+    }
     let name = req.body.name;
     let capacity = req.body.capacity;
     let dimension = req.body.dimensions;
@@ -67,6 +75,10 @@ router.post('/createSeatingLayout', (req, res) => {
 
 // creates a student section
 router.post('/createSection', (req, res) => {
+    if (!req.session.user) {
+        console.log("Unuathorized request. Please login.");
+        return res.status(401).send();
+    }
     let sectionName = req.body.sectionName;
     let attendanceThreshold = req.body.attendanceThreshold;
     let seatingLayout = req.body.seatingLayout;
@@ -107,7 +119,10 @@ router.post('/createSection', (req, res) => {
 
 // updates a student section
 router.put('/updateSection', (req, res) => {
-
+    if (!req.session.user) {
+        console.log("Unuathorized request. Please login.");
+        return res.status(401).send();
+    }
     let sectionId = req.body.sectionId;
     let sectionName = req.body.sectionName;
     let attendanceThreshold = req.body.attendanceThreshold;
@@ -177,6 +192,10 @@ router.put('/updateSection', (req, res) => {
 // Delete a seating layout given its id if it is not used by a section.
 // Returns status 200 on success, 500 on error, 418 if it is used by a section.
 router.post('/deleteSeatingLayout', (req, res) => {
+    if (!req.session.user) {
+        console.log("Unuathorized request. Please login.");
+        return res.status(401).send();
+    }
     var id = req.body.id;
 
     SeatingLayout.findById(id, (err, layout) => {
@@ -214,6 +233,10 @@ router.post('/deleteSeatingLayout', (req, res) => {
 });
 
 router.delete('/deleteSection', (req, res) => {
+    if (!req.session.user) {
+        console.log("Unuathorized request. Please login.");
+        return res.status(401).send();
+    }
     // Delete all sections with the given name 
     // (should only delete one since emails are unique)
     var name = req.body.name;
@@ -232,7 +255,10 @@ router.delete('/deleteSection', (req, res) => {
 
 // gets information regarding a section given a section id
 router.get('/getSectionView', (req, res) => {
-
+    if (!req.session.user) {
+        console.log("Unuathorized request. Please login.");
+        return res.status(401).send();
+    }
     // Note: for get requests data is sent through query params
     let sectionID = req.query.sectionID;
     

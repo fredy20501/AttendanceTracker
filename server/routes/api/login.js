@@ -56,6 +56,10 @@ router.get('/secret-api', (req, res) => {
 });
 
 router.get('/logout', (req, res) => {
+    if (!req.session.user) {
+        console.log("Unuathorized request. Please login.");
+        return res.status(401).send();
+    }
     req.session.destroy();
     return res.status(200).send();
 });

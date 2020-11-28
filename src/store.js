@@ -179,7 +179,7 @@ const store = new Vuex.Store({
     },
 
     updateSection(context, payload) {
-      return $http.post('section/updateSection', payload)
+      return $http.put('section/updateSection', payload)
       .catch(err => {
         err.message = "Could not save section. Please try again later"
         throw err
@@ -299,6 +299,14 @@ const store = new Vuex.Store({
       })
       .catch(err => {
         err.message = "Could not get attendance data. Please try again later"
+        throw err
+      })
+    },
+    
+    updateSeatingArrangement(context, payload) {
+      return $http.put('student/updateStudentSectionView', payload)
+      .catch(err => {
+        err.message = "Could not reserve the seat. Please try again later"
         throw err
       })
     }

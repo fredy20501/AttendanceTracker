@@ -13,8 +13,8 @@ router.get('/', (req, res) => {
 router.get('/previousSeatingPlans', (req, res) => {
     // Return all seating plans stored in the database
     // (we do not filter by professor id)
-    SeatingLayout.find({}, function(err, seatingLayout){
-        if(err){
+    SeatingLayout.find({}, function (err, seatingLayout) {
+        if (err) {
             console.log(err);
             return res.status(500).send();
         }
@@ -93,7 +93,7 @@ router.post('/createSection', (req, res) => {
 
         return res.status(200).json({
             newSection
-        }); 
+        });
     })
 
 });
@@ -177,13 +177,15 @@ router.delete('/deleteSeatingLayout', (req, res) => {
     // (should only delete one since emails are unique)
     var name = req.body.name;
 
-    SeatingLayout.deleteMany({ name: name }, (err) => {
-        if(err){
+    SeatingLayout.deleteMany({
+        name: name
+    }, (err) => {
+        if (err) {
             console.log(err);
             return res.status(500).send();
         }
 
-        return res.status(200).send(); 
+        return res.status(200).send();
     });
 });
 
@@ -192,15 +194,61 @@ router.delete('/deleteSection', (req, res) => {
     // (should only delete one since emails are unique)
     var name = req.body.name;
 
-    Course.deleteMany({ name: name }, (err) => {
-        if(err){
+    Course.deleteMany({
+        name: name
+    }, (err) => {
+        if (err) {
             console.log(err);
             return res.status(500).send();
         }
 
-        return res.status(200).send(); 
+        return res.status(200).send();
     });
 });
+
+
+/**drops a section by a given student, such that it removes him from the registered_students list
+ * of a given course
+ * ==========================================
+ * Example api call body:
+ * {
+    "studentID": "5f984a44da9eb32ba01d31dd",
+    "sectionID" : "5f984a44da9eb32ba01d31df"
+    }
+ */
+router.post('/dropSection', (req, res) => {
+    let studentID = req.body.studentID;
+    let sectionID = req.body.sectionID;
+
+    Course.findOne({
+        _id: sectionID
+    }, function (err, course) {
+
+        let index = course.registered_students.indexOf(studentID)
+
+        if (index == -1) {
+            return res.status(500).send(err);
+        }
+        course.registered_students.splice(index, 1);
+
+        // puts the element as null if found
+        course.seatingArrangement.forEach(function(arr){
+            arr.forEach(function(element){
+                element = null;
+            });
+        });
+
+        course.save(err => {
+            if (err) {
+                console.log(err);
+                return res.status(500).send(err);
+            }
+
+            return res.status(200).send();
+        })
+    })
+});
+
 // ------------- Combined Seating Layout and Course Methods -------------
 
 // gets information regarding a course given a course id
@@ -208,39 +256,39 @@ router.get('/getCourseView', (req, res) => {
 
     // Note: for get requests data is sent through query params
     let courseID = req.query.courseID;
-    
+
     Course.findById(courseID)
-    // The populate method replaces an objectId reference with the actual object
-    // Documentation: https://mongoosejs.com/docs/populate.html
-    .populate('professor', 'name')
-    .populate('seating_layout')
-    .exec()
-    .then(course => {
-        // Here we want to populate the seating arrangement
-        // (we need to do it 'manually' since it is a 2d array)
-        // Inspired by: https://stackoverflow.com/questions/55878496/mongoose-populate-on-two-dimensional-array
+        // The populate method replaces an objectId reference with the actual object
+        // Documentation: https://mongoosejs.com/docs/populate.html
+        .populate('professor', 'name')
+        .populate('seating_layout')
+        .exec()
+        .then(course => {
+            // Here we want to populate the seating arrangement
+            // (we need to do it 'manually' since it is a 2d array)
+            // Inspired by: https://stackoverflow.com/questions/55878496/mongoose-populate-on-two-dimensional-array
 
-        // Generate all the seating arrangement position of the 2d array
-        let seating_positions = [];
-        for(let i=0; i<=course.seating_arrangement.length; i++) {
-            for(let j=0; j<=course.seating_arrangement[0].length; j++) {
-                seating_positions.push(`seating_arrangement.${i}.${j}`);
+            // Generate all the seating arrangement position of the 2d array
+            let seating_positions = [];
+            for (let i = 0; i <= course.seating_arrangement.length; i++) {
+                for (let j = 0; j <= course.seating_arrangement[0].length; j++) {
+                    seating_positions.push(`seating_arrangement.${i}.${j}`);
+                }
             }
-        }
 
-        // Populate all the positions of the seating_arrangement
-        course.populate(seating_positions.join(' '), (err, fullCourse) => {
-            if(err) {
-                console.log(err)
-                return res.status(500).send(err)
-            }
-            return res.status(200).json(fullCourse) 
-        });
-    })
-    .catch(err => {
-        console.log(err)
-        return res.status(500).send(err)
-    })
+            // Populate all the positions of the seating_arrangement
+            course.populate(seating_positions.join(' '), (err, fullCourse) => {
+                if (err) {
+                    console.log(err)
+                    return res.status(500).send(err)
+                }
+                return res.status(200).json(fullCourse)
+            });
+        })
+        .catch(err => {
+            console.log(err)
+            return res.status(500).send(err)
+        })
 })
 
 

@@ -17,53 +17,20 @@ router.get('/getCoursesByStudent', (req, res) => {
     let studentID = req.query.studentID;
 
     Course.find({
-        registered_students: {
-            $in: [studentID]
-        }
-    })
-    .populate('professor')
-    .exec(function (err, courses) {
-        if (err || courses == null) {
-            console.log(err);
-            return res.status(500).send(err);
-        }
-        res.status(200).send(courses);
-    });
-});
-
-
-/**drops a section by a given student, such that it removes him from the registered_students list
- * of a given course
- * ==========================================
- * Example api call body:
- * {
-    "studentID": "5f984a44da9eb32ba01d31dd",
-    "sectionID" : "5f984a44da9eb32ba01d31df"
-    }
- */
-router.put('/dropSection', (req, res) => {
-    let studentID = req.body.studentID;
-    let sectionID = req.body.sectionID;
-
-    Course.findOne({ _id: sectionID }, function(err, course) {
-
-        let index = course.registered_students.indexOf(studentID)
-
-        if(index == -1){
-            return res.status(500).send(err);
-        }
-        course.registered_students.splice(index, 1);
-
-        course.save(err => {
-            if (err) {
+            registered_students: {
+                $in: [studentID]
+            }
+        })
+        .populate('professor')
+        .exec(function (err, courses) {
+            if (err || courses == null) {
                 console.log(err);
                 return res.status(500).send(err);
             }
-
-            return res.status(200).send();
-        })
-    })
+            res.status(200).send(courses);
+        });
 });
+
 
 /**GETS all the courses created by a professor
  * ==========================================
@@ -77,16 +44,16 @@ router.get('/getCoursesCreatedByProfessor', (req, res) => {
     let professorID = req.query.professorID;
 
     Course.find({
-        professor: professorID
-    })
-    .populate('professor')
-    .exec(function (err, courses) {
-        if (err || courses == null) {
-            console.log(err);
-            return res.status(500).send(err);
-        }
-        res.status(200).send(courses);
-    });
+            professor: professorID
+        })
+        .populate('professor')
+        .exec(function (err, courses) {
+            if (err || courses == null) {
+                console.log(err);
+                return res.status(500).send(err);
+            }
+            res.status(200).send(courses);
+        });
 });
 
 /** Registers a student to his course
@@ -107,7 +74,7 @@ router.put('/registerForCourse', (req, res) => {
         }
 
         // check to see if student is already registered
-        if(course.registered_students.indexOf(studentID) != -1){
+        if (course.registered_students.indexOf(studentID) != -1) {
             return res.status(520).send(err);
         }
 

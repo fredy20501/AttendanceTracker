@@ -1,5 +1,8 @@
 <template>
-  <div>
+<transition name="fade" mode="out-in">
+  <Loading v-if="loading"/>
+
+  <div v-else>
     <h2>{{sectionName}}</h2>
     <br>
     
@@ -146,6 +149,7 @@
     />
 
   </div>
+</transition>
 </template>
 
 <script>
@@ -163,6 +167,8 @@ export default {
 
   data() {
     return {
+      // Hide the page until data is loaded
+      loading: true,
       
       currentDateAndTime: '',
       
@@ -280,6 +286,9 @@ export default {
 
         // Merge the seat type & student info into the full class layout
         this.classLayout = this.mergeStudentSeatLayouts(res.seating_layout.layout, res.seating_arrangement)
+
+        // Show the page once data is loaded
+        this.loading = false
       })
       .catch(err => {
         console.log(err);

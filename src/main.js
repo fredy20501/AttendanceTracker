@@ -39,6 +39,11 @@ import {HalfCircleSpinner} from 'epic-spinners'
 Vue.component('HalfCircleSpinner', HalfCircleSpinner)
 
 
+// Import Loading component globally
+import Loading from '@/components/layout/Loading'
+Vue.component('Loading', Loading)
+
+
 // Global store is defined in store.js
 import store from './store'
 

@@ -18,13 +18,14 @@ describe('Backend server fuctionality', () => {
         db.once('open', done);
     });
 
-    //Close server & database when done
+    //Close server & database after running tests
     afterAll(async (done) => {
         await mongoose.connection.close();
         server.close(done);
     });
 
     it("Should reach createSeatingLayout and deleteSeatingLayout endpoints", async done => {
+        //log in as a professor
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
@@ -41,14 +42,14 @@ describe('Backend server fuctionality', () => {
         });
         const prof1 = response.body.user
 
-        // Delete before to make sure it doesn't exist
+        //delete layout before to make sure it doesn't exist
         SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
             if(err){
                 console.log(err);
             }
         });
 
-        // Create layout successfully
+        //create a test layout
         response = await request.post("/api/section/createSeatingLayout").send({
             name: 'testLayout',
             capacity : 1,
@@ -60,7 +61,7 @@ describe('Backend server fuctionality', () => {
         });
         expect(response.status).toBe(200);
 
-        // Delete layout
+        //delete layout
         SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
             if(err){
                 console.log(err);
@@ -291,7 +292,7 @@ describe('Backend server fuctionality', () => {
             }
         });
 
-        // Create a sample seating layout for this test
+        //create a sample seating layout
         response = await request.post('/api/section/createSeatingLayout').send({
             name: 'testLayout12',
             capacity: 4,
@@ -306,7 +307,7 @@ describe('Backend server fuctionality', () => {
         });
         const layout1 = response.body.seatingLayout
 
-        //Create test section
+        //create a test section
         response = await request.post('/api/section/createSection').send({
             sectionName: 'testSection12',
             attendanceThreshold: '0',
@@ -321,14 +322,14 @@ describe('Backend server fuctionality', () => {
         });
         const section1 = response.body.newSection
 
-        // Test getting the section view
+        //test getting the section view
         response = await request.get("/api/section/getSectionView").query({
             sectionID:section1._id
         });
         expect(response.status).toBe(200);
         expect(response.body.name).toBe('testSection12');
 
-        // Delete test data
+        //delete test data
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection12'
         });
@@ -361,7 +362,7 @@ describe('Backend server fuctionality', () => {
     });
 
     
-    //********* delete layout tests */
+    /********* delete layout tests */
 
     it("Should reach deleteLayout endpoint", async done => {
         var response = await request.post("/api/login").send({
@@ -370,7 +371,7 @@ describe('Backend server fuctionality', () => {
         });
         var prof1 = response.body.user
 
-        //delete just in case
+        //delete layout in case it already exists
         SeatingLayout.deleteOne({name:'testLayout42'}, (err) =>{
             if(err){
                 console.log(err);
@@ -420,7 +421,6 @@ describe('Backend server fuctionality', () => {
         });
         var prof1 = response.body.user
 
-        //delete just in case
         SeatingLayout.deleteOne({name:'testLayout42'}, (err) =>{
             if(err){
                 console.log(err);

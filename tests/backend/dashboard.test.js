@@ -18,13 +18,14 @@ describe('Dashboard api fuctionality', () => {
         db.once('open', done);
     });
 
-    //Close server & database when done
+    //Close server & database after running tests
     afterAll(async (done) => {
         await mongoose.connection.close();
         server.close(done);
     });
 
     it("Should reach getSectionView endpoint", async done => {
+        //Log in as a professor first
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
@@ -35,77 +36,67 @@ describe('Dashboard api fuctionality', () => {
             professorID: prof1.id
         });
         expect(response.status).toBe(200);
-
+        //Log out after testing
         await request.get("/api/logout");
         done();
     });
 
     it("Should reach getSectionsByStudent endpoint", async done => {
-        //from here
+        //Log in as a student first
         var response = await request.post("/api/login").send({
             email:'test.student@unb.ca', 
             password:'testing123'
         });
-        //to here will always be the same (we need to login first)
 
         const st1 = response.body.user
         response = await request.get("/api/dashboard/getSectionsByStudent").query({
             studentID: st1.id
         });
 
-        //here
         expect(response.status).toBe(200);
         await request.get("/api/logout");
         done();
-        //to here wont change either
     });
 
     it("Should not reach getSectionsByStudent endpoint with improper parameter", async done => {
-        //from here
+        //Log in as a professor
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
         });
-        //to here will always be the same (we need to login first)
         
-        // Send invalid id
+        //Send invalid id
         response = await request.get("/api/dashboard/getSectionsByStudent").query({
                 studentID: '999999999999'
         });
 
-        //here
         expect(response.status).toBe(500);
         await request.get("/api/logout");
         done();
-        //to here wont change either
     });
 
     it("Should not reach getSectionsCreatedByProfessor endpoint with improper parameter", async done => {
-        //from here
+        //Log in as a professor
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
         });
-        //to here will always be the same (we need to login first)
 
         // Send invalid id
         response = await request.get("/api/dashboard/getSectionsCreatedByProfessor").query({
             professorID: '999999999999'
         });
 
-        //here
         expect(response.status).toBe(500);
         await request.get("/api/logout");
         done();
-        //to here wont change either
     });
 
 
     // ====== Register for section endpoint tests ======
 
     it("Should reach registerForSection endpoint", async done => {
-
-        //login as professor
+        //Log in as professor
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
@@ -155,7 +146,7 @@ describe('Dashboard api fuctionality', () => {
         response = await request.post('/api/section/createSection').send({
             sectionName: 'testSection2',
             attendanceThreshold: '0',
-            seatingLayout: layout1._id,//layout1._id,
+            seatingLayout: layout1._id,
             attMandatory: false,
             professor: prof1._id,
             admin: admin1._id,
@@ -177,18 +168,15 @@ describe('Dashboard api fuctionality', () => {
         });
         const st1 = response.body.user
 
-        /*******************now test registering the student here*********************** */
+        /*******************now test registering the student here************************/
 
-        //to here will always be the same (we need to login first)
-
-        //const st1 = response.body.user
         response = await request.put("/api/dashboard/registerForSection").send({
             studentID: st1.id,
             sectionName: 'testSection2'
         });
         expect(response.status).toBe(200);
 
-        //********* now delete it all *********** */
+        //********* now delete it all ************/
         response = await request.delete("/api/delete-user").send({
             email: 'st2@test.com'
         });
@@ -210,7 +198,7 @@ describe('Dashboard api fuctionality', () => {
 
     it("Should not reach registerForSection endpoint when student already registered", async done => {
 
-        //login as professor
+        //log in as professor
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
             password:'testing123'
@@ -285,7 +273,7 @@ describe('Dashboard api fuctionality', () => {
         });
         const st1 = response.body.user;
 
-        /*******************now test registering the student here*********************** */
+        /******************* now test registering the student here ************************/
 
         response = await request.put("/api/dashboard/registerForSection").send({
             studentID: st1.id,
@@ -327,7 +315,7 @@ describe('Dashboard api fuctionality', () => {
         });
         const prof1 = response.body.user;
       
-        //delete st1 just incase it already exists
+        //delete st1 incase it already exists
         response = await request.delete("/api/delete-user").send({
             email: 'st51@test.com'
         });
@@ -341,7 +329,7 @@ describe('Dashboard api fuctionality', () => {
         });
         const st1 = response.body.user
 
-        /*******************now test registering the student here*********************** */
+        /******************* now test registering the student here ************************/
 
         response = await request.put("/api/dashboard/registerForSection").send({
             studentID: st1.id,
@@ -349,7 +337,7 @@ describe('Dashboard api fuctionality', () => {
         });
         expect(response.status).toBe(530);
 
-        //********* now delete it all *********** */
+        /********* now delete user ************/
         response = await request.delete("/api/delete-user").send({
             email: 'st51@test.com'
         });

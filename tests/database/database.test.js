@@ -11,6 +11,7 @@ describe('Database Functionality', () => {
 
     // Open database before running tests
     beforeAll(async (done) => {
+        jest.setTimeout(10000);
         server = http.createServer(app);
         server.listen();
         request = supertest(server);
@@ -222,4 +223,21 @@ describe('Database Functionality', () => {
         
         done()
     });
+
+    it('Should return previous seating layout', async done => {
+        var response = await request.post("/api/login").send({
+            email:'test.professor@unb.ca', 
+            password:'testing123'
+        });
+
+        response = request.get("/api/section/previousSeatingPlans").send({
+       //response =  await SeatingLayout.find({
+        
+        });
+        expect(response.status).toBe(200);
+        //expect(response.body).toBeTruthy();
+        //console.log(response);
+    });
 })
+
+

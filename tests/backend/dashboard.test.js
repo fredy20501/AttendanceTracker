@@ -82,7 +82,7 @@ describe('Dashboard api fuctionality', () => {
             password:'testing123'
         });
 
-        // Send invalid id
+        //Send invalid id
         response = await request.get("/api/dashboard/getSectionsCreatedByProfessor").query({
             professorID: '999999999999'
         });

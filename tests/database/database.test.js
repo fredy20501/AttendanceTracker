@@ -229,9 +229,9 @@ describe('Database Functionality', () => {
        //response =  await SeatingLayout.find({
         
         });
-        expect(response.status).toBe(200);
+        console.log(response);
+        //expect(response.status).toBe(200);
         //expect(response.body).toBeTruthy();
-        //console.log(response);
     });
 })
 

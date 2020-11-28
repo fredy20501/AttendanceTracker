@@ -63,6 +63,7 @@
             <!-- Loop through each seat in the row -->
             <td v-for="(seat, j) in row" v-bind:key="j">
               <button
+                aria-label="select seat"
                 type="button"
                 @click="toggleSeatAttendance(i,j)"
                 v-bind:class="{

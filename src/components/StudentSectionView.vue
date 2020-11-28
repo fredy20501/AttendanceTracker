@@ -5,7 +5,7 @@
   <div v-else>
     <h2>{{sectionName}}</h2>
     <br>
-    
+
     <div style="text-align:left">
       <div>
         <b>Date:</b> <span>{{currentDateAndTime}}</span>
@@ -18,33 +18,13 @@
       </div>
     </div>
 
-    <br>
-
-    <table style="width:100%">
-      <tbody>
-        <tr class="align-bottom">
-          <td class="button-width">
-            <button type="button" @click="editSection">
-              Edit Section
-            </button>
-          </td>
-          <td></td>
-          <td class="button-width">
-            <button type="button" @click="refreshPage">
-              Refresh Grid
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
     <div class="grid-layout">
       <table v-if="classLayout.length>0" aria-label="Classroom Layout">
         <tbody>
           <tr>
             <td :colspan="classLayout[0].length+1">
               <div style="font-weight:bold">
-                Click to mark absent
+                Click to select a new seat
               </div>
               <br>
             </td>
@@ -64,16 +44,20 @@
             <td v-for="(seat, j) in row" v-bind:key="j">
               <button
                 type="button"
-                @click="toggleSeatAttendance(i,j)"
+                @click="selectSeat(i,j)"
                 v-bind:class="{
                   'seat': true,
                   'type-0': seat.type==0,
                   'type-1': seat.type==1,
                   'type-2': seat.type==2,
                   'type-3': seat.type==3,
-                  'selected': seat.absent===true
+                  'selected': isSelected(i,j),
+                  'green-selected': seat._id==getUser.id
                 }"
-              >{{seat.name}}</button>
+              >
+                <!-- Show the user's name in the new selected seat -->
+                {{isSelected(i,j) ? getUser.name : seat.name}}
+              </button>
             </td>
           </tr>
           <!-- Put a label as final row to represent the front of the class -->
@@ -108,45 +92,48 @@
         <div class="seat type-0"></div>
       </div>
       <div>
-        <label>Absent</label>
-        <div class="seat type-2 selected"></div>
+        <label>Current<br>Seat</label>
+        <div class="seat green-selected"></div>
+      </div>
+      <div>
+        <label>New<br>Seat</label>
+        <div class="seat selected"></div>
       </div>
     </div>
 
     <br>
+    <br>
 
-    <div>
-      <h3>Statistics</h3>
-      <div v-if="showStats" style="display: inline-block; vertical-align: top; width:250px; margin: 5px">
-        <PieChart :chartData="pieChartData" :options="pieChartOptions"/>
-      </div>
-      <div style="display: inline-block; text-align:left; padding-top: 8px; margin: 5px">
+    <button type="button" class="blue button-width" :disabled="isSelected(-1,-1)" @click="submitSeatSelection">
+      Update Seat
+    </button>
+
+    <br>
+    <br>
+    <hr class="divider">
+    <h2>Danger Zone</h2>
+
+    <div class="double-column danger-zone">
+      <div>
         <div>
-          Students present: {{numPresent}} <span v-if="showStats">({{percentPresent}}%)</span>
+          <b>Drop section</b><br>
+          Unregister yourself from this section. 
+          You may register again but your seat will be lost.
         </div>
-        <div v-if="showStats">
-          Students absent: {{numAbsent}} <span v-if="showStats">({{percentAbsent}}%)</span>
+        <div>
+          <SpinnerButton 
+            color="red"
+            label="Drop Section"
+            type="button"
+            width="300px"
+            height="30px"
+            :onClick="confirmDropSection"
+            :disabled="$wait.waiting('dropSection')"
+            :loading="$wait.waiting('dropSection')"
+          />
         </div>
-        <br>
-        <button class="button-width" type="button" @click="exportData">
-          Export Attendance Data
-        </button>
       </div>
     </div>
-
-    <br>
-    <br>
-
-    <SpinnerButton
-      color="blue"
-      label="Submit Attendance"
-      width="300px"
-      height="30px"
-      type="submit"
-      :onClick="submitAttendance"
-      :disabled="$wait.waiting('submitAttendance')"
-      :loading="$wait.waiting('submitAttendance')"
-    />
 
   </div>
 </transition>
@@ -154,21 +141,19 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import SpinnerButton from './SpinnerButton'
-import PieChart from './PieChart'
+import SpinnerButton from '@/components/SpinnerButton.vue'
 
 export default {
-  name: 'ProfessorSectionView',
+  name: 'StudentSectionView',
   components: {
-    SpinnerButton,
-    PieChart
+    SpinnerButton
   },
 
   data() {
     return {
       // Hide the page until data is loaded
       loading: true,
-      
+
       currentDateAndTime: '',
       
       // Section data
@@ -181,64 +166,26 @@ export default {
       // the type of seat (0=locked, 1=open access, etc) and the name of the student siting in it (if any).
       classLayout: [],
 
-      pieChartOptions: {
-        legend: {
-          labels: {
-            fontSize: 17.6,
-            fontColor: 'black',
-            fontFamily: "'Avenir', 'Helvetica', 'Arial', 'sans-serif'"
-          }
-        }
-      }
+      // Store row+column of the currently selected seat
+      selectedSeat: {
+        row: -1,
+        column: -1
+      },
     }
   },
-  
+
   computed: {
     // Import the getters from the global store
     ...mapGetters(['getUser']),
 
-    showStats: function() {
-      return this.mandatory && this.registeredStudents.length>0
-    },
-    numPresent: function() {
-      // Calculate the number of students present by checking the absent status of each seat
-      var numPresent = 0
-      this.classLayout.forEach(row => {
-        row.forEach(seat => {
-          if (seat.absent === false) numPresent++
-        })
-      })
-      return numPresent
-    },
-    numAbsent: function() {
-      return this.registeredStudents.length - this.numPresent
-    },
-    percentPresent: function() {
-      return Math.round(100*this.numPresent/this.registeredStudents.length)
-    },
-    percentAbsent: function() {
-      return 100 - this.percentPresent
-    },
     sectionType: function() {
       return this.mandatory ? 'Mandatory' : 'Opt In'
     },
-
     // The section id for this page is given as a route parameter
     // i.e. to get to this page from another page we need to also pass the section id like so:
     //      this.$router.push({name: 'section', params: {id: '123EF41'}})
     sectionId: function() {
       return this.$route.params.id
-    },
-
-    pieChartData: function() {
-      return {
-        labels: ['Present', 'Absent'],
-        datasets: [{
-          backgroundColor: ['#24a0ee', '#cc0000'],
-          hoverBackgroundColor: ['#1e87c9', '#ba0000'],
-          data: [this.numPresent, this.numAbsent]
-        }]
-      }
     }
   },
 
@@ -249,16 +196,6 @@ export default {
   },
 
   methods: {
-    
-    // Refresh the data on the page (date & grid)
-    refreshPage() {
-      this.setCurrentDate()
-      this.getSectionData()
-      this.$notify({
-        title: 'Refreshed!',
-        type: 'info'
-      })
-    },
 
     // Set the current date & time formatted as a string
     setCurrentDate() {
@@ -282,7 +219,7 @@ export default {
         this.professor = res.professor.name
         this.registeredStudents = res.students
         this.mandatory = res.always_mandatory
-
+        
         // Merge the seat type & student info into the full class layout
         this.classLayout = this.mergeStudentSeatLayouts(res.seating_layout.layout, res.seating_arrangement)
 
@@ -307,7 +244,6 @@ export default {
     mergeStudentSeatLayouts(seatLayout, studentLayout) {
       // Copy the student layout
       var mergedLayout = JSON.parse(JSON.stringify(studentLayout))
-
       // Loop through the student layout, adding the seat type to each seat
       const numRows = mergedLayout.length
       const numColumns = mergedLayout[0].length
@@ -315,69 +251,114 @@ export default {
         for (var j=0; j<numColumns; j++) {
           var seatType = seatLayout[i][j]
           var student = mergedLayout[i][j]
-
           if (student == null) {
             // No student in this seat
             mergedLayout[i][j] = {name: '', type: seatType}
           }
           else {
-            // There is a student, just add the seat type & default absence status
+            // There is a student, just add the seat type
             student.type = seatType
-            student.absent = false
-
-            // Keep the absent cells as absent if it is absent in the current class layout
-            // (this is to allow refreshing without losing the absences)
-            var oldSeat = this.classLayout?.[i]?.[j]
-            if (oldSeat != null) student.absent = oldSeat.absent
           }
         }
       }
       return mergedLayout
     },
 
-    // Toggle the attendance (present or absent) of the seat at the specified row & column
-    toggleSeatAttendance(row, column) {
-      var student = this.classLayout[row][column]
-      // Check if there is a student in the seat
-      if (student.name != '') {
-        // Toggle the absent status
-        student.absent = !student.absent
-      }
-    },
-
-    // Return an array of the student Ids for the absent students
-    getAbsentStudents() {
-      var studentIds = []
-      // Loop through the class layout, adding absent students to the array
-      this.classLayout.forEach(row => {
-        row.forEach(seat => {
-          if (seat.absent===true) studentIds.push(seat._id)
-        })
-      })
-      return studentIds
+    // Returns true if the seat at the given row+column is selected
+    isSelected(row, column) {
+      return this.selectedSeat.row === row && this.selectedSeat.column === column
     },
     
-    // Calls the proper API to submit the attendance
-    submitAttendance() {
-      // Start the loading spinner
-      this.$wait.start('submitAttendance')
+    // Returns true if the seat at the given row+column is the current seat of the user
+    isCurrent(row, column) {
+      const seat = this.classLayout[row][column]
+      return seat._id==this.getUser.id
+    },
 
-      const absentStudents = this.getAbsentStudents()
-      console.log(absentStudents)
+    // Returns true if the given seat is selectable, false otherwise
+    // (A seat is not selectable if it is locked, open-access, or a student is already in it)
+    isSelectableSeat(row, column) {
+      const seat = this.classLayout[row][column]
+      var selectable = true;
+      // Can't select locked or open-access seats
+      if (seat.type == 0 || seat.type == 1) selectable = false
+      // Can't select a seat which already has a student
+      if (seat.name != "") selectable = false
+      return selectable
+    },
 
-      this.$store.dispatch('saveAttendance', {
+    // This function will be called when a seat is selected
+    selectSeat(row, column) {
+      // TODO!! -> finish this function
+
+      // If that seat is already selected, unselect it
+      if (this.isSelected(row, column) || this.isCurrent(row, column)) {
+        this.selectedSeat.row = -1
+        this.selectedSeat.column = -1
+        return
+      }
+
+      // Make sure the seat is selectable
+      if (!this.isSelectableSeat(row, column)) return
+
+      // Select the seat
+      this.selectedSeat.row = row
+      this.selectedSeat.column = column
+    },
+
+    // Returns the new seating arrangement (2d array of student Ids)
+    getNewSeatingArrangement() {
+      var newLayout = new Array()
+
+      for (var i = 0; i < this.classLayout.length; i++)  {
+        var newRow = new Array()
+        for (var j = 0; j < this.classLayout[0].length; j++)  {
+          const seat = this.classLayout[i][j]
+          // Add the id if seat is not empty (but don't add the current seat)
+          if (seat.name != "" && !this.isCurrent(i, j)) {
+            newRow.push(seat._id)
+          }
+          // Add the new seat (i.e. the selected one)
+          else if (this.isSelected(i, j))  {
+            newRow.push(this.getUser.id)
+          }
+          // Empty seat
+          else  {
+            newRow.push(null)
+          }
+        }
+        newLayout.push(newRow)
+      }
+      return newLayout
+    },
+
+    // Calls the proper API to reserve the selected seat for the user
+    submitSeatSelection() {
+      // Don't do anything if no seat is selected or the selected seat is not valid
+      if (this.isSelected(-1,-1) || !this.isSelectableSeat(this.selectedSeat.row, this.selectedSeat.column)) {
+        return;
+      }
+
+      // Create a new 2d array showing the new position of all students
+      const newSeatingArrangement = this.getNewSeatingArrangement()
+
+      this.$store.dispatch('updateSeatingArrangement', {
         sectionID: this.sectionId,
-        absent_students: absentStudents,
-        mandatory: this.mandatory
+        seatingArrangement: newSeatingArrangement
       })
       .then(() => {
-        // Success!
-        this.$notify({
-          title: 'Attendance saved!',
-          type: 'success'
-        })
-        // Stop the loading spinner
-        this.$wait.end('submitAttendance')
+        // Refresh the grid
+        this.getSectionData()
+
+        // Show success notification
+        this.$notify({ 
+          title: "Seat Updated Successfully", 
+          type: "success"
+        });
+
+        // Clear the seat selection
+        this.selectedSeat.row = -1
+        this.selectedSeat.column = -1
       })
       .catch(err => {
         console.log(err);
@@ -388,26 +369,50 @@ export default {
             type: err.type ?? 'error'
           });
         }
-        // Stop the loading spinner
-        this.$wait.end('submitAttendance')
       })
     },
 
-    // Go to the create section page to edit the section
-    editSection() {
-      // Go to the edit section page using the router
-      // We send the sectionId as a parameter so that the page knows we want to edit this section
-      this.$router.push({ name: 'createSection', params: {id: this.sectionId} })
+    confirmDropSection() {
+      this.$dialog.confirm('Are you sure?')
+      .then(() => {
+        this.dropSection()
+      })
+      .catch(() => {})
     },
 
-    // TODO: This function will export the attendance data for this section into an excel file
-    exportData() {
-      // Temporary message to tell users it is not currently functional
-      this.$notify({
-        title: 'Export data is not functional yet',
-        type: 'warn'
+    dropSection() {
+      // Start the loading spinner
+      this.$wait.start('dropSection')
+
+      this.$store.dispatch('dropSection', {
+        sectionID: this.sectionId,
+        studentID: this.getUser.id
+      })
+      .then(() => {
+        // Redirect to home page
+        this.$router.push({name: 'home'})
+        // Show success notification
+        this.$notify({
+          title: 'Section dropped successfully!',
+          type: 'success'
+        })
+      })
+      .catch(err => {
+        console.log(err);
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          });
+        }
+      })
+      .finally(() => {
+        // Stop the loading spinner
+        this.$wait.end('dropSection')
       })
     }
+
   }
 }
 </script>
@@ -426,14 +431,10 @@ export default {
   font-weight: bold;
 }
 
-.align-top {
-  vertical-align: top;
-}
-.align-bottom {
-  vertical-align: bottom;
-}
-
 .button-width {
   width: 300px;
+}
+.green-selected {
+  border: 3px solid #22a222;
 }
 </style>

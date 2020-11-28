@@ -2,6 +2,7 @@ const app = require('app.js');
 const mongoose = require('mongoose');
 const supertest = require("supertest");
 const http = require('http');
+const {SeatingLayout } = require('dbSchemas/attendanceSchema.js');
 
 describe('Backend server fuctionality', () => {
     
@@ -44,8 +45,11 @@ describe('Backend server fuctionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection'
         });
-        response = await request.delete("/api/section/deleteSeatingLayout").send({
-            name: 'testLayout'
+        //delete just in case
+        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
+            if(err){
+                console.log(err);
+            }
         });
 
         response = await request.post('/api/register').send({
@@ -95,9 +99,9 @@ describe('Backend server fuctionality', () => {
         });
         const layout1 = response.body.seatingLayout
 
-        //Create test course
+        //Create test section
         response = await request.post('/api/section/createSection').send({
-            courseName: 'testSection',
+            sectionName: 'testSection',
             attendanceThreshold: '0',
             seatingLayout: layout1._id,
             attMandatory: false,
@@ -111,10 +115,10 @@ describe('Backend server fuctionality', () => {
             classList: [],
             attendance: [Date.now(), student1, false]
         });
-        const course1 = response.body.newSection
+        const section1 = response.body.newSection
 
         response = await request.put("/api/professor/pushNewAttendance").send({
-            courseID: course1._id,
+            sectionID: section1._id,
             absent_students: [student1],
             mandatory: false
         });
@@ -136,9 +140,14 @@ describe('Backend server fuctionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection'
         });
-        expect(response.status).toBe(200);
+        //delete just in case
+        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
+            if(err){
+                console.log(err);
+            }
+            done();
+        });
 
-        done();
 
     });
 

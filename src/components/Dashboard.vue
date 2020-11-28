@@ -145,6 +145,7 @@ export default {
       .then(res => {
         // Add the new section to the UI
         this.sections.push(res)
+        this.sections = this.sections.sort(this.compSection);
         // Clear the field
         this.sectionName = ""
         this.hideRegistration = true

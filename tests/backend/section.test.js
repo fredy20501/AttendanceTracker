@@ -215,7 +215,7 @@ describe('Backend server fuctionality', () => {
         });
         const section1 = response.body.newSection
 
-        response = await request.post("/api/section/updateSection").send({
+        response = await request.put("/api/section/updateSection").send({
             sectionId: section1._id,
             sectionName: 'testSection',
             attendanceThreshold: '0',
@@ -225,6 +225,11 @@ describe('Backend server fuctionality', () => {
             admin: admin1._id,
             students: [],
             maxCapacity: 30,
+            classList: [
+                {name: 'test1', email:'test1@unb.ca'},
+                {name: 'test2', email:'test2@unb.ca'},
+                {name: 'test3', email:'test3@unb.ca'},
+            ],
             seatingArrangement: [] 
         });
         expect(response.status).toBe(200);

@@ -46,11 +46,7 @@ describe('Backend server fuctionality', () => {
             name: 'testSection'
         });
         //delete layout in case it already exists
-        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
+        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
 
         //create student 1
         response = await request.post('/api/register').send({
@@ -146,13 +142,9 @@ describe('Backend server fuctionality', () => {
         });
         await request.get("/api/logout");
 
-        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-            done();
-        });
-
+        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
+        
+        done();
     });
 
 })

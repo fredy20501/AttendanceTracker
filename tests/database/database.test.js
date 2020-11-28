@@ -70,11 +70,7 @@ describe('Database Functionality', () => {
         response = await request.delete("/api/delete-user").send({
             email: 'admin@test.com'
         });
-        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
+        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection' 
         });
@@ -194,11 +190,7 @@ describe('Database Functionality', () => {
         expect(response.description).toBe('This is a sample');
 
         //Delete sample seating layout after testing
-        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
+        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
 
         //Delete test section after testing
         response = await request.delete("/api/section/deleteSection").send({

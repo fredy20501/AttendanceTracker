@@ -43,11 +43,7 @@ describe('Backend server fuctionality', () => {
         const prof1 = response.body.user
 
         //delete layout before to make sure it doesn't exist
-        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
+        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
 
         //create a test layout
         response = await request.post("/api/section/createSeatingLayout").send({
@@ -62,11 +58,7 @@ describe('Backend server fuctionality', () => {
         expect(response.status).toBe(200);
 
         //delete layout
-        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
+        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
 
         await request.get("/api/logout");
         done()
@@ -84,11 +76,7 @@ describe('Backend server fuctionality', () => {
         response = await request.delete("/api/delete-user").send({
             email: 'prof1@test.com'
         });
-        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
+        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection' 
         });
@@ -142,12 +130,7 @@ describe('Backend server fuctionality', () => {
             email: 'prof1@test.com'
         });
         expect(response.status).toBe(200);
-        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
-        expect(response.status).toBe(200);
+        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
         await request.get("/api/logout");
 
         done()
@@ -169,11 +152,7 @@ describe('Backend server fuctionality', () => {
             name: 'testSection'
         });
 
-        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
+        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
 
         response = await request.post('/api/register').send({
             email: 'admin@test.com',
@@ -243,12 +222,7 @@ describe('Backend server fuctionality', () => {
             email: 'prof1@test.com'
         });
         expect(response.status).toBe(200);
-        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
-        expect(response.status).toBe(200);
+        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
         await request.get("/api/logout");
 
         done();
@@ -291,11 +265,7 @@ describe('Backend server fuctionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection12'
         });
-        SeatingLayout.deleteOne({name:'testLayout12'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
+        await SeatingLayout.deleteOne({name:'testLayout12'}).exec();
 
         //create a sample seating layout
         response = await request.post('/api/section/createSeatingLayout').send({
@@ -338,11 +308,7 @@ describe('Backend server fuctionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection12'
         });
-        SeatingLayout.deleteOne({name:'testLayout12'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
+        await SeatingLayout.deleteOne({name:'testLayout12'}).exec();
         await request.get("/api/logout");
 
         done();
@@ -377,11 +343,7 @@ describe('Backend server fuctionality', () => {
         var prof1 = response.body.user
 
         //delete layout in case it already exists
-        SeatingLayout.deleteOne({name:'testLayout42'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
+        await SeatingLayout.deleteOne({name:'testLayout42'}).exec();
 
         response = await request.post("/api/section/createSeatingLayout").send({
             name: 'testLayout42',
@@ -426,11 +388,7 @@ describe('Backend server fuctionality', () => {
         });
         var prof1 = response.body.user
 
-        SeatingLayout.deleteOne({name:'testLayout42'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
+        await SeatingLayout.deleteOne({name:'testLayout42'}).exec();
 
         response = await request.post("/api/section/createSeatingLayout").send({
             name: 'testLayout42',
@@ -468,11 +426,7 @@ describe('Backend server fuctionality', () => {
             name: 'testSection42'
         });
 
-        SeatingLayout.deleteOne({name:'testLayout42'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
+        await SeatingLayout.deleteOne({name:'testLayout42'}).exec();
 
         await request.get("/api/logout");
         done();

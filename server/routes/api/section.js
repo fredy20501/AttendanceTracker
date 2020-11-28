@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 var {
     Section,
-    SeatingLayout
+    SeatingLayout,
+    User
 } = require('../../dbSchemas/attendanceSchema');
 
 router.get('/', (req, res) => {
@@ -10,6 +11,9 @@ router.get('/', (req, res) => {
 
 });
 
+// --------------- Seating Layout Methods --------------------
+
+// gets information regarding a seating layout given a professor id
 router.get('/previousSeatingPlans', (req, res) => {
     // Return all seating plans stored in the database
     // (we do not filter by professor id)
@@ -27,6 +31,7 @@ router.get('/previousSeatingPlans', (req, res) => {
 
 });
 
+// creates a seating layout
 router.post('/createSeatingLayout', (req, res) => {
     let name = req.body.name;
     let capacity = req.body.capacity;
@@ -58,7 +63,9 @@ router.post('/createSeatingLayout', (req, res) => {
     })
 });
 
+// --------------- Section Methods --------------------
 
+// creates a student section
 router.post('/createSection', (req, res) => {
     let sectionName = req.body.sectionName;
     let attendanceThreshold = req.body.attendanceThreshold;
@@ -98,9 +105,8 @@ router.post('/createSection', (req, res) => {
 
 });
 
-
-//currently unfinished
-router.post('/updateSection', (req, res) => {
+// updates a student section
+router.put('/updateSection', (req, res) => {
 
     let sectionId = req.body.sectionId;
     let sectionName = req.body.sectionName;
@@ -113,7 +119,6 @@ router.post('/updateSection', (req, res) => {
     let classList = req.body.classList;
     let maxCapacity = req.body.maxCapacity;
     let seatingArrangement = req.body.seatingArrangement;
-    let attendance = [];
 
     Section.findOne({
         _id: sectionId
@@ -152,9 +157,6 @@ router.post('/updateSection', (req, res) => {
         }
         if (seatingArrangement != null && seatingArrangement !== "") {
             section.seating_arrangement = seatingArrangement;
-        }
-        if (Array.isArray(attendance) && attendance.length) {
-            section.attendance = attendance;
         }
         if (Array.isArray(classList) && classList.length) {
             section.class_list = classList;
@@ -225,6 +227,7 @@ router.delete('/deleteSection', (req, res) => {
         return res.status(200).send(); 
     });
 });
+
 // ------------- Combined Seating Layout and Section Methods -------------
 
 // gets information regarding a section given a section id

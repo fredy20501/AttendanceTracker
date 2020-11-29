@@ -225,13 +225,14 @@ describe('Database Functionality', () => {
             password:'testing123'
         });
 
-        response = request.get("/api/section/previousSeatingPlans").send({
+        response = await request.get("/api/section/previousSeatingPlans").query({
        //response =  await SeatingLayout.find({
         
         });
         console.log(response);
-        //expect(response.status).toBe(200);
+        expect(response.status).toBe(200);
         //expect(response.body).toBeTruthy();
+        done();
     });
 })
 

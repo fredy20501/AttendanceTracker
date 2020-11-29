@@ -11,6 +11,7 @@ describe('Backend server fuctionality', () => {
 
     //Open server & database before running tests
     beforeAll(async (done) => {
+        jest.setTimeout(10000);
         server = http.createServer(app);
         server.listen();
         request = supertest(server);

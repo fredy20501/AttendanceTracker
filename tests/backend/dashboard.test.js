@@ -11,7 +11,6 @@ describe('Dashboard api fuctionality', () => {
 
     //Open server & database before running tests
     beforeAll(async (done) => {
-        jest.setTimeout(50000)
         server = http.createServer(app);
         server.listen();
         request = supertest(server);

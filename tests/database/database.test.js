@@ -11,7 +11,6 @@ describe('Database Functionality', () => {
 
     // Open database before running tests
     beforeAll(async (done) => {
-        jest.setTimeout(10000);
         server = http.createServer(app);
         server.listen();
         request = supertest(server);

@@ -14,7 +14,7 @@ let {
  */
 router.get('/getSectionsByStudent', (req, res) => {
     if (!req.session.user) {
-        console.log("Unuathorized request. Please login.");
+        console.log("Unauthorized request. Please login.");
         return res.status(401).send();
     }
     // Note: for get requests data is sent through query params
@@ -44,7 +44,7 @@ router.get('/getSectionsByStudent', (req, res) => {
  */
 router.get('/getSectionsCreatedByProfessor', (req, res) => {
     if (!req.session.user) {
-        console.log("Unuathorized request. Please login.");
+        console.log("Unauthorized request. Please login.");
         return res.status(401).send();
     }
     // Note: for get requests data is sent through query params
@@ -69,7 +69,7 @@ router.get('/getSectionsCreatedByProfessor', (req, res) => {
  */
 router.put('/registerForSection', (req, res) => {
     if (!req.session.user) {
-        console.log("Unuathorized request. Please login.");
+        console.log("Unauthorized request. Please login.");
         return res.status(401).send();
     }
     let studentID = req.body.studentID;

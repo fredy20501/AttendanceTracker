@@ -7,6 +7,8 @@ Vue.use(Vuex)
 
 const isProduction = process.env.NODE_ENV === 'production'
 
+Axios.defaults.withCredentials = true;
+
 var $http
 if (isProduction) {
   // Use the correct server url if running in production

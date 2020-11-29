@@ -47,7 +47,7 @@ router.post('/login', (req, res) => {
 // may be copied and changed as needed
 router.get('/secret-api', (req, res) => {
     if (!req.session.user) {
-        console.log("Unuathorized request. Please login.");
+        console.log("Unauthorized request. Please login.");
         return res.status(401).send();
     }
 
@@ -56,10 +56,6 @@ router.get('/secret-api', (req, res) => {
 });
 
 router.get('/logout', (req, res) => {
-    if (!req.session.user) {
-        console.log("Unuathorized request. Please login.");
-        return res.status(401).send();
-    }
     req.session.destroy();
     return res.status(200).send();
 });

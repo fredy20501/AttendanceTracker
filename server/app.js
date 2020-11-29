@@ -24,7 +24,14 @@ db.once('open', function() {
   console.log("Mongodb connection successful")
 });
 
-app.use(cors())
+app.use(cors({
+  origin: [
+    'http://localhost:8080',
+    'https://localhost:8080'
+  ],
+  credentials: true,
+  exposedHeaders: ['set-cookie']
+}))
 
 // Body Parser Middleware
 app.use(express.json());
@@ -33,7 +40,11 @@ app.use(express.urlencoded({extended:false}));
 // TODO: need to set a session store for production (otherwise get a warning since memory leaks can occur)
 //       see: https://github.com/expressjs/session/issues/556
 // TODO: change the secret key
-app.use(session({secret:"34h3k24h32k4jh23k4jh23", resave: false, saveUninitialized: true}));
+app.use(session({
+  secret:"34h3k24h32k4jh23k4jh23", 
+  resave: false, 
+  saveUninitialized: true,
+}));
 
 
 app.get('/', (req,res) => {

@@ -217,22 +217,6 @@ describe('Database Functionality', () => {
         
         done()
     });
-
-    it('Should return previous seating layout', async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-
-        response = await request.get("/api/section/previousSeatingPlans").query({
-       //response =  await SeatingLayout.find({
-        
-        });
-        console.log(response);
-        expect(response.status).toBe(200);
-        //expect(response.body).toBeTruthy();
-        done();
-    });
 })
 
 

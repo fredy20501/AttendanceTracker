@@ -186,6 +186,17 @@ const store = new Vuex.Store({
       })
     },
 
+    deleteLayout(context, payload) {
+      return $http.post('section/deleteSeatingLayout', payload)
+      .catch(err => {
+        err.message = "Could not delete layout. Please try again later"
+        if(err.response.status == 418){
+          err.message = "Layout cannot be deleted since it is currently used for a section"
+        }
+        throw err
+      })
+    },
+
     getSectionsForStudent(context, payload) {
       return $http.get('dashboard/getSectionsByStudent', {
         // Note: for get requests we need to send data through params
@@ -279,6 +290,43 @@ const store = new Vuex.Store({
       })
     },
 
+    dropSection(context, payload) {
+      return $http.post('section/dropSection', payload)
+      .catch(err => {
+        err.message = "Could not drop section. Please try again later"
+        throw err
+      })
+    },
+
+    deleteSection(context, payload) {
+      return $http.post('professor/archiveSection', payload)
+      .catch(err => {
+        err.message = "Could not delete section. Please try again later"
+        throw err
+      })
+    },
+
+    clearStudents(context, payload) {
+      return $http.put('professor/clearStudents', payload)
+      .catch(err => {
+        err.message = "Could not clear students. Please try again later"
+        throw err
+      })
+    },
+    
+    getAttendanceData(context, payload) {
+      return $http.get('professor/getAttendanceData', {
+        // Note: for get requests we need to send data through params
+        params: {
+          sectionID: payload.sectionID
+        }
+      })
+      .catch(err => {
+        err.message = "Could not get attendance data. Please try again later"
+        throw err
+      })
+    },
+    
     updateSeatingArrangement(context, payload) {
       return $http.put('student/updateStudentSectionView', payload)
       .catch(err => {

@@ -1,5 +1,8 @@
 <template>
-  <div>
+<transition name="fade" mode="out-in">
+  <Loading v-if="loading"/>
+
+  <div v-else>
     <h2>{{sectionName}}</h2>
     <br>
 
@@ -105,16 +108,51 @@
       Update Seat
     </button>
 
+    <br>
+    <br>
+    <hr class="divider">
+    <h2>Danger Zone</h2>
+
+    <div class="double-column danger-zone">
+      <div>
+        <div>
+          <b>Drop section</b><br>
+          Unregister yourself from this section. 
+          You may register again but your seat will be lost.
+        </div>
+        <div>
+          <SpinnerButton 
+            color="red"
+            label="Drop Section"
+            type="button"
+            width="300px"
+            height="30px"
+            :onClick="confirmDropSection"
+            :disabled="$wait.waiting('dropSection')"
+            :loading="$wait.waiting('dropSection')"
+          />
+        </div>
+      </div>
+    </div>
+
   </div>
+</transition>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import SpinnerButton from '@/components/SpinnerButton.vue'
 
 export default {
   name: 'StudentSectionView',
+  components: {
+    SpinnerButton
+  },
+
   data() {
     return {
+      // Hide the page until data is loaded
+      loading: true,
 
       currentDateAndTime: '',
       
@@ -181,8 +219,12 @@ export default {
         this.professor = res.professor.name
         this.registeredStudents = res.students
         this.mandatory = res.always_mandatory
+        
         // Merge the seat type & student info into the full class layout
         this.classLayout = this.mergeStudentSeatLayouts(res.seating_layout.layout, res.seating_arrangement)
+
+        // Show the page once data is loaded
+        this.loading = false
       })
       .catch(err => {
         console.log(err);
@@ -328,7 +370,49 @@ export default {
           });
         }
       })
+    },
+
+    confirmDropSection() {
+      this.$dialog.confirm('Are you sure?')
+      .then(() => {
+        this.dropSection()
+      })
+      .catch(() => {})
+    },
+
+    dropSection() {
+      // Start the loading spinner
+      this.$wait.start('dropSection')
+
+      this.$store.dispatch('dropSection', {
+        sectionID: this.sectionId,
+        studentID: this.getUser.id
+      })
+      .then(() => {
+        // Redirect to home page
+        this.$router.push({name: 'home'})
+        // Show success notification
+        this.$notify({
+          title: 'Section dropped successfully!',
+          type: 'success'
+        })
+      })
+      .catch(err => {
+        console.log(err);
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          });
+        }
+      })
+      .finally(() => {
+        // Stop the loading spinner
+        this.$wait.end('dropSection')
+      })
     }
+
   }
 }
 </script>

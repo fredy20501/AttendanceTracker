@@ -1,11 +1,14 @@
 <template>
-  <div>
+<transition name="fade" mode="out-in">
+  <Loading v-if="loading && !isCreateMode"/>
+
+  <div v-else>
     <!-- 
       The mode determines if we are currently adding 
       a new section or updating an existing one
      -->
-    <h2 v-if="pageMode=='add'">Create Section</h2>
-    <h2 v-if="pageMode=='edit'">Edit Section</h2>
+    <h2 v-if="isCreateMode">Create Section</h2>
+    <h2 v-if="!isCreateMode">Edit Section</h2>
     <br>
 
     <ValidationObserver v-slot="{ handleSubmit, invalid}">
@@ -77,8 +80,8 @@
 
       <br>
       <br>
-      <hr style="margin: 20px 0; border-top: 10px solid #333;">
-      <br>
+      <hr class="divider">
+      <h2>Class Layout</h2>
 
       <div class="column">
         <!-- Basic dropdown for selecting layout -->
@@ -111,7 +114,8 @@
         <button type="button" v-on:click="createLayout">New layout</button><br>
         <br>
         <SpinnerButton 
-          class="blue"
+          v-if="isCurrentLayoutNew"
+          color="blue"
           label="Save Layout"
           type="button"
           width="100%"
@@ -120,7 +124,17 @@
           :loading="$wait.waiting('saveLayout')"
           :onClick="saveLayout" 
         />
-
+        <SpinnerButton 
+          v-if="!isCurrentLayoutNew && layouts.length != 0"
+          class="red"
+          label="Delete Layout"
+          type="button"
+          width="100%"
+          height="30px"
+          :disabled="$wait.waiting('deleteLayout') || isCurrentLayoutNew "
+          :loading="$wait.waiting('deleteLayout')"
+          :onClick="confirmDeleteLayout" 
+        />
         <br>
         <br>
 
@@ -231,8 +245,8 @@
 
       <!-- Add/Save button: Only one is shown depending if the mode is "add" or "update" -->
       <SpinnerButton 
-        v-if="pageMode=='add'"
-        class="blue"
+        v-if="isCreateMode"
+        color="blue"
         label="Create Section"
         width="300px"
         height="30px"
@@ -241,8 +255,8 @@
         :loading="$wait.waiting('createSection')"
       />
       <SpinnerButton 
-        v-if="pageMode=='edit'"
-        class="blue"
+        v-if="!isCreateMode"
+        color="blue"
         label="Save Section"
         width="300px"
         height="30px"
@@ -253,8 +267,61 @@
 
     </form>
     </ValidationObserver>
-    
+
+    <div v-if="!isCreateMode">
+      <br>
+      <br>
+      <hr class="divider">
+      <h2>Danger Zone</h2>
+
+      <div class="double-column danger-zone">
+        <div>
+          <div>
+            <b>Clear Students</b><br>
+            Remove all students from the section. Students may 
+            register again but will have lost their seats.
+          </div>
+          <div>
+            <SpinnerButton 
+              style="margin:5px"
+              color="red"
+              label="Clear Students"
+              width="300px"
+              height="30px"
+              type="button"
+              :disabled="$wait.waiting('clearStudents')"
+              :loading="$wait.waiting('clearStudents')"
+              :onClick="confirmClearStudents"
+            />
+          </div>
+        </div>
+        <br>
+        <div>
+          <div>
+            <b>Delete section</b><br>
+            Delete the section entirely. Deleted sections 
+            are archived so an administrator may be able 
+            to recover them if needed.
+          </div>
+          <div>
+            <SpinnerButton 
+              style="margin:5px"
+              color="red"
+              label="Delete Section"
+              width="300px"
+              height="30px"
+              type="button"
+              :disabled="$wait.waiting('deleteSection')"
+              :loading="$wait.waiting('deleteSection')"
+              :onClick="confirmDeleteSection"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
+</transition>
 </template>
 
 <script>
@@ -270,6 +337,8 @@ export default {
 
   data() {
     return {
+      // Hide the page until data is loaded
+      loading: true,
       
       // Field values
       sectionName: "",
@@ -312,8 +381,8 @@ export default {
 
     // The mode determines if we are currently adding a new section or updating an existing one
     // (this is determined by whether the sectionId is set as a url parameter)
-    pageMode: function() {
-      return this.sectionId == null ? 'add' : 'edit'
+    isCreateMode: function() {
+      return this.sectionId == null
     },
     isMandatory: function() { 
       return this.attendanceType == 'mandatory'
@@ -348,13 +417,15 @@ export default {
     this.getLayouts(() => {
       // When getLayouts is done run this code
 
-      if (this.pageMode == 'edit') {
+      if (!this.isCreateMode) {
         // Load the section information into the fields
         this.getSectionData()
       }
     })
     
   },
+
+
 
   methods: {
 
@@ -378,6 +449,9 @@ export default {
         if (layoutIndex !== -1) {
           this.layoutSelected = layoutIndex
         }
+        
+        // Show the page once data is loaded
+        this.loading = false
       })
       .catch(err => {
         console.log(err);
@@ -447,11 +521,17 @@ export default {
         this.isBetween(column, this.seatSelect.first.column, this.seatSelect.second.column)
     },
     
+
+    //comparison function for layouts so they can be sorted
+    compLayout(firstEl, secondEl){
+      return firstEl.name.localeCompare(secondEl.name);
+    },
+
     // Call api to get the list of layouts for the dropdown
     getLayouts(callback) {
       this.$store.dispatch('getSeatingLayouts')
       .then(res => {
-        this.layouts = res.layouts
+        this.layouts = res.layouts.sort(this.compLayout)
 
         // Run the callback function (if one was given)
         if (callback) callback()
@@ -470,9 +550,17 @@ export default {
 
     createLayout() {
       this.stopPaintSelect()
-
-      // Make a copy of the current layout as the new layout
-      const newLayout = JSON.parse(JSON.stringify(this.currentLayout))
+      var newLayout;
+      
+      if(this.layouts.length == 0){
+        // if we dont have any layouts, use a default example as template
+        newLayout = {layout: [[0, 1, 2, 3]]};
+      }
+      else{
+        // Make a copy of the current layout as the new layout
+        newLayout = JSON.parse(JSON.stringify(this.currentLayout));
+      }
+      
       newLayout.type = "new"
       // Remove the id since it isn't correct anymore
       delete newLayout._id
@@ -556,24 +644,60 @@ export default {
       })
     },
 
+    confirmDeleteLayout() {
+      this.$dialog.confirm('Are you sure?')
+      .then(() => {
+        this.deleteLayout()
+      })
+      .catch(() => {})
+    },
+
+    deleteLayout(){
+      // Start loading spinner
+      this.$wait.start('deleteLayout');
+
+      this.$store.dispatch('deleteLayout', {
+        id: this.currentLayout._id
+      }).then( () =>{//used to have res
+
+        //this.layouts[this.layoutSelected] = null;
+        this.layouts.splice(this.layoutSelected, 1);
+        this.layoutSelected = 0;
+
+        // show success message
+        this.$notify({ 
+          title: "Seating layout saved successfully", 
+          type: "success"
+        })
+      }).catch(err =>{
+        console.log(err)
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error',
+            duration: 10000
+          })
+        }    
+      })
+      .finally(() => {
+        // Stop the loading spinner
+        this.$wait.end('deleteLayout')    
+      })
+    },
+
     // General submit function which redirects
     // to the proper function depending on the mode
     submit() {
-      if (this.pageMode=="add") this.createSection()
-      else if (this.pageMode=="edit") this.saveSection()
-      else {
-        this.$notify({ 
-          title: "Invalid mode. Please try again", 
-          type: "error"
-        })
-      }
+      if (this.isCreateMode) this.createSection()
+      else this.saveSection()
     },
 
     // Check if the currently selected seating layout is saved
     // If not, show an error notification and return false
     // If it is saved, return true
     isSeatingLayoutSaved() {
-      if (this.isCurrentLayoutNew) {
+      if (this.isCurrentLayoutNew || this.layouts.length == 0) {
         this.$notify({ 
           title: "Current seating layout is not saved", 
           type: "error"
@@ -692,6 +816,83 @@ export default {
       })
     },
 
+    confirmDeleteSection() {
+      this.$dialog.confirm('Are you sure?')
+      .then(() => {
+        this.deleteSection()
+      })
+      .catch(() => {})
+    },
+
+    deleteSection() {
+      // Start the loading spinner
+      this.$wait.start('deleteSection')
+
+      this.$store.dispatch('deleteSection', {
+        sectionID: this.sectionId,
+      })
+      .then(() => {
+        // Redirect to home page
+        this.$router.push({name: 'home'})
+        // show success message
+        this.$notify({ 
+          title: "Section deleted successfully", 
+          type: "success"
+        })
+      })
+      .catch(err => {
+        console.log(err)
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          })
+        }
+      })
+      .finally(() => {
+        // Stop the loading spinner
+        this.$wait.end('deleteSection')
+      })
+    },
+
+    confirmClearStudents() {
+      this.$dialog.confirm('Are you sure?')
+      .then(() => {
+        this.clearStudents()
+      })
+      .catch(() => {})
+    },
+
+    clearStudents() {
+      // Start the loading spinner
+      this.$wait.start('clearStudents')
+
+      this.$store.dispatch('clearStudents', {
+        sectionID: this.sectionId,
+      })
+      .then(() => {
+        // show success message
+        this.$notify({ 
+          title: "Students cleared successfully", 
+          type: "success"
+        })
+      })
+      .catch(err => {
+        console.log(err)
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          })
+        }
+      })
+      .finally(() => {
+        // Stop the loading spinner
+        this.$wait.end('clearStudents')
+      })
+    },
 
 
     addRow() {
@@ -802,4 +1003,9 @@ label.radio {
   max-width: 640px;
   margin: auto;
 }
+
+.divider {
+  margin: 20px 0; border-top: 10px solid #333;
+}
+
 </style>

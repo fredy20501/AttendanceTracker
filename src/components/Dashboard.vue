@@ -1,11 +1,14 @@
 <template>
-  <div>
+<transition name="fade" mode="out-in">
+  <Loading v-if="loading"/>
+
+  <div v-else>
     <h2>My Sections</h2>
     <br>
     
     <div>
       <div v-for="(section,i) in sections" v-bind:key="i" style=" display: inline-block"> 
-        <div class = "tile" v-on:click="goToSection(section._id)">
+        <button class="tile" v-on:click="goToSection(section._id)">
           {{section.name}}
 
           <!-- Only show the professor's name for the student's dashboard -->
@@ -17,7 +20,7 @@
           <hr>
           <b>Attendance Type:</b> {{attendanceType(section)}}
           <br>
-        </div> 
+        </button>
       </div>
     </div>
     
@@ -50,8 +53,8 @@
       </div>
     </div>
     
-    
   </div>
+</transition>
 </template>
 
 <script>
@@ -62,6 +65,8 @@ export default {
 
   data() {
     return {
+      // Hide the page until data is loaded
+      loading: true,
 
       // This variable will hold the list of sections (each an object with specific information)
       sections: [],
@@ -95,6 +100,11 @@ export default {
       return section.always_mandatory ? 'Mandatory' : 'Opt in'
     },
 
+      //comparison function for Sections so they can be sorted
+    compSection(firstEl, secondEl){
+      return firstEl.name.localeCompare(secondEl.name);
+    },
+
     // This function calls the backend api to get the sections for the user
     // For students it returns the sections they are registered for
     // For professors it returns the sections they are teaching (i.e. the one they created)
@@ -105,7 +115,10 @@ export default {
         userId: this.getUser.id
       })
       .then(res => {
-        this.sections = res.sections
+        this.sections = res.sections.sort(this.compSection);
+
+        // Show the page once data is loaded
+        this.loading = false
       })
       .catch(err => {
         console.log(err);
@@ -132,6 +145,7 @@ export default {
       .then(res => {
         // Add the new section to the UI
         this.sections.push(res)
+        this.sections = this.sections.sort(this.compSection);
         // Clear the field
         this.sectionName = ""
         this.hideRegistration = true
@@ -163,10 +177,10 @@ export default {
 .tile {
   display: inline-block;
   width: 250px;
-  margin:10px;
-  border: 3px solid black;
   margin: 10px;
   padding: 10px 0;
+  height: auto;
+  font-weight: normal;
 }
 
 </style>

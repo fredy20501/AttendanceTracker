@@ -55,8 +55,9 @@ const sectionSchema = new Schema({
     timestamps: true 
 });
 const Section = mongoose.model('section', sectionSchema, 'section');
+const ArchivedSection = mongoose.model('archivedSection', sectionSchema, 'archivedSection');
 
-module.exports = {User, Section, SeatingLayout};
+module.exports = {User, Section, SeatingLayout, ArchivedSection};
 
 /********************************
  * Schema Property Explainations*

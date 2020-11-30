@@ -39,7 +39,7 @@ const routes = [
     path: '/section/:id',
     name: 'section',
     meta: { back: true, requiresAuth: true },
-    component: () => import(/* webpackChunkName: "[section]" */ '../views/SectionView.vue')
+    component: () => import(/* webpackChunkName: "section" */ '../views/SectionView.vue')
   },
   {
     // The id of the section we want to view will be given as a url parameter

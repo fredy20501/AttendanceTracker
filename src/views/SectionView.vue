@@ -15,13 +15,11 @@ export default {
   name: 'SectionView',
   components: {
     StudentSectionView,
-    ProfessorSectionView
+    ProfessorSectionView,
   },
   computed: {
     // Import the getters from the global store
-    ...mapGetters([
-      'isProfessor'
-    ])
+    ...mapGetters(['isProfessor'])
   },
 }
 </script>

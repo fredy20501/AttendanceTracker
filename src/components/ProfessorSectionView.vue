@@ -138,7 +138,7 @@
     <br>
 
     <SpinnerButton
-      class="blue"
+      color="blue"
       label="Submit Attendance"
       width="300px"
       height="30px"

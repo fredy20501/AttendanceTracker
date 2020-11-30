@@ -17,8 +17,8 @@ router.get('/', (req, res) => {
 router.get('/previousSeatingPlans', (req, res) => {
     // Return all seating plans stored in the database
     // (we do not filter by professor id)
-    SeatingLayout.find({}, function(err, seatingLayout){
-        if(err){
+    SeatingLayout.find({}, function (err, seatingLayout) {
+        if (err) {
             console.log(err);
             return res.status(500).send();
         }
@@ -100,7 +100,7 @@ router.post('/createSection', (req, res) => {
 
         return res.status(200).json({
             newSection
-        }); 
+        });
     })
 
 });
@@ -224,9 +224,64 @@ router.delete('/deleteSection', (req, res) => {
             return res.status(500).send();
         }
 
-        return res.status(200).send(); 
+        return res.status(200).send();
     });
 });
+
+
+/**drops a section by a given student, such that it removes him from the registered_students list
+ * of a given section
+ * ==========================================
+ * Example api call body:
+ * {
+    "studentID": "5f984a44da9eb32ba01d31dd",
+    "sectionID" : "5f984a44da9eb32ba01d31df"
+    }
+ */
+router.post('/dropSection', (req, res) => {
+    let studentID = req.body.studentID;
+    let sectionID = req.body.sectionID;
+
+    Section.findById(sectionID, function (err, section) {
+        if (err || section == null) {
+            console.log(err);
+            return res.status(500).send(err);
+        }
+
+        // Find the student in the list of registered students
+        let index = section.registered_students.indexOf(studentID);
+        if (index == -1) {
+            // Error if student is not enrolled
+            return res.status(520).send(err);
+        }
+        // Remove the student from the list of registered students
+        section.registered_students.splice(index, 1);
+
+        // Copy the seating arrangement
+        var newSeatingArrangement = JSON.parse(JSON.stringify(section.seating_arrangement));
+        // Remove the student from the seating arrangement
+        newSeatingArrangement.forEach((row, rowIndex) => {
+            row.forEach((column, columnIndex) => {
+                // Replace seat with null if found
+                const seat = newSeatingArrangement[rowIndex][columnIndex];
+                if (seat == studentID) {
+                    newSeatingArrangement[rowIndex][columnIndex] = null;
+                }
+            });
+        });
+        // Replace the seating arrangement
+        section.seating_arrangement = newSeatingArrangement;
+
+        section.save(err => {
+            if (err) {
+                console.log(err);
+                return res.status(500).send(err);
+            }
+            return res.status(200).send();
+        })
+    })
+});
+
 
 // ------------- Combined Seating Layout and Section Methods -------------
 
@@ -259,7 +314,6 @@ router.get('/getSectionView', (req, res) => {
                 seating_positions.push(`seating_arrangement.${i}.${j}`);
             }
         }
-
         // Populate all the positions of the seating_arrangement
         section.populate(seating_positions.join(' '), (err, fullSection) => {
             if(err) {

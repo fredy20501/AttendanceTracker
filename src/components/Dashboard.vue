@@ -100,6 +100,11 @@ export default {
       return section.always_mandatory ? 'Mandatory' : 'Opt in'
     },
 
+      //comparison function for Sections so they can be sorted
+    compSection(firstEl, secondEl){
+      return firstEl.name.localeCompare(secondEl.name);
+    },
+
     // This function calls the backend api to get the sections for the user
     // For students it returns the sections they are registered for
     // For professors it returns the sections they are teaching (i.e. the one they created)
@@ -110,7 +115,7 @@ export default {
         userId: this.getUser.id
       })
       .then(res => {
-        this.sections = res.sections
+        this.sections = res.sections.sort(this.compSection);
 
         // Show the page once data is loaded
         this.loading = false
@@ -140,6 +145,7 @@ export default {
       .then(res => {
         // Add the new section to the UI
         this.sections.push(res)
+        this.sections = this.sections.sort(this.compSection);
         // Clear the field
         this.sectionName = ""
         this.hideRegistration = true

@@ -45,4 +45,38 @@ router.put('/pushNewAttendance', (req, res) => {
     });
 });
 
+/**
+ * Get all attendance objects of the specified section
+ * ==========================================
+ * Example api call: (note that data is passed through query params)
+ { 
+    params: {
+        "sectionID": "5f9aa985a74e0454388aa083"
+    }
+ }
+ */
+router.get('/getAttendanceData', (req, res) => {
+    // Note: for get requests data is sent through query params
+    let sectionID = req.query.sectionID;
+
+    Section.findById(sectionID)
+
+    // Replace the id of students with their names
+    .populate('attendance.absent_students', ['name', 'email'])
+    .populate('registered_students', ['name', 'email'])
+
+    .exec(function (err, section) {
+        if (err || section == null) {
+            console.log(err);
+            return res.status(500).send(err);
+        }
+
+        return res.status(200).json({
+            attendanceData: section.attendance,
+            classList: section.class_list,
+            registeredStudents: section.registered_students
+        });
+    });
+});
+
 module.exports = router;

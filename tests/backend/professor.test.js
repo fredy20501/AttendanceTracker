@@ -147,8 +147,104 @@ describe('Backend server fuctionality', () => {
             }
             done();
         });
+    });
 
+    it("Can get attendance data", async done => {
+        var response = await request.post("/api/login").send({
+            email:'test.professor@unb.ca', 
+            password:'testing123'
+        });
 
+        // Delete users and section in case they already exist in the database
+        response = await request.delete("/api/delete-user").send({
+            email: 'st1@test.com'
+        });
+        response = await request.delete("/api/delete-user").send({
+            email: 'prof1@test.com'
+        });
+        response = await request.delete("/api/section/deleteSection").send({
+            name: 'testSection'
+        });
+        response = await request.delete("/api/section/deleteSeatingLayout").send({
+            name: 'testLayout'
+        });
+
+        // Create a sample user, seating layout, and section for this test
+        response = await request.post('/api/register').send({
+            email: 'st1@test.com',
+            name: 'Student 1',
+            password:'st1234',
+            is_professor: false
+        });
+        const student1 = response.body.user;
+
+        response = await request.post('/api/register').send({
+            email: 'prof1@test.com',
+            name: 'A Professor',
+            password:'pr1234of',
+            is_professor: true
+        });
+        const prof1 = response.body.user;
+
+        response = await request.post('/api/section/createSeatingLayout').send({
+            name: 'testLayout',
+            capacity: 4,
+            dimensions: [2 , 2],
+            layout: [
+                [1, 1],
+                [1, 1]
+            ], 
+            default: true,
+            description: 'This is a sample',
+            createdBy: prof1._id
+        });
+        const layout1 = response.body.seatingLayout;
+
+        response = await request.post('/api/section/createSection').send({
+            sectionName: 'testSection',
+            attendanceThreshold: '0',
+            seatingLayout: layout1._id,
+            attMandatory: false,
+            professor: prof1._id,
+            maxCapacity: 4,
+            seatingArrangement: [
+                [null, null],
+                [null, null]
+            ]
+        });
+        const section1 = response.body.newSection;
+
+        // Add attendance to the section
+        response = await request.put("/api/professor/pushNewAttendance").send({
+            sectionID: section1._id,
+            absent_students: [student1._id],
+            mandatory: false,
+        });
+        expect(response.status).toBe(200);
+
+        // Make sure getAttendanceData endpoint works
+        response = await request.get("/api/professor/getAttendanceData").query({
+            sectionID: section1._id
+        });
+        expect(response.status).toBe(200);
+        expect(response.body.attendanceData[0].absent_students[0]._id).toBe(student1._id);
+
+        // Delete test data
+        response = await request.delete("/api/delete-user").send({
+            email: 'st1@test.com'
+        });
+        response = await request.delete("/api/delete-user").send({
+            email: 'prof1@test.com'
+        });
+        response = await request.delete("/api/section/deleteSection").send({
+            name: 'testSection'
+        });
+        response = await request.delete("/api/section/deleteSeatingLayout").send({
+            name: 'testLayout'
+        });
+        await request.get("/api/logout");
+
+        done();
     });
 
 

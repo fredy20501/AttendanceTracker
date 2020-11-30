@@ -290,6 +290,19 @@ const store = new Vuex.Store({
       })
     },
 
+    getAttendanceData(context, payload) {
+      return $http.get('professor/getAttendanceData', {
+        // Note: for get requests we need to send data through params
+        params: {
+          sectionID: payload.sectionID
+        }
+      })
+      .catch(err => {
+        err.message = "Could not get attendance data. Please try again later"
+        throw err
+      })
+    },
+    
     updateSeatingArrangement(context, payload) {
       return $http.put('student/updateStudentSectionView', payload)
       .catch(err => {

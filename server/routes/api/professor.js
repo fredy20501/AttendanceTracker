@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 let {
-    Section
+    Section,
+    ArchivedSection
 } = require('../../dbSchemas/attendanceSchema');
 
 /**pushes a new attendance object to a section
@@ -55,8 +56,7 @@ router.put('/clearStudents', (req, res) => {
 
     Section.findById(sectionID, function (err, section) {
         if (err || section == null) {
-            console.log(err);
-            console.log("Section not found");
+            console.log("Section not found:", err);
             return res.status(500).send(err);
         }
 
@@ -80,3 +80,41 @@ router.put('/clearStudents', (req, res) => {
 });
 
 module.exports = router;
+
+/**
+ * allows the professor to delete a section
+ * and archives the section 
+ * ================================
+ * Example API body call:
+ * {
+ *   "sectionID" : "5fbbeebc85d6314ab80bfc07"
+ * }
+ */
+router.post('/archiveSection', (req, res) => {
+    let sectionID = req.body.sectionID;
+
+    Section.findOne({ _id: sectionID }, function(err, section) {
+
+        if (err || section == null) {
+            console.log(err);
+            return res.status(500).send(err);
+        }
+
+        let swap = new (ArchivedSection)(section.toJSON())
+        section.remove(err => {
+            if (err) {
+                console.log(err);
+                return res.status(500).send(err);
+            }
+        })
+
+        swap.save(err => {
+            if (err) {
+                console.log(err);
+                return res.status(500).send(err);
+            }
+
+            return res.status(200).send();
+        })
+    })
+});

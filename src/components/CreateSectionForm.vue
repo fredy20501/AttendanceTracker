@@ -1,6 +1,6 @@
 <template>
 <transition name="fade" mode="out-in">
-  <Loading v-if="loading && pageMode=='edit'"/>
+  <Loading v-if="loading && !isCreateMode"/>
 
   <div v-else>
     <!-- 

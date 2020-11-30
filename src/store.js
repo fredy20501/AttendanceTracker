@@ -299,7 +299,7 @@ const store = new Vuex.Store({
     },
 
     deleteSection(context, payload) {
-      return $http.put('professor/archiveSection', payload)
+      return $http.post('professor/archiveSection', payload)
       .catch(err => {
         err.message = "Could not delete section. Please try again later"
         throw err

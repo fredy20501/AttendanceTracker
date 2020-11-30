@@ -22,7 +22,7 @@
         <br>
         <div>
           <SpinnerButton 
-            class="blue"
+            color="blue"
             label="Login"
             type="submit"
             width="100%"
@@ -41,16 +41,6 @@
         </div>
       </form>
     </ValidationObserver>
-
-    <div class="demo-accounts">
-      <b>Test Student</b><br>
-      email: test.student@unb.ca<br>
-      password: testing123<br>
-      <br>
-      <b>Test Professor</b><br>
-      email: test.professor@unb.ca<br>
-      password: testing123<br>
-    </div>
   </div>
 </template>
 
@@ -113,22 +103,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped >
-.demo-accounts {
-  position: absolute;
-  right: 10px;
-  top: 125px;
-  border: 1px dashed black;
-  padding: 10px;
-  text-align: left;
-  opacity: 0.8;
-}
-
-// Hide the demo account block on small screen sizes
-@media only screen and (max-width: 880px) {
-  .demo-accounts {
-    display: none;
-  }
-}
-</style>

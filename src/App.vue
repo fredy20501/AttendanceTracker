@@ -220,4 +220,33 @@ button:disabled {
   opacity: 0.4
 }
 
+/* Customize the popup dialogs from vuejs-dialog */
+div.dg-main-content {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-size: 1.1em;
+  width: calc(98% - 30px);
+
+  .dg-btn {
+    border-radius: 0;
+    width: 100px;
+  }
+
+  .dg-btn--ok {
+    @extend .red;
+    border-color: black;
+  }
+  .dg-btn--cancel {
+    @extend .blue;
+    border-color: black;
+  }
+}
+
+.danger-zone {
+  > div > div {
+    text-align: left;
+    display: inline-block;
+    max-width: 300px;
+    vertical-align: top;
+  }
+}
 </style>

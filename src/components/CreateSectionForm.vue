@@ -175,6 +175,7 @@
                 <!-- Loop through each seat in the row -->
                 <td v-for="(seat, j) in row" v-bind:key="j">
                   <button
+                    aria-label="select seat"
                     type="button"
                     @click="fromPaintSelect(i,j)" 
                     @mouseover="toPaintSelect(i,j)"
@@ -206,32 +207,36 @@
         <div class="legend">
           <h3>Seat Legend</h3>
           <div>
-            <label>Selected<br>Access</label>
+            <label id="legendSelectedAccess">Selected<br>Access</label>
             <button type="button" 
+              aria-labelledby="legendSelectedAccess"
               v-bind:class="{'seat': true, 'type-2': true, 
                 'selected': currentPaintSelected==2
               }"
               v-on:click="paintSelectIndex=2"></button>
           </div>
           <div>
-            <label>Extended<br>Access</label>
+            <label id="legendExtendedAccess">Extended<br>Access</label>
             <button type="button" 
+              aria-labelledby="legendExtendedAccess"
               v-bind:class="{'seat': true, 'type-3': true, 
                 'selected': currentPaintSelected==3
               }"
               v-on:click="paintSelectIndex=3"></button>
           </div>
           <div>
-            <label>Open<br>Access</label>
+            <label id="legendOpenAccess">Open<br>Access</label>
             <button type="button" 
+              aria-labelledby="legendOpenAccess"
               v-bind:class="{'seat': true, 'type-1': true, 
                 'selected': currentPaintSelected==1
               }"
               v-on:click="paintSelectIndex=1"></button>
           </div>
           <div>
-            <label>Locked</label>
+            <label id="legendLocked">Locked</label>
             <button type="button" 
+              aria-labelledby="legendLocked"
               v-bind:class="{'seat': true, 'type-0': true, 
                 'selected': currentPaintSelected==0
               }"

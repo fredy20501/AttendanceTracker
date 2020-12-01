@@ -18,7 +18,7 @@ describe('Backend server fuctionality', () => {
         db.once('open', done);
     });
 
-    //Close server & database when done
+    //Close server & database after running tests
     afterAll(async (done) => {
         await mongoose.connection.close();
         server.close(done);
@@ -45,13 +45,10 @@ describe('Backend server fuctionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection'
         });
-        //delete just in case
-        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
+        //delete layout in case it already exists
+        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
 
+        //create student 1
         response = await request.post('/api/register').send({
             email: 'st1@test.com',
             name: 'Student 1',
@@ -60,6 +57,7 @@ describe('Backend server fuctionality', () => {
         });
         const student1 = response.body.user
 
+        //create student 2
         response = await request.post('/api/register').send({
             email: 'st2@test.com',
             name: 'Student 2',
@@ -68,6 +66,7 @@ describe('Backend server fuctionality', () => {
         });
         const student2 = response.body.user
 
+        //create a professor
         response = await request.post('/api/register').send({
             email: 'prof1@test.com',
             name: 'A Professor',
@@ -76,6 +75,7 @@ describe('Backend server fuctionality', () => {
         });
         const prof1 = response.body.user;
 
+        //create an admin
         response = await request.post('/api/register').send({
             email: 'admin@test.com',
             name: 'An Admin',
@@ -84,7 +84,7 @@ describe('Backend server fuctionality', () => {
         });
         const admin1 = response.body.user
 
-        // Create a sample seating layout for this test
+        //create a sample seating layout
         response = await request.post('/api/section/createSeatingLayout').send({
             name: 'testLayout',
             capacity: 4,
@@ -99,7 +99,7 @@ describe('Backend server fuctionality', () => {
         });
         const layout1 = response.body.seatingLayout
 
-        //Create test section
+        //create a test section
         response = await request.post('/api/section/createSection').send({
             sectionName: 'testSection',
             attendanceThreshold: '0',
@@ -123,8 +123,8 @@ describe('Backend server fuctionality', () => {
             mandatory: false
         });
         expect(response.status).toBe(200);
-        await request.get("/api/logout");
 
+        //delete users, section & layout after testing
         response = await request.delete("/api/delete-user").send({
             email: 'st1@test.com'
         });
@@ -140,14 +140,12 @@ describe('Backend server fuctionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection'
         });
-        //delete just in case
-        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-            done();
-        });
+        await request.get("/api/logout");
+
+        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
+        done();
     });
+
 
     it("Can get attendance data", async done => {
         var response = await request.post("/api/login").send({
@@ -260,11 +258,7 @@ describe('Backend server fuctionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection'
         });
-        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-        });
+        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
 
         // Create test users
         response = await request.post('/api/register').send({
@@ -326,14 +320,10 @@ describe('Backend server fuctionality', () => {
         response = await request.delete("/api/section/deleteSection").send({
             name: 'testSection'
         });
-        SeatingLayout.deleteOne({name:'testLayout'}, (err) =>{
-            if(err){
-                console.log(err);
-            }
-            done();
-        });
+        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
         
         await request.get("/api/logout");
+        done();
     });
 
 

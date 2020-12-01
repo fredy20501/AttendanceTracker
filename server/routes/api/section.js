@@ -298,6 +298,11 @@ router.get('/getSectionView', (req, res) => {
     .populate('seating_layout')
     .exec()
     .then(section => {
+        if(section == null){
+            console.log("section was null/not found");
+            return res.status(500).send();
+        }
+
         // Here we want to populate the seating arrangement
         // (we need to do it 'manually' since it is a 2d array)
         // Inspired by: https://stackoverflow.com/questions/55878496/mongoose-populate-on-two-dimensional-array

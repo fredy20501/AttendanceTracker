@@ -17,7 +17,7 @@ describe('Backend server fuctionality', () => {
         db.once('open', done);
     });
 
-    //Close server & database when done
+    //Close server & database after running tests
     afterAll(async (done) => {
         await mongoose.connection.close();
         server.close(done);
@@ -60,21 +60,21 @@ describe('Backend server fuctionality', () => {
         });
         expect(response.status).toBe(200);
 
-        // Login
+        // Log in
         response = await request.post("/api/login").send({
             email:'123test@test456.com', 
             password:'12345'
         });
         expect(response.status).toBe(200);
 
-        // Logout
-        response = await request.get("/api/logout");
-        expect(response.status).toBe(200);
-
         // Delete test account
         response = await request.delete("/api/delete-user").send({
             email: '123test@test456.com'
         });
+        expect(response.status).toBe(200);
+
+        // Logout
+        response = await request.get("/api/logout");
         expect(response.status).toBe(200);
 
         done();

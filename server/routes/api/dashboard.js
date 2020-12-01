@@ -9,7 +9,7 @@ let {
  * ==========================================
  * Example api call body:
  * {
-	"studentId": "5f984a44da9eb32ba01d31dd"
+	"studentID": "5f984a44da9eb32ba01d31dd"
     }
  */
 router.get('/getSectionsByStudent', (req, res) => {
@@ -23,13 +23,15 @@ router.get('/getSectionsByStudent', (req, res) => {
     })
     .populate('professor')
     .exec(function (err, sections) {
-        if (err || sections == null) {
+        if (err || sections == null || sections.length == 0) {
             console.log(err);
             return res.status(500).send(err);
         }
         res.status(200).send(sections);
     });
 });
+
+
 
 /**GETS all the sections created by a professor
  * ==========================================
@@ -47,7 +49,7 @@ router.get('/getSectionsCreatedByProfessor', (req, res) => {
     })
     .populate('professor')
     .exec(function (err, sections) {
-        if (err || sections == null) {
+        if (err || sections == null || sections.length == 0) {
             console.log(err);
             return res.status(500).send(err);
         }

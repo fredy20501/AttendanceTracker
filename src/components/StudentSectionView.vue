@@ -66,7 +66,7 @@
             <td></td>
             <td :colspan="classLayout[0].length">
               <div style="margin: 10px auto 0 auto; padding: 0 10px; max-width: 200px;" class="border">
-                Whiteboard
+                Front of Classroom
               </div>
             </td>
           </tr>
@@ -109,15 +109,47 @@
       Update Seat
     </button>
 
+    <br>
+    <br>
+    <hr class="divider">
+    <h2>Danger Zone</h2>
+
+    <div class="double-column danger-zone">
+      <div>
+        <div>
+          <b>Drop section</b><br>
+          Unregister yourself from this section. 
+          You may register again but your seat will be lost.
+        </div>
+        <div>
+          <SpinnerButton 
+            color="red"
+            label="Drop Section"
+            type="button"
+            width="300px"
+            height="30px"
+            :onClick="confirmDropSection"
+            :disabled="$wait.waiting('dropSection')"
+            :loading="$wait.waiting('dropSection')"
+          />
+        </div>
+      </div>
+    </div>
+
   </div>
 </transition>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import SpinnerButton from '@/components/SpinnerButton.vue'
 
 export default {
   name: 'StudentSectionView',
+  components: {
+    SpinnerButton
+  },
+
   data() {
     return {
       // Hide the page until data is loaded
@@ -339,7 +371,49 @@ export default {
           });
         }
       })
+    },
+
+    confirmDropSection() {
+      this.$dialog.confirm('Are you sure?')
+      .then(() => {
+        this.dropSection()
+      })
+      .catch(() => {})
+    },
+
+    dropSection() {
+      // Start the loading spinner
+      this.$wait.start('dropSection')
+
+      this.$store.dispatch('dropSection', {
+        sectionID: this.sectionId,
+        studentID: this.getUser.id
+      })
+      .then(() => {
+        // Redirect to home page
+        this.$router.push({name: 'home'})
+        // Show success notification
+        this.$notify({
+          title: 'Section dropped successfully!',
+          type: 'success'
+        })
+      })
+      .catch(err => {
+        console.log(err);
+        // Show a notification with the error message
+        if (err.message) {
+          this.$notify({ 
+            title: err.message, 
+            type: err.type ?? 'error'
+          });
+        }
+      })
+      .finally(() => {
+        // Stop the loading spinner
+        this.$wait.end('dropSection')
+      })
     }
+
   }
 }
 </script>

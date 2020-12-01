@@ -290,6 +290,30 @@ const store = new Vuex.Store({
       })
     },
 
+    dropSection(context, payload) {
+      return $http.post('section/dropSection', payload)
+      .catch(err => {
+        err.message = "Could not drop section. Please try again later"
+        throw err
+      })
+    },
+
+    deleteSection(context, payload) {
+      return $http.post('professor/archiveSection', payload)
+      .catch(err => {
+        err.message = "Could not delete section. Please try again later"
+        throw err
+      })
+    },
+
+    clearStudents(context, payload) {
+      return $http.put('professor/clearStudents', payload)
+      .catch(err => {
+        err.message = "Could not clear students. Please try again later"
+        throw err
+      })
+    },
+    
     getAttendanceData(context, payload) {
       return $http.get('professor/getAttendanceData', {
         // Note: for get requests we need to send data through params

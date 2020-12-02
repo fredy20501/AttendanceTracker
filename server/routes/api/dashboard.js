@@ -23,7 +23,7 @@ router.get('/getSectionsByStudent', (req, res) => {
     })
     .populate('professor')
     .exec(function (err, sections) {
-        if (err || sections == null || sections.length == 0) {
+        if (err) {
             console.log(err);
             return res.status(500).send(err);
         }
@@ -49,7 +49,7 @@ router.get('/getSectionsCreatedByProfessor', (req, res) => {
     })
     .populate('professor')
     .exec(function (err, sections) {
-        if (err || sections == null || sections.length == 0) {
+        if (err) {
             console.log(err);
             return res.status(500).send(err);
         }

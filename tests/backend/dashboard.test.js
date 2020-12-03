@@ -58,7 +58,7 @@ describe('Dashboard api fuctionality', () => {
         done();
     });
 
-    it("Should not reach getSectionsByStudent endpoint with improper parameter", async done => {
+    it("getSectionsByStudent should give no result when student does not exist", async done => {
         //Log in as a professor
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
@@ -69,13 +69,15 @@ describe('Dashboard api fuctionality', () => {
         response = await request.get("/api/dashboard/getSectionsByStudent").query({
                 studentID: '999999999999'
         });
+        expect(response.status).toBe(200);
+        // Returns empty array since student does not have any sections
+        expect(response.body).toEqual([]);
 
-        expect(response.status).toBe(500);
         await request.get("/api/logout");
         done();
     });
 
-    it("Should not reach getSectionsCreatedByProfessor endpoint with improper parameter", async done => {
+    it("getSectionsCreatedByProfessor should give no result when professor does not exist", async done => {
         //Log in as a professor
         var response = await request.post("/api/login").send({
             email:'test.professor@unb.ca', 
@@ -86,8 +88,10 @@ describe('Dashboard api fuctionality', () => {
         response = await request.get("/api/dashboard/getSectionsCreatedByProfessor").query({
             professorID: '999999999999'
         });
+        expect(response.status).toBe(200);
+        // Returns empty array since professor does not have any sections
+        expect(response.body).toEqual([]);
 
-        expect(response.status).toBe(500);
         await request.get("/api/logout");
         done();
     });

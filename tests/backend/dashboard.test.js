@@ -2,515 +2,185 @@ const app = require('app.js');
 const mongoose = require('mongoose');
 const supertest = require("supertest");
 const http = require('http');
-const { User, Section, SeatingLayout } = require('dbSchemas/attendanceSchema.js');
+const test = require('../testFunctions.js');
 
 describe('Dashboard api fuctionality', () => {
-    
-    let server;
-    let request;
 
-    //Open server & database before running tests
+    var server;
+    var request;
+    var testData;
+    var response;
+
     beforeAll(async (done) => {
+        //Open server & database before running tests
         server = http.createServer(app);
         server.listen();
         request = supertest(server);
         const db = mongoose.connection;
-        db.once('open', done);
+        db.once('open', async function() {
+            // Create test data
+            testData = await test.createTestData();
+            // Login once before all tests
+            await test.login(request, testData.professor);
+
+            done();
+        });
     });
 
-    //Close server & database after running tests
     afterAll(async (done) => {
+        // Logout once after all tests
+        await test.logout(request);
+        // Delete test data
+        await test.deleteTestData(testData);
+
+        //Close server & database when done
         await mongoose.connection.close();
         server.close(done);
     });
 
-    it("Should reach getSectionView endpoint", async done => {
-        //Log in as a professor first
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-        const prof1 = response.body.user
 
-        response = await request.get("/api/dashboard/getSectionsCreatedByProfessor").query({
-            professorID: prof1.id
-        });
-        expect(response.status).toBe(200);
-        //Log out after testing
-        await request.get("/api/logout");
-        done();
-    });
+    describe("Get sections endpoint tests", () => {
 
-    it("Should reach getSectionsByStudent endpoint", async done => {
-        //Log in as a student first
-        var response = await request.post("/api/login").send({
-            email:'test.student@unb.ca', 
-            password:'testing123'
+        it("Should reach getSectionView endpoint", async done => {
+            response = await request.get("/api/dashboard/getSectionsCreatedByProfessor").query({
+                professorID: testData.professor.id
+            });
+            expect(response.status).toBe(200);
+
+            done();
         });
 
-        const st1 = response.body.user
-        response = await request.get("/api/dashboard/getSectionsByStudent").query({
-            studentID: st1.id
+        it("Should reach getSectionsByStudent endpoint", async done => {
+            response = await request.get("/api/dashboard/getSectionsByStudent").query({
+                studentID: testData.student.id
+            });
+            expect(response.status).toBe(200);
+
+            done();
         });
 
-        expect(response.status).toBe(200);
-        await request.get("/api/logout");
-        done();
-    });
-
-    it("getSectionsByStudent should give no result when student does not exist", async done => {
-        //Log in as a professor
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-        
-        //Send invalid id
-        response = await request.get("/api/dashboard/getSectionsByStudent").query({
+        it("getSectionsByStudent should give no result when student does not exist", async done => {
+            //Send student who doesn't exist
+            response = await request.get("/api/dashboard/getSectionsByStudent").query({
                 studentID: '999999999999'
-        });
-        expect(response.status).toBe(200);
-        // Returns empty array since student does not have any sections
-        expect(response.body).toEqual([]);
+            });
+            expect(response.status).toBe(200);
+            // Returns empty array since student does not have any sections
+            expect(response.body).toEqual([]);
 
-        await request.get("/api/logout");
-        done();
+            done();
+        });
+
+        it("getSectionsCreatedByProfessor should give no result when professor does not exist", async done => {
+            //Send professor who does not exist
+            response = await request.get("/api/dashboard/getSectionsCreatedByProfessor").query({
+                professorID: '999999999999'
+            });
+            expect(response.status).toBe(200);
+            // Returns empty array since professor does not have any sections
+            expect(response.body).toEqual([]);
+
+            done();
+        });
+
     });
-
-    it("getSectionsCreatedByProfessor should give no result when professor does not exist", async done => {
-        //Log in as a professor
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-
-        //Send invalid id
-        response = await request.get("/api/dashboard/getSectionsCreatedByProfessor").query({
-            professorID: '999999999999'
-        });
-        expect(response.status).toBe(200);
-        // Returns empty array since professor does not have any sections
-        expect(response.body).toEqual([]);
-
-        await request.get("/api/logout");
-        done();
-    });
-
 
     // ====== Register for section endpoint tests ======
+    describe("Register for section endpoint tests", () => {
 
-    it("Should reach registerForSection endpoint", async done => {
-        //Log in as professor
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-        const prof1 = response.body.user;
+        // Create & delete a dedicated test section for these tests
+        var registerTestSection;
+        beforeAll(async() => registerTestSection = await test.createSection(testData.professor, testData.layout));
+        afterAll(async() => await test.deleteSection(registerTestSection.id));
 
-        response = await request.delete("/api/delete-user").send({
-            email: 'admin5@test.com'
-        });
-        response = await request.delete("/api/delete-user").send({
-            email: 'st2@test.com'
-        });
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection2' 
-        });
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
+        it("Should be able to register for a section only once", async done => {
+            // Should succeed if registering for the first time
+            response = await request.put("/api/dashboard/registerForSection").send({
+                studentID: testData.student.id,
+                sectionName: registerTestSection.name
+            });
+            expect(response.status).toBe(200);
 
-        //create an admin
-        response = await request.post('/api/register').send({
-            email: 'admin5@test.com',
-            name: 'An Admin5',
-            password:'ad1234min',
-            is_professor: true
-        });
-        const admin1 = response.body.user; 
+            // Should fail if you are already registered
+            response = await request.put("/api/dashboard/registerForSection").send({
+                studentID: testData.student.id,
+                sectionName: registerTestSection.name
+            });
+            expect(response.status).toBe(520);
 
-        //create a layout
-        response = await request.post('/api/section/createSeatingLayout').send({
-            name: 'testLayout',
-            capacity: 4,
-            dimensions: [ 2 , 2],
-            layout: [
-                [1, 1],
-                [1, 1]
-            ], 
-            default: true,
-            description: 'This is a sample',
-            createdBy: prof1._id
+            done();
         });
-        const layout1 = response.body.seatingLayout
 
-        //create test section
-        response = await request.post('/api/section/createSection').send({
-            sectionName: 'testSection2',
-            attendanceThreshold: '0',
-            seatingLayout: layout1._id,
-            attMandatory: false,
-            professor: prof1._id,
-            admin: admin1._id,
-            maxCapacity: 25,
-            seatingArrangement: [
-                [null, null, null, null, null],
-            ],
-            classList: [],
-            attendance: [Date.now(), null, false]
-        });
-        const se1 = response.body;
-        
-        //create a student
-        response = await request.post('/api/register').send({
-            email: 'st2@test.com',
-            name: 'Student 2',
-            password:'st1234',
-            is_professor: false
-        });
-        const st1 = response.body.user
+        it("Should not reach registerForSection endpoint when section doesnt exist", async done => {
+            response = await request.put("/api/dashboard/registerForSection").send({
+                studentID: testData.student.id,
+                sectionName: 'this section does not exist'
+            });
+            expect(response.status).toBe(530);
 
-        /*******************now test registering the student here************************/
+            done();
+        });
 
-        response = await request.put("/api/dashboard/registerForSection").send({
-            studentID: st1.id,
-            sectionName: 'testSection2'
-        });
-        expect(response.status).toBe(200);
-
-        //********* now delete it all ************/
-        response = await request.delete("/api/delete-user").send({
-            email: 'st2@test.com'
-        });
-        response = await request.delete("/api/delete-user").send({
-            email: 'admin5@test.com'
-        });
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection2' 
-        });
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
-
-        await request.get("/api/logout");
-        done();
     });
 
-    it("Should not reach registerForSection endpoint when student already registered", async done => {
+    describe("Drop section endpoint tests", () => {
 
-        //log in as professor
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
+        // Create & delete a dedicated test section for these tests
+        var dropTestSection;
+        beforeAll(async() => {
+            dropTestSection = await test.createSection(
+                testData.professor, 
+                testData.layout, 
+                // Test student is registered for this section
+                [testData.student.id]
+            );
         });
-        const prof1 = response.body.user;
+        afterAll(async() => await test.deleteSection(dropTestSection.id));
 
-        response = await request.delete("/api/delete-user").send({
-            email: 'admin42@test.com'
-        });
-        
-        //create an admin
-        response = await request.post('/api/register').send({
-            email: 'admin42@test.com',
-            name: 'An Admin42',
-            password:'ad1234min',
-            is_professor: true
-        });
-        const admin1 = response.body.user;
+        it("Should reach dropSection endpoint", async done => {
+            // Drop the section (student is registered)
+            response = await request.post("/api/section/dropSection").send({
+                studentID: testData.student.id,
+                sectionID: dropTestSection.id
+            });
+            expect(response.status).toBe(200);
 
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
+            // Check section to make sure it worked as expected
+            const updatedSection = await test.getSection(dropTestSection.id);
+            // Student should not be in the registered student list
+            expect(updatedSection.registered_students.indexOf(testData.student.id)).toBe(-1);
+            // Registered student list should have been reduced by 1
+            expect(updatedSection.registered_students.length).toBe(0);
+            // Seating arrangement & layout should still be the same size
+            expect(updatedSection.seating_arrangement.length).toBe(testData.layout.layout.length);
+            expect(updatedSection.seating_arrangement[0].length).toBe(testData.layout.layout[0].length);
 
-        //create a layout
-        response = await request.post('/api/section/createSeatingLayout').send({
-            name: 'testLayout',
-            capacity: 4,
-            dimensions: [ 2 , 2],
-            layout: [
-                [1, 1],
-                [1, 1]
-            ], 
-            default: true,
-            description: 'This is a sample',
-            createdBy: prof1._id
-        });
-        const layout1 = response.body.seatingLayout
-        
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection' 
+            done();
         });
 
-        //create test section
-        response = await request.post('/api/section/createSection').send({
-            sectionName: 'testSection',
-            attendanceThreshold: '0',
-            seatingLayout: layout1._id,
-            attMandatory: false,
-            professor: prof1._id,
-            admin: admin1._id,
-            maxCapacity: 25,
-            seatingArrangement: [
-                [null, null, null, null, null],
-            ],
-            classList: [],
-            attendance: [Date.now(), null, false]
-        });
-        const se1 = response.body;
-        
-        //create a student
-        response = await request.delete("/api/delete-user").send({
-            email: 'st1@test.com'
+        it("dropSection should fail when student is not registered for the section", async done => {
+            // Drop the section (student is not registered)
+            response = await request.post("/api/section/dropSection").send({
+                studentID: testData.student.id,
+                sectionID: testData.section.id
+            });
+            expect(response.status).toBe(520);
+
+            done();
         });
 
-        response = await request.post('/api/register').send({
-            email: 'st1@test.com',
-            name: 'Student 1',
-            password:'st1234',
-            is_professor: false
-        });
-        const st1 = response.body.user;
+        it("dropSection should fail when section does not exist", async done => {
+            // Try to drop a section that does not exist
+            response = await request.post("/api/section/dropSection").send({
+                studentID: testData.student.id,
+                sectionID: '123456789012'
+            });
+            expect(response.status).toBe(500);
 
-        /******************* now test registering the student here ************************/
-
-        response = await request.put("/api/dashboard/registerForSection").send({
-            studentID: st1.id,
-            sectionName: 'testSection'
-        });
-        // Try to register when you are already registered
-        response = await request.put("/api/dashboard/registerForSection").send({
-            studentID: st1.id,
-            sectionName: 'testSection'
-        });
-        expect(response.status).toBe(520);
-
-        //********* now delete it all *********** */
-        response = await request.delete("/api/delete-user").send({
-            email: 'st1@test.com'
-        });
-        response = await request.delete("/api/delete-user").send({
-            email: 'admin42@test.com'
-        });
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection' 
-        });
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
-        await request.get("/api/logout");
-
-        done();
-    });
-
-    it("Should not reach registerForSection endpoint when section doesnt exist", async done => {
-
-        //login as professor
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-        const prof1 = response.body.user;
-      
-        //delete st1 incase it already exists
-        response = await request.delete("/api/delete-user").send({
-            email: 'st51@test.com'
+            await request.get("/api/logout");
+            done();
         });
 
-        //create a student
-        response = await request.post('/api/register').send({
-            email: 'st51@test.com',
-            name: 'Student 51',
-            password:'st1234',
-            is_professor: false
-        });
-        const st1 = response.body.user
-
-        /******************* now test registering the student here ************************/
-
-        response = await request.put("/api/dashboard/registerForSection").send({
-            studentID: st1.id,
-            sectionName: 'testSectionabc123'
-        });
-        expect(response.status).toBe(530);
-
-        /********* now delete user ************/
-        response = await request.delete("/api/delete-user").send({
-            email: 'st51@test.com'
-        });
-        await request.get("/api/logout");
-
-        done();
-    });
-
-
-    // ====== Drop section endpoint tests ======
-
-    it("Should reach dropSection endpoint", async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-        // Delete test data in case it already exists in the database
-        response = await request.delete("/api/delete-user").send({
-            email: 'st1@test.com'
-        });
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection'
-        });
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
-
-        // Create test users
-        response = await request.post('/api/register').send({
-            email: 'st1@test.com',
-            name: 'Student 1',
-            password:'st1234',
-            is_professor: false
-        });
-        const student1 = response.body.user
-
-        // Create a sample seating layout for this test
-        response = await request.post('/api/section/createSeatingLayout').send({
-            name: 'testLayout',
-            capacity: 4,
-            dimensions: [2 , 2],
-            layout: [
-                [1, 1],
-                [1, 1]
-            ], 
-            default: true
-        });
-        const layout1 = response.body.seatingLayout
-
-        // Create test section
-        response = await request.post('/api/section/createSection').send({
-            sectionName: 'testSection',
-            attendanceThreshold: '0',
-            seatingLayout: layout1._id,
-            attMandatory: false,
-            maxCapacity: 30,
-            seatingArrangement: [
-                [null, student1._id],
-                [null, null],
-            ],
-        });
-        const section1 = response.body.newSection
-
-        // Register student1 for the section
-        await Section.findByIdAndUpdate(section1._id, {
-            registered_students: [student1._id]
-        }).exec();
-
-        // Drop the section
-        response = await request.post("/api/section/dropSection").send({
-            studentID: student1._id,
-            sectionID: section1._id
-        });
-        expect(response.status).toBe(200);
-
-        // Check section to make sure it worked as expected
-        const newSection1 = await Section.findById(section1._id);
-        // Student should not be in the registered student list
-        expect(newSection1.registered_students.indexOf(student1._id)).toBe(-1);
-        // Student1 should have lost their seat
-        expect(newSection1.seating_arrangement[0][1]).toBe(null);
-        // Registered student list should have been reduced by 1
-        expect(newSection1.registered_students.length).toBe(0);
-        // Seating arrangement & layout should still be the same size
-        expect(newSection1.seating_arrangement.length).toBe(layout1.layout.length);
-        expect(newSection1.seating_arrangement[0].length).toBe(layout1.layout[0].length);
-
-
-        // Delete test data
-        response = await request.delete("/api/delete-user").send({
-            email: 'st1@test.com'
-        });
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection'
-        });
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
-        
-        await request.get("/api/logout");
-        done();
-    });
-
-    it("dropSection should fail when student is not registered for the section", async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-        // Delete test data in case it already exists in the database
-        response = await request.delete("/api/delete-user").send({
-            email: 'st1@test.com'
-        });
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection'
-        });
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
-
-        // Create test users
-        response = await request.post('/api/register').send({
-            email: 'st1@test.com',
-            name: 'Student 1',
-            password:'st1234',
-            is_professor: false
-        });
-        const student1 = response.body.user
-
-        // Create a sample seating layout for this test
-        response = await request.post('/api/section/createSeatingLayout').send({
-            name: 'testLayout',
-            capacity: 4,
-            dimensions: [2 , 2],
-            layout: [
-                [1, 1],
-                [1, 1]
-            ], 
-            default: true
-        });
-        const layout1 = response.body.seatingLayout
-
-        // Create test section
-        response = await request.post('/api/section/createSection').send({
-            sectionName: 'testSection',
-            attendanceThreshold: '0',
-            seatingLayout: layout1._id,
-            attMandatory: false,
-            maxCapacity: 30,
-            seatingArrangement: [
-                [null, student1._id],
-                [null, null],
-            ],
-        });
-        const section1 = response.body.newSection
-
-        // Drop the section (student is not registered)
-        response = await request.post("/api/section/dropSection").send({
-            studentID: student1._id,
-            sectionID: section1._id
-        });
-        expect(response.status).toBe(520);
-
-        // Delete test data
-        response = await request.delete("/api/delete-user").send({
-            email: 'st1@test.com'
-        });
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection'
-        });
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
-        
-        await request.get("/api/logout");
-        done();
-    });
-
-    
-    it("dropSection should fail when section does not exist", async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-
-        // Try to archive a section that does not exist
-        response = await request.post("/api/section/dropSection").send({
-            studentID: '123456789012',
-            sectionID: '123456789012'
-        });
-        expect(response.status).toBe(500);
-
-        await request.get("/api/logout");
-        done();
     });
 
 })

@@ -5,7 +5,7 @@ module.exports = {
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
-  testSequencer: "./tests/testSequencer.js",
+  testSequencer: "./tests/global/testSequencer.js",
 
   // Stop running tests after `n` failures
   // bail: 0,

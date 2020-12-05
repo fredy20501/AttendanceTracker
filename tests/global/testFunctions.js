@@ -43,7 +43,7 @@ async function deleteUser(userID) {
 
 async function createSeatingLayout(layout) {
     // Set default values if not given
-    const L = layout ?? new Object();
+    const L = layout || new Object();
     if (!L.layout) L.layout = [[2]];
     if (!L.dimensions) L.dimensions = [L.layout.length, L.layout[0].length];
     if (!L.capacity) L.capacity = L.dimensions[0] * L.dimensions[1];
@@ -63,7 +63,7 @@ async function deleteSeatingLayout(layoutID) {
 
 async function createSection(section) {
     // Set default values if not given
-    const s = section ?? new Object();
+    const s = section || new Object();
     if (!s.professor) s.professor = await createUser(true);
     if (!s.max_capacity) s.max_capacity = 1;
     if (!s.registered_students) s.registered_students = [];

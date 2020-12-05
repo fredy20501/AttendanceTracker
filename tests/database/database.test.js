@@ -52,13 +52,13 @@ describe('Database Functionality', () => {
             const userName = '*test_user'+test.uniqueID();
             const email = userName+'@test.com';
             const password = '12345';
-            var user = await request.post('/api/register').send({
+            response = await request.post('/api/register').send({
                 email: email,
                 name: userName,
                 password: password,
                 is_professor: true
             });
-            testUserID = user.id;
+            testUserID = response.body.user._id;
     
             //Search user in database by email
             const updatedUser = await User.findOne({email: email});
@@ -101,6 +101,7 @@ describe('Database Functionality', () => {
                 createdBy: testData.professor.id
             });
             const layout1 = response.body.seatingLayout
+            testLayoutID = layout1._id;
     
             //Create test section
             const sectionName = '*test_section'+test.uniqueID();
@@ -117,6 +118,7 @@ describe('Database Functionality', () => {
                 seatingArrangement: seatingArrangement,
                 classList: []
             });
+            testSectionID = response.body.newSection._id;
             
             //Get the section in database by name
             const updatedSection = await Section.findOne({name: sectionName});

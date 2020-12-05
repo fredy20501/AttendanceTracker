@@ -2,14 +2,17 @@ const app = require('app.js');
 const mongoose = require('mongoose');
 const supertest = require("supertest");
 const http = require('http');
+const test = require('../testFunctions.js');
 
 describe('Backend server fuctionality', () => {
 
-    let server;
-    let request;
+    var server;
+    var request;
+    var testUserID;
+    var response;
 
-    //Open server & database before running tests
     beforeAll(async (done) => {
+        //Open server & database before running tests
         server = http.createServer(app);
         server.listen();
         request = supertest(server);
@@ -17,59 +20,58 @@ describe('Backend server fuctionality', () => {
         db.once('open', done);
     });
 
-    //Close server & database after running tests
     afterAll(async (done) => {
+        // Delete test user
+        if (testUserID) await test.deleteUser(testUserID);
+
+        //Close server & database connection when done
         await mongoose.connection.close();
         server.close(done);
     });
 
-    it('can reach server api', async done => {
-        const response = await request.get("/");
+    it('can reach server api', async () => {
+        response = await request.get("/");
         expect(response.status).toBe(200);
-        done();
     });
 
-    it('can send invalid login', async done => {
-        const response = await request.post("/api/login").send({
+    it('can send invalid login', async () => {
+        response = await request.post("/api/login").send({
             email:'blah', 
             password:'bbbbbb'
         });
         // expect 401 since user should not exist
         expect(response.status).toBe(401);
-        done();
     });
 
-    it('can not allow access to data without being logged in', async done => {
-        const response = await request.get("/api/secret-api");
+    it('can not allow access to data without being logged in', async () => {
+        response = await request.get("/api/secret-api");
         expect(response.status).toBe(401);
-        done();
     });
 
-    it('can successfully create, login, logout, and delete test account', async done =>{
-        // Delete test account (if it exists)
-        response = await request.delete("/api/delete-user").send({
-            email: '123test@test456.com'
-        });
-        
-        // Create test account
-        var response = await request.post("/api/register").send({
-            name:'test_user', 
-            email:'123test@test456.com', 
-            password:'12345',
+    it('can successfully create, login, logout, and delete test account', async () =>{
+        // Create test user
+        const password = test.uniqueID();
+        const userName = '*test_user'+password;
+        const email = userName+'@unb.ca';
+        response = await request.post("/api/register").send({
+            name: userName, 
+            email: email,
+            password: password,
             is_professor: false
         });
+        testUserID = response.body.user._id;
         expect(response.status).toBe(200);
 
         // Log in
         response = await request.post("/api/login").send({
-            email:'123test@test456.com', 
-            password:'12345'
+            email: email, 
+            password: password
         });
         expect(response.status).toBe(200);
 
         // Delete test account
         response = await request.delete("/api/delete-user").send({
-            email: '123test@test456.com'
+            email: email
         });
         expect(response.status).toBe(200);
 
@@ -77,7 +79,8 @@ describe('Backend server fuctionality', () => {
         response = await request.get("/api/logout");
         expect(response.status).toBe(200);
 
-        done();
+        // Note: the test user is also deleted in the afterAll() function
+        // in case the test fails and it is not deleted
     });
 
 })

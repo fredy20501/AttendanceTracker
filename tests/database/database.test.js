@@ -1,222 +1,151 @@
 const app = require('app.js');
+const mongoose = require('mongoose');
 const supertest = require("supertest");
 const http = require('http');
-const mongoose = require('mongoose');
+const test = require('../testFunctions.js');
 const { User, Section, SeatingLayout } = require('dbSchemas/attendanceSchema.js');
 
 describe('Database Functionality', () => {
 
-    let request;
-    let server;
+    var server;
+    var request;
+    var testData;
+    var response;
 
-    // Open database before running tests
     beforeAll(async (done) => {
+        //Open server & database before running tests
         server = http.createServer(app);
         server.listen();
         request = supertest(server);
         const db = mongoose.connection;
-        db.once('open', done);
+        db.once('open', async function() {
+            // Create test data
+            testData = await test.createTestData();
+            // Login once before all tests
+            await test.login(request, testData.professor);
+
+            done();
+        });
     });
 
-    // Close database & server when done
     afterAll(async (done) => {
+        // Logout once after all tests
+        await test.logout(request);
+        // Delete test data
+        await test.deleteTestData(testData);
+
+        //Close server & database connection when done
         await mongoose.connection.close();
         server.close(done);
     });
 
-    it('Should store user to database', async done => {
-        var response = await request.delete("/api/delete-user").send({
-            email: 'testUser@test.com'
-        });
-        //Send request to register a user
-        var user = await request.post('/api/register').send({
-            email: 'testUser@test.com',
-            name: 'test user',
-            password:'12345',
-            is_professor: true
+    describe("Register user", () => {
+
+        // Delete test user after the test
+        var testUserID;
+        afterAll(async() => {
+           if (testUserID) await test.deleteUser(testUserID);
         });
 
-        //Search user in database by email
-        user = await User.findOne({
-            email: 'testUser@test.com'
+        it('Should store user to database', async () => {
+            //Send request to register a user
+            const userName = '*test_user'+test.uniqueID();
+            const email = userName+'@test.com';
+            const password = '12345';
+            var user = await request.post('/api/register').send({
+                email: email,
+                name: userName,
+                password: password,
+                is_professor: true
+            });
+            testUserID = user.id;
+    
+            //Search user in database by email
+            const updatedUser = await User.findOne({email: email});
+    
+            //Check that user information stored in the database is correct
+            expect(updatedUser.name).toBe(userName);
+            expect(updatedUser.email).toBe(email)
+            expect(updatedUser.password).toBe(password)
+            expect(updatedUser.is_professor).toBe(true);
+    
+            // Note: the test user is deleted in the afterAll() function
         });
 
-        //Check that user information stored in the database is correct
-        expect(user.name).toBe('test user');
-        expect(user.email).toBe('testUser@test.com')
-        expect(user.password).toBe('12345')
-        expect(user.is_professor).toBe(true);
+    });
+    
 
-        //Delete test user after testing
-        response = await request.delete("/api/delete-user").send({
-            email: 'testUser@test.com'
+    describe("Store section & seating layout", () => {
+        
+        // Delete test data after the test
+        var testLayoutID;
+        var testSectionID;
+        afterAll(async() => {
+           if (testLayoutID) await test.deleteSeatingLayout(testLayoutID);
+           if (testSectionID) await test.deleteSection(testSectionID);
         });
-        expect(response.status).toBe(200);
 
-        done ()
+        it('Should store section & seating layout to database', async () => {
+            // Create a sample seating layout for this test
+            const layoutName = '*test_layout'+test.uniqueID();
+            const layout = [
+                [2, 1, 1, 1, 0]
+            ];
+            response = await request.post('/api/section/createSeatingLayout').send({
+                name: layoutName,
+                capacity: 25,
+                dimensions: [5 , 5],
+                layout: layout,
+                default: true,
+                description: 'This is a sample',
+                createdBy: testData.professor.id
+            });
+            const layout1 = response.body.seatingLayout
+    
+            //Create test section
+            const sectionName = '*test_section'+test.uniqueID();
+            const seatingArrangement = [
+                [null, testData.student.id, null, null, null]
+            ];
+            response = await request.post('/api/section/createSection').send({
+                sectionName: sectionName,
+                attendanceThreshold: '0',
+                seatingLayout: layout1._id,
+                attMandatory: false,
+                professor: testData.professor.id,
+                maxCapacity: 25,
+                seatingArrangement: seatingArrangement,
+                classList: []
+            });
+            
+            //Get the section in database by name
+            const updatedSection = await Section.findOne({name: sectionName});
+    
+            //Check that section information is stored
+            expect(updatedSection.name).toBe(sectionName);
+            expect(updatedSection.professor.toString()).toBe(testData.professor.id);
+            expect(updatedSection.max_capacity).toBe(25);
+            expect(updatedSection.attendance_threshold).toBe(0);
+            expect(JSON.stringify(updatedSection.seating_layout)).toBe(JSON.stringify(layout1._id));
+            expect(JSON.stringify(updatedSection.seating_arrangement)).toBe(JSON.stringify(seatingArrangement));
+            expect(updatedSection.always_mandatory).toBe(false);
+    
+            //Get the seating layout in database by name
+            const updatedLayout = await SeatingLayout.findOne({name: layoutName});
+            //Check that seating layout information is stored
+            expect(updatedLayout.name).toBe(layoutName);
+            expect(updatedLayout.capacity).toBe(25);
+            expect(updatedLayout.created_by.toString()).toBe(testData.professor.id);
+            expect(JSON.stringify(updatedLayout.dimensions)).toBe(JSON.stringify([5,5]));
+            expect(JSON.stringify(updatedLayout.layout)).toBe(JSON.stringify(layout));
+            expect(updatedLayout.default).toBe(true);
+            expect(updatedLayout.description).toBe('This is a sample');
+    
+            // Note: the section & seating layout are deleted in the afterAll() function
+        });
+
     });
 
-    it('Should store section & seating layout to database', async done => {
-        //Delete test users that may be existing in the database
-        response = await request.delete("/api/delete-user").send({
-            email: 'prof1@test.com'
-        });
-        response = await request.delete("/api/delete-user").send({
-            email: 'st1@test.com'
-        });
-        response = await request.delete("/api/delete-user").send({
-            email: 'st2@test.com'
-        });
-        response = await request.delete("/api/delete-user").send({
-            email: 'admin@test.com'
-        });
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection' 
-        });
-
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-
-        //Create 2 students, an admin, and a professor
-        response = await request.post('/api/register').send({
-            email: 'st1@test.com',
-            name: 'Student 1',
-            password:'st1234',
-            is_professor: false
-        });
-        const student1 = response.body.user
-
-        response = await request.post('/api/register').send({
-            email: 'st2@test.com',
-            name: 'Student 2',
-            password:'st2345',
-            is_professor: false
-        });
-        const student2 = response.body.user
-
-        response = await request.post('/api/register').send({
-            email: 'admin@test.com',
-            name: 'An Admin',
-            password:'ad1234min',
-            is_professor: true
-        });
-        const admin1 = response.body.user
-
-        response = await request.delete("/api/delete-user").send({
-            email: 'prof1@test.com'
-        });
-        response = await request.post('/api/register').send({
-            email: 'prof1@test.com',
-            name: 'A Professor',
-            password:'pr1234of',
-            is_professor: true
-        });
-        const prof1 = response.body.user;
-
-        // Create a sample seating layout for this test
-        response = await request.post('/api/section/createSeatingLayout').send({
-            name: 'testLayout',
-            capacity: 25,
-            dimensions: [ 5 , 5],
-            layout: [
-                [2, 1, 1, 1, 0],
-                [2, 1, 1, 1, 0],
-                [2, 1, 1, 1, 0],
-                [2, 1, 1, 1, 0],
-                [2, 3, 3, 3, 0]
-            ],
-            default: true,
-            description: 'This is a sample',
-            createdBy: prof1._id
-        });
-        const layout1 = response.body.seatingLayout
-
-        //Create test section
-        response = await request.post('/api/section/createSection').send({
-            sectionName: 'testSection',
-            attendanceThreshold: '0',
-            seatingLayout: layout1._id,
-            attMandatory: false,
-            professor: prof1._id,
-            admin: admin1._id,
-            maxCapacity: 25,
-            seatingArrangement: [
-                [null, student1._id, null, null, student2._id],
-            ],
-            classList: [],
-            attendance: [Date.now(), student1._id, false]
-        });
-        
-        //Search section in database by name
-        response = await Section.findOne({
-            name: 'testSection'
-        });
-        //section = section.body;
-
-        //Check that section information is stored
-        expect(response.name).toBe('testSection');
-        expect(JSON.stringify(response.admin)).toBe(JSON.stringify(admin1._id));
-        expect(JSON.stringify(response.professor)).toBe(JSON.stringify(prof1._id));
-        expect(response.max_capacity).toBe(25);
-        expect(response.attendance_threshold).toBe(0);
-        expect(JSON.stringify(response.seating_layout)).toBe(JSON.stringify(layout1._id));
-        expect(JSON.stringify(response.seating_arrangement)).toBe(JSON.stringify([
-            [null, student1._id, null, null, student2._id],
-        ]));
-        expect(response.always_mandatory).toBe(false);
-
-        response = await SeatingLayout.findOne({
-            name: 'testLayout'
-        });
-
-        //Check that seating layout is stored
-        expect(response.name).toBe('testLayout');
-        expect(response.capacity).toBe(25);
-        expect(JSON.stringify(response.created_by)).toBe(JSON.stringify(prof1._id));
-        expect(JSON.stringify(response.dimensions)).toBe(JSON.stringify([5,5]));
-        expect(JSON.stringify(response.layout)).toBe(
-            JSON.stringify([
-                [2, 1, 1, 1, 0],
-                [2, 1, 1, 1, 0],
-                [2, 1, 1, 1, 0],
-                [2, 1, 1, 1, 0],
-                [2, 3, 3, 3, 0]
-            ])
-        );
-        expect(response.default).toBe(true);
-        expect(response.description).toBe('This is a sample');
-
-        //Delete sample seating layout after testing
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
-
-        //Delete test section after testing
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection'
-        });
-        expect(response.status).toBe(200);
-
-        //Delete test users after testing
-        response = await request.delete("/api/delete-user").send({
-            email: 'st1@test.com'
-        });
-
-        response = await request.delete("/api/delete-user").send({
-            email: 'st2@test.com'
-        });
-
-        response = await request.delete("/api/delete-user").send({
-            email: 'admin@test.com'
-        });
-        response = await request.delete("/api/delete-user").send({
-            email: 'prof1@test.com'
-        });
-        await request.get("/api/logout");
-        
-        done()
-    });
 })
 
 

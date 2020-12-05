@@ -33,33 +33,29 @@ describe('Dashboard api fuctionality', () => {
         // Delete test data
         await test.deleteTestData(testData);
 
-        //Close server & database when done
+        //Close server & database connection when done
         await mongoose.connection.close();
         server.close(done);
     });
 
 
-    describe("Get sections endpoint tests", () => {
+    describe("Get sections endpoint", () => {
 
-        it("Should reach getSectionView endpoint", async done => {
+        it("Should reach getSectionView endpoint", async () => {
             response = await request.get("/api/dashboard/getSectionsCreatedByProfessor").query({
                 professorID: testData.professor.id
             });
             expect(response.status).toBe(200);
-
-            done();
         });
 
-        it("Should reach getSectionsByStudent endpoint", async done => {
+        it("Should reach getSectionsByStudent endpoint", async () => {
             response = await request.get("/api/dashboard/getSectionsByStudent").query({
                 studentID: testData.student.id
             });
             expect(response.status).toBe(200);
-
-            done();
         });
 
-        it("getSectionsByStudent should give no result when student does not exist", async done => {
+        it("getSectionsByStudent should give no result when student does not exist", async () => {
             //Send student who doesn't exist
             response = await request.get("/api/dashboard/getSectionsByStudent").query({
                 studentID: '999999999999'
@@ -67,11 +63,9 @@ describe('Dashboard api fuctionality', () => {
             expect(response.status).toBe(200);
             // Returns empty array since student does not have any sections
             expect(response.body).toEqual([]);
-
-            done();
         });
 
-        it("getSectionsCreatedByProfessor should give no result when professor does not exist", async done => {
+        it("getSectionsCreatedByProfessor should give no result when professor does not exist", async () => {
             //Send professor who does not exist
             response = await request.get("/api/dashboard/getSectionsCreatedByProfessor").query({
                 professorID: '999999999999'
@@ -79,21 +73,24 @@ describe('Dashboard api fuctionality', () => {
             expect(response.status).toBe(200);
             // Returns empty array since professor does not have any sections
             expect(response.body).toEqual([]);
-
-            done();
         });
 
     });
 
-    // ====== Register for section endpoint tests ======
-    describe("Register for section endpoint tests", () => {
+
+    describe("Register for section endpoint", () => {
 
         // Create & delete a dedicated test section for these tests
         var registerTestSection;
-        beforeAll(async() => registerTestSection = await test.createSection(testData.professor, testData.layout));
+        beforeAll(async() => {
+            registerTestSection = await test.createSection({
+                professor: testData.professor, 
+                seating_layout: testData.layout
+            });
+        });
         afterAll(async() => await test.deleteSection(registerTestSection.id));
 
-        it("Should be able to register for a section only once", async done => {
+        it("Should be able to register for a section only once", async () => {
             // Should succeed if registering for the first time
             response = await request.put("/api/dashboard/registerForSection").send({
                 studentID: testData.student.id,
@@ -107,37 +104,41 @@ describe('Dashboard api fuctionality', () => {
                 sectionName: registerTestSection.name
             });
             expect(response.status).toBe(520);
-
-            done();
         });
 
-        it("Should not reach registerForSection endpoint when section doesnt exist", async done => {
+        it("Should not reach registerForSection endpoint when section doesnt exist", async () => {
             response = await request.put("/api/dashboard/registerForSection").send({
                 studentID: testData.student.id,
                 sectionName: 'this section does not exist'
             });
             expect(response.status).toBe(530);
-
-            done();
         });
 
     });
 
-    describe("Drop section endpoint tests", () => {
+
+    describe("Drop section endpoint", () => {
 
         // Create & delete a dedicated test section for these tests
         var dropTestSection;
+        var dropTestSeatingLayout;
         beforeAll(async() => {
-            dropTestSection = await test.createSection(
-                testData.professor, 
-                testData.layout, 
+            dropTestSeatingLayout = await test.createSeatingLayout({layout: [[0]]});
+            dropTestSection = await test.createSection({
+                professor: testData.professor,
                 // Test student is registered for this section
-                [testData.student.id]
-            );
+                registered_students: [testData.student.id],
+                // Test student has a seat
+                seating_layout: dropTestSeatingLayout,
+                seating_arrangement: [[testData.student.id]]
+            });
         });
-        afterAll(async() => await test.deleteSection(dropTestSection.id));
+        afterAll(async() => {
+            await test.deleteSection(dropTestSection.id);
+            await test.deleteSeatingLayout(dropTestSeatingLayout.id);
+        });
 
-        it("Should reach dropSection endpoint", async done => {
+        it("Should reach dropSection endpoint", async () => {
             // Drop the section (student is registered)
             response = await request.post("/api/section/dropSection").send({
                 studentID: testData.student.id,
@@ -151,25 +152,23 @@ describe('Dashboard api fuctionality', () => {
             expect(updatedSection.registered_students.indexOf(testData.student.id)).toBe(-1);
             // Registered student list should have been reduced by 1
             expect(updatedSection.registered_students.length).toBe(0);
+            // Student should have lost their seat
+            expect(updatedSection.seating_arrangement[0][0]).toBe(null);
             // Seating arrangement & layout should still be the same size
             expect(updatedSection.seating_arrangement.length).toBe(testData.layout.layout.length);
             expect(updatedSection.seating_arrangement[0].length).toBe(testData.layout.layout[0].length);
-
-            done();
         });
 
-        it("dropSection should fail when student is not registered for the section", async done => {
+        it("dropSection should fail when student is not registered for the section", async () => {
             // Drop the section (student is not registered)
             response = await request.post("/api/section/dropSection").send({
                 studentID: testData.student.id,
                 sectionID: testData.section.id
             });
             expect(response.status).toBe(520);
-
-            done();
         });
 
-        it("dropSection should fail when section does not exist", async done => {
+        it("dropSection should fail when section does not exist", async () => {
             // Try to drop a section that does not exist
             response = await request.post("/api/section/dropSection").send({
                 studentID: testData.student.id,
@@ -178,7 +177,6 @@ describe('Dashboard api fuctionality', () => {
             expect(response.status).toBe(500);
 
             await request.get("/api/logout");
-            done();
         });
 
     });

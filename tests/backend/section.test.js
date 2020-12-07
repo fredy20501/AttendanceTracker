@@ -2,435 +2,246 @@ const app = require('app.js');
 const mongoose = require('mongoose');
 const supertest = require("supertest");
 const http = require('http');
-const {SeatingLayout } = require('dbSchemas/attendanceSchema.js');
+const test = require('../global/testFunctions.js');
 
 describe('Backend server fuctionality', () => {
     
-    let server;
-    let request;
+    var server;
+    var request;
+    var testData;
+    var response;
 
-    //Open server & database before running tests
     beforeAll(async (done) => {
-        jest.setTimeout(10000);
+        //Open server & database before running tests
         server = http.createServer(app);
         server.listen();
         request = supertest(server);
         const db = mongoose.connection;
-        db.once('open', done);
+        db.once('open', async function() {
+            // Create test data
+            testData = await test.createTestData();
+            // Login once before all tests
+            await test.login(request, testData.professor);
+
+            done();
+        });
     });
 
-    //Close server & database after running tests
     afterAll(async (done) => {
+        // Logout once after all tests
+        await test.logout(request);
+        // Delete test data
+        await test.deleteTestData(testData);
+
+        //Close server & database connection when done
         await mongoose.connection.close();
         server.close(done);
     });
 
-    it("Should reach createSeatingLayout and deleteSeatingLayout endpoints", async done => {
-        //log in as a professor
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
+
+    describe("Create & Delete seating layout endpoints", () => {
+
+        // Delete the seating layout after the test
+        var testSeatingLayoutID;
+        afterAll(async() => {
+            if (testSeatingLayoutID) await test.deleteSeatingLayout(testSeatingLayoutID);
         });
 
-        response = await request.delete("/api/delete-user").send({
-            email: 'prof1@test.com'
+        it("Should reach createSeatingLayout and deleteSeatingLayout endpoints", async () => {
+            //create a test layout
+            response = await request.post("/api/section/createSeatingLayout").send({
+                name: '*test_layout'+test.uniqueID(),
+                capacity : 1,
+                dimension: [1,1],
+                layout:[[0]],
+                default: true,
+                description: 'test',
+                createdBy: testData.professor.id
+            });
+            testSeatingLayoutID = response.body.seatingLayout._id;
+            expect(response.status).toBe(200);
         });
-        response = await request.post('/api/register').send({
-            email: 'prof1@test.com',
-            name: 'A Professor',
-            password:'pr1234of',
-            is_professor: true
-        });
-        const prof1 = response.body.user
 
-        //delete layout before to make sure it doesn't exist
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
-
-        //create a test layout
-        response = await request.post("/api/section/createSeatingLayout").send({
-            name: 'testLayout',
-            capacity : 1,
-            dimension: [1,1],
-            layout:[[0]],
-            default: true,
-            description: 'test',
-            createdBy: prof1._id
-        });
-        expect(response.status).toBe(200);
-
-        //delete layout
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
-
-        await request.get("/api/logout");
-        done()
     });
 
-    it("Should reach createSection endpoint", async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
+    describe("Create section endpoint", () => {
+        // Delete the section after the test
+        var testCreateSectionID;
+        afterAll(async() => {
+            if (testCreateSectionID) await test.deleteSection(testCreateSectionID);
         });
-        
-        response = await request.delete("/api/delete-user").send({
-            email: 'admin@test.com'
-        });
-        response = await request.delete("/api/delete-user").send({
-            email: 'prof1@test.com'
-        });
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection' 
-        });
-
-        response = await request.post('/api/register').send({
-            email: 'admin@test.com',
-            name: 'An Admin',
-            password:'ad1234min',
-            is_professor: true
-        });
-        const admin1 = response.body.user
-
-        response = await request.post('/api/register').send({
-            email: 'prof1@test.com',
-            name: 'A Professor',
-            password:'pr1234of',
-            is_professor: true
-        });
-        const prof1 = response.body.user
-
-        response = await request.post("/api/section/createSeatingLayout").send({
-            name: 'testLayout',
-            capacity : 1,
-            dimension: [1,1],
-            layout:[[0]],
-            default: false,
-            description: 'test',
-            createdBy: prof1._id
-        });
-        const layout1 = response.body.seatingLayout
-
-        response = await request.post("/api/section/createSection").send({
-            sectionName: 'testSection',
-            attendanceThreshold: '0',
-            seatingLayout: layout1._id,
-            attMandatory: false,
-            professor: prof1._id,
-            admin: admin1._id,
-            students: [],
-            maxCapacity: 30,
-            seatingArrangement: [] 
-        });
-        expect(response.status).toBe(200);
-
-        //delete testing objects
-        response = await request.delete("/api/delete-user").send({
-            email: 'admin@test.com'
-        });
-        expect(response.status).toBe(200);
-        response = await request.delete("/api/delete-user").send({
-            email: 'prof1@test.com'
-        });
-        expect(response.status).toBe(200);
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
-        await request.get("/api/logout");
-
-        done()
-    });
-
-    it("Should reach updateSection endpoint", async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-        
-        response = await request.delete("/api/delete-user").send({
-            email: 'admin@test.com'
-        });
-        response = await request.delete("/api/delete-user").send({
-            email: 'prof1@test.com'
-        });
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection'
+            
+        it("Should reach createSection endpoint", async () => {
+            response = await request.post("/api/section/createSection").send({
+                sectionName: '*test_section'+test.uniqueID(),
+                attendanceThreshold: '0',
+                seatingLayout: testData.layout.id,
+                attMandatory: false,
+                professor: testData.professor.id,
+                students: [],
+                maxCapacity: 30,
+                seatingArrangement: [] 
+            });
+            testCreateSectionID = response.body.newSection._id;
+            expect(response.status).toBe(200);
         });
 
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
-
-        response = await request.post('/api/register').send({
-            email: 'admin@test.com',
-            name: 'An Admin',
-            password:'ad1234min',
-            is_professor: true
-        });
-        const admin1 = response.body.user
-
-        response = await request.post('/api/register').send({
-            email: 'prof1@test.com',
-            name: 'A Professor',
-            password:'pr1234of',
-            is_professor: true
-        });
-        const prof1 = response.body.user
-
-        response = await request.post("/api/section/createSeatingLayout").send({
-            name: 'testLayout',
-            capacity : 1,
-            dimension: [1,1],
-            layout:[[0]],
-            default: false,
-            description: 'test',
-            createdBy: prof1._id
-        });
-        const layout1 = response.body.seatingLayout
-
-        response = await request.post("/api/section/createSection").send({
-            sectionName: 'testSection',
-            attendanceThreshold: '0',
-            seatingLayout: layout1._id,
-            attMandatory: false,
-            professor: prof1._id,
-            admin: admin1._id,
-            students: [],
-            maxCapacity: 30,
-            seatingArrangement: [] 
-        });
-        const section1 = response.body.newSection
-
-        response = await request.put("/api/section/updateSection").send({
-            sectionId: section1._id,
-            sectionName: 'testSection',
-            attendanceThreshold: '0',
-            seatingLayout: layout1._id,
-            attMandatory: false,
-            professor: prof1._id,
-            admin: admin1._id,
-            students: [],
-            maxCapacity: 30,
-            classList: [
-                {name: 'test1', email:'test1@unb.ca'},
-                {name: 'test2', email:'test2@unb.ca'},
-                {name: 'test3', email:'test3@unb.ca'},
-            ],
-            seatingArrangement: [] 
-        });
-        expect(response.status).toBe(200);
-
-        //delete testing objects
-        response = await request.delete("/api/delete-user").send({
-            email: 'admin@test.com'
-        });
-        expect(response.status).toBe(200);
-        response = await request.delete("/api/delete-user").send({
-            email: 'prof1@test.com'
-        });
-        expect(response.status).toBe(200);
-        await SeatingLayout.deleteOne({name:'testLayout'}).exec();
-        await request.get("/api/logout");
-
-        done();
-    });
-
-    it("Should reach deleteSection endpoint", async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection' 
-        });
-        expect(response.status).toBe(200);
-        await request.get("/api/logout");
-        done();
-    });
-
-    it("Should reach previousSeatingPlans endpoint (and it should be an array)", async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-
-        response = await request.get("/api/section/previousSeatingPlans");
-        expect(response.status).toBe(200);
-        expect(Array.isArray(response.body.seatingLayout)).toBe(true);
-
-        await request.get("/api/logout");
-        done();
-    });
-
-    it("Should reach getSectionView endpoint", async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-        const prof1 = response.body.user
-
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection12'
-        });
-        await SeatingLayout.deleteOne({name:'testLayout12'}).exec();
-
-        //create a sample seating layout
-        response = await request.post('/api/section/createSeatingLayout').send({
-            name: 'testLayout12',
-            capacity: 4,
-            dimensions: [ 2 , 2],
-            layout: [
-                [1, 1],
-                [1, 1]
-            ], 
-            default: true,
-            description: 'This is a sample',
-            createdBy: prof1.id
-        });
-        const layout1 = response.body.seatingLayout
-
-        //create a test section
-        response = await request.post('/api/section/createSection').send({
-            sectionName: 'testSection12',
-            attendanceThreshold: '0',
-            seatingLayout: layout1._id,
-            attMandatory: false,
-            professor: prof1._id,
-            maxCapacity: 30,
-            seatingArrangement: [
-                [null, null, null, null, null],
-            ],
-            classList: []
-        });
-        const section1 = response.body.newSection
-
-        //test getting the section view
-        response = await request.get("/api/section/getSectionView").query({
-            sectionID:section1._id
-        });
-        expect(response.status).toBe(200);
-        expect(response.body.name).toBe('testSection12');
-
-        //delete test data
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection12'
-        });
-        await SeatingLayout.deleteOne({name:'testLayout12'}).exec();
-        await request.get("/api/logout");
-
-        done();
-    });
-
-    it("Shouldnt reach getSectionView endpoint with invalid section", async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-        const prof1 = response.body.user
-
-        // Send a section id that doesn't exist
-        response = await request.get("/api/section/getSectionView").query({
-            sectionID:"123499991234"
-        });
-        expect(response.status).toBe(500);
-
-        await request.get("/api/logout");
-
-        done();
     });
 
     
-    /********* delete layout tests */
-
-    it("Should reach deleteLayout endpoint", async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
+    describe("Update section endpoint", () => {
+        // Create & delete a dedicated test section & layout for these tests
+        var updateTestSection;
+        var testSeatingLayout;
+        beforeAll(async() => {
+            updateTestSection = await test.createSection({
+                professor: testData.professor, 
+                seating_layout: testData.layout
+            });
+            testSeatingLayout = await test.createSeatingLayout();
         });
-        var prof1 = response.body.user
-
-        //delete layout in case it already exists
-        await SeatingLayout.deleteOne({name:'testLayout42'}).exec();
-
-        response = await request.post("/api/section/createSeatingLayout").send({
-            name: 'testLayout42',
-            capacity : 1,
-            dimension: [1,1],
-            layout:[[0]],
-            default: false,
-            description: 'test',
-            createdBy: prof1.id
+        afterAll(async() => {
+            await test.deleteSection(updateTestSection.id);
+            await test.deleteSeatingLayout(testSeatingLayout.id);
         });
-        const layout1 = response.body.seatingLayout
 
+        it("Should reach updateSection endpoint", async () => {
+            const newName = '*test_section'+test.uniqueID();
+            const classList = [
+                {name: 'test1', email:'test1@unb.ca'},
+                {name: 'test2', email:'test2@unb.ca'},
+                {name: 'test3', email:'test3@unb.ca'},
+            ];
+            response = await request.put("/api/section/updateSection").send({
+                sectionId: updateTestSection.id,
+                sectionName: newName, // Change the name
+                attendanceThreshold: 27,
+                seatingLayout: testSeatingLayout.id, // Change the layout
+                attMandatory: false,
+                professor: testData.professor.id,
+                students: [],
+                maxCapacity: 130,
+                classList: classList,
+                seatingArrangement: [] 
+            });
+            expect(response.status).toBe(200);
 
-        response = await request.post("/api/section/deleteSeatingLayout").send({
-            id: layout1._id 
+            // Check section to make sure it worked as expected
+            const updatedSection = await test.getSection(updateTestSection.id);
+            // Name should have changed
+            expect(updatedSection.name).toBe(newName);
+            // Seating layout should have changed
+            expect(updatedSection.seating_layout.toString()).toBe(testSeatingLayout.id);
+            // Max capacity should have changed
+            expect(updatedSection.max_capacity).toBe(130);
+            // Attendance threshold should have changed
+            expect(updatedSection.attendance_threshold).toBe(27);
+            // Class list should have changed (check parts of it)
+            expect(updatedSection.class_list[1].name).toBe(classList[1].name);
+            expect(updatedSection.class_list[2].email).toBe(classList[2].email);
         });
-        expect(response.status).toBe(200);
 
-        await request.get("/api/logout");
-        done();
     });
 
-    it("deleteLayout Should not delete a layout which doesnt exist", async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
+
+    describe("Delete section endpoint", () => {
+
+        // Create a dedicated test section for this test
+        var deleteTestSection;
+        beforeAll(async() => {
+            deleteTestSection = await test.createSection({
+                professor: testData.professor, 
+                seating_layout: testData.layout
+            });
+        });
+        // Delete it afterwards in case the test failed
+        afterAll(async() => await test.deleteSection(deleteTestSection.id));
+
+        it("Should reach deleteSection endpoint", async () => {
+            response = await request.delete("/api/section/deleteSection").send({
+                name: deleteTestSection.name
+            });
+            expect(response.status).toBe(200);
         });
 
-        response = await request.post("/api/section/deleteSeatingLayout").send({
-            id: "123456789012"
-        });
-        expect(response.status).toBe(500);
-
-        await request.get("/api/logout");
-        done();
     });
 
-    it("deleteLayout Should not delete a layout in use by a section", async done => {
-        var response = await request.post("/api/login").send({
-            email:'test.professor@unb.ca', 
-            password:'testing123'
-        });
-        var prof1 = response.body.user
 
-        await SeatingLayout.deleteOne({name:'testLayout42'}).exec();
+    describe("Get seating layouts endpoint", () => {
 
-        response = await request.post("/api/section/createSeatingLayout").send({
-            name: 'testLayout42',
-            capacity : 1,
-            dimension: [1,1],
-            layout:[[0]],
-            default: false,
-            description: 'test',
-            createdBy: prof1.id
-        });
-        const layout1 = response.body.seatingLayout
-
-
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection42'
+        it("Should reach previousSeatingPlans endpoint (and it should be an array)", async () => {
+            response = await request.get("/api/section/previousSeatingPlans");
+            expect(response.status).toBe(200);
+            expect(Array.isArray(response.body.seatingLayout)).toBe(true);
         });
 
-        response = await request.post("/api/section/createSection").send({
-            sectionName: 'testSection42',
-            attendanceThreshold: '0',
-            seatingLayout: layout1._id,
-            attMandatory: false,
-            professor: prof1._id,
-            students: [],
-            maxCapacity: 30,
-            seatingArrangement: [] 
+    })
+    
+
+    describe("Get section details endpoint", () => {
+
+        it("Should reach getSectionView endpoint", async () => {
+            response = await request.get("/api/section/getSectionView").query({
+                sectionID: testData.section.id
+            });
+            expect(response.status).toBe(200);
+            expect(response.body.name).toBe(testData.section.name);
+        });
+    
+        it("Shouldn't reach getSectionView endpoint with invalid section", async () => {
+            // Send a section id that doesn't exist
+            response = await request.get("/api/section/getSectionView").query({
+                sectionID:"123499991234"
+            });
+            expect(response.status).toBe(500);
+        });
+    
+    });
+    
+    
+    describe("Delete layout enpoint", () => {
+
+        // Create & delete dedicated test data for these tests
+        var deleteTestLayout;
+        var usedTestLayout;
+        var usedTestSection;
+        beforeAll(async() => {
+            deleteTestLayout = await test.createSeatingLayout();
+            usedTestLayout = await test.createSeatingLayout();
+            usedTestSection = await test.createSection({
+                professor: testData.professor,
+                // usedTestLayout is used by a section
+                seating_layout: usedTestLayout
+            });
+        });
+        afterAll(async() => {
+            await test.deleteSection(usedTestSection.id);
+            await test.deleteSeatingLayout(usedTestLayout.id);
+            await test.deleteSeatingLayout(deleteTestLayout.id);
         });
 
-        response = await request.post("/api/section/deleteSeatingLayout").send({
-            id: layout1._id 
+        it("Should reach deleteLayout endpoint", async () => {
+            response = await request.post("/api/section/deleteSeatingLayout").send({
+                id: deleteTestLayout.id 
+            });
+            expect(response.status).toBe(200);
         });
-        expect(response.status).toBe(418);
-
-        response = await request.delete("/api/section/deleteSection").send({
-            name: 'testSection42'
+    
+        it("deleteLayout Should not delete a layout which doesnt exist", async () => {
+            response = await request.post("/api/section/deleteSeatingLayout").send({
+                id: "123456789012"
+            });
+            expect(response.status).toBe(500);
+        });
+    
+        it("deleteLayout Should not delete a layout in use by a section", async () => {
+            response = await request.post("/api/section/deleteSeatingLayout").send({
+                id: usedTestLayout.id 
+            });
+            // Status 418 means the layout is used by a section
+            expect(response.status).toBe(418);
         });
 
-        await SeatingLayout.deleteOne({name:'testLayout42'}).exec();
-
-        await request.get("/api/logout");
-        done();
     });
 
 })

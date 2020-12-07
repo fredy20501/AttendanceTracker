@@ -10,7 +10,15 @@
     "backend": "nodemon server/index.js",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "test": "jest --coverage --detectOpenHandles"
+    
+    "//": "//COMMENT// This will run all tests concurrently and ~testCleanup at the end",
+    "test": "jest --coverage --testPathIgnorePatterns=.*~.* --silent && jest --silent ~testCleanup",
+    
+    "//": "//COMMENT// Use this if you want to run test files manually and/or see console logs",
+    "testDebug": "jest",
+    
+    "//": "//COMMENT// Use this if you want to manually clear all test data from the database",
+    "clearTestData": "cross-env NODE_PATH=./server node tests/global/clearTestData.js"
   },
   "repository": {
     "type": "git",
